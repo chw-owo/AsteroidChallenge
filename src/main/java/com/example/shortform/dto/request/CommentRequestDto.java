@@ -1,4 +1,4 @@
-package com.example.shortform.dto.RequestDto;
+package com.example.shortform.dto.request;
 
 import lombok.*;
 
@@ -9,7 +9,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 @Setter
-public class PostRequestDto implements Serializable {
+public class CommentRequestDto implements Serializable {
     private String content;
-    private String postImage;
 }
