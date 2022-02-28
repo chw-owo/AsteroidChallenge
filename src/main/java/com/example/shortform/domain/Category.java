@@ -27,4 +27,8 @@ public class Category extends Timestamped{
 
     @OneToMany(mappedBy = "category", orphanRemoval = true)
     private List<Challenge> challenges = new ArrayList<>();
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

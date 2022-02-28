@@ -1,5 +1,10 @@
 package com.example.shortform.domain;
 
+import com.example.shortform.dto.RequestDto.ChallengeModifyRequestDto;
+import com.example.shortform.dto.ResponseDto.ChallengeModifyResponseDto;
+import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
+import com.example.shortform.dto.ResponseDto.MemberResponseDto;
+import com.example.shortform.dto.ResponseDto.TagNameResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -68,7 +73,34 @@ public class Challenge extends Timestamped{
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public void setUser(User user) {
-        this.user = user;
+    public ChallengeResponseDto toResponse(List<TagNameResponseDto> tagNameList, List<MemberResponseDto> memberList) {
+        return ChallengeResponseDto.builder()
+                .challengeId(id)
+                .userId(user.getId())
+                .title(title)
+                .content(content)
+                .categoryName(category.getName())
+                .challengeImage(challengeImage)
+                .maxMember(maxMember)
+                .currentMember(currentMember)
+                .startDate(startDate)
+                .endDate(endDate)
+                .isPrivate(isPrivate)
+                .tagNameList(tagNameList)
+                .members(memberList)
+                .build();
+    }
+
+    public void update(ChallengeModifyRequestDto requestDto) {
+        this.title = requestDto.getTitle();
+        this.content = requestDto.getContent();
+        this.challengeImage = requestDto.getChallengeImage();
+        this.category.setName(requestDto.getCategory());
+    }
+
+    public ChallengeModifyResponseDto toResponse() {
+        return ChallengeModifyResponseDto.builder()
+                .challengeId(this.id)
+                .build();
     }
 }

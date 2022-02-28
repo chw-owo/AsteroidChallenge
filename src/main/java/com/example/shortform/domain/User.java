@@ -1,5 +1,6 @@
 package com.example.shortform.domain;
 
+import com.example.shortform.dto.ResponseDto.MemberResponseDto;
 import lombok.*;
 
 import javax.persistence.*;
@@ -50,5 +51,13 @@ public class User extends Timestamped{
 
     public void setChallenges(List<Challenge> challenges) {
         this.challenges = challenges;
+    }
+
+    public MemberResponseDto toMemberResponse() {
+        return MemberResponseDto.builder()
+                .userId(id)
+                .nickname(nickname)
+                .profileImage(profileImage)
+                .build();
     }
 }

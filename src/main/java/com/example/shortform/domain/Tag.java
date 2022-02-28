@@ -1,5 +1,6 @@
 package com.example.shortform.domain;
 
+import com.example.shortform.dto.ResponseDto.TagNameResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,4 +28,14 @@ public class Tag extends Timestamped{
 
     @OneToMany(mappedBy = "tag", orphanRemoval = true)
     private List<TagChallenge> tagChallenges = new ArrayList<>();
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public TagNameResponseDto toResponse() {
+        return TagNameResponseDto.builder()
+                .tagName(name)
+                .build();
+    }
 }
