@@ -28,36 +28,36 @@ public class Challenge extends Timestamped{
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "challenge_image")
+    @Column(name = "challenge_image", nullable =true )
     private String challengeImage;
 
-    @Column(name = "max_member", nullable = false)
+    @Column(name = "max_member", nullable =true)//, nullable = false)
     private int maxMember;
 
-    @Column(name = "current_member", nullable = false)
+    @Column(name = "current_member", nullable =true)//, nullable = false)
     private int currentMember;
 
-    @Column(name = "start_date")//, nullable = false)
+    @Column(name = "start_date", nullable =true)//, nullable = false)
     private LocalDate startDate;
 
-    @Column(name = "end_date")//, nullable = false)
+    @Column(name = "end_date", nullable =true)//, nullable = false)
     private LocalDate endDate;
 
-    @Column(name = "is_private", nullable = false)
+    @Column(name = "is_private", nullable =true)//, nullable = false)
     private Boolean isPrivate = false;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable =true)
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable =true)//, nullable = false)
     private ChallengeStatus status;
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<UserChallenge> userChallenges = new ArrayList<>();
 
-    @ManyToOne(cascade = CascadeType.MERGE, optional = false)
-    @JoinColumn(name = "category_id", nullable = true)//false)
+    @ManyToOne(cascade = CascadeType.MERGE)//, optional = false)
+    @JoinColumn(name = "category_id", nullable =true)//false)
     private Category category;
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
@@ -66,8 +66,8 @@ public class Challenge extends Timestamped{
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne//(optional = false)
+    @JoinColumn(name = "user_id", nullable =true)//, nullable = false)
     private User user;
 
     public void setUser(User user) {
@@ -85,6 +85,7 @@ public class Challenge extends Timestamped{
         this.isPrivate=requestDto.getIsPrivate();
         this.password=requestDto.getPassword();
         this.tagChallenges=null;//tagChallenges;
+        //category.getChallenges().add(this);
 
     }
 }

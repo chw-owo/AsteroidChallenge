@@ -37,6 +37,17 @@ public class ChallengeService {
         return true;
     }
 
+    @Transactional
+    public ChallengeResponseDto postChallenge(ChallengeRequestDto requestDto){
+
+        Category category = categoryRepository.findByName(requestDto.getCategory());
+        Challenge challenge =  new Challenge(requestDto, category);
+        challengeRepository.save(challenge);
+        ChallengeResponseDto responseDto = new ChallengeResponseDto(challenge);
+
+        return responseDto;
+    }
+
     public List<Challenge> getChallenge(){
         return challengeRepository.findAll();
     }
@@ -75,18 +86,5 @@ public class ChallengeService {
         return tagList;
     }
 
-    @Transactional
-    public ChallengeResponseDto postChallenge(ChallengeRequestDto requestDto, HttpServletRequest request){
 
-//        String token = request.getHeader(AUTHORIZATION_HEADER);
-//        String userId =  tokenProvider.parseClaims(token).getSubject();
-//        User user = userRepository.findByLoginId(userId).orElseThrow(()->new Exception("invalid Token"));
-
-        Category category = categoryRepository.findByName(requestDto.getCategory());
-        Challenge challenge =  new Challenge(requestDto, category);
-        //challengeRepository.save(challenge);
-        ChallengeResponseDto responseDto = new ChallengeResponseDto(challenge);
-
-        return responseDto;
-    }
 }

@@ -28,6 +28,10 @@ public class ChallengeController {
     public boolean makeCategory(@RequestBody CategoryRequestDto requestDto){
         return challengeService.makeCategory(requestDto);
     }
+    @PostMapping("/challenge")
+    public ChallengeResponseDto postChallenge(@RequestBody ChallengeRequestDto requestDto){
+        return challengeService.postChallenge(requestDto);
+    }
 
     @GetMapping("/challege")
     public List<Challenge> getChallenge(){
@@ -39,8 +43,5 @@ public class ChallengeController {
         return challengeService.getRecommendChallenge();
     }
 
-    @PostMapping("/challenge")
-    public ChallengeResponseDto postChallenge(@RequestBody ChallengeRequestDto requestDto, HttpServletRequest request){
-        return challengeService.postChallenge(requestDto, request);
-    }
+
 }

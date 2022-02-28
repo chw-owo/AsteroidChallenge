@@ -1,21 +1,15 @@
 package com.example.shortform.dto.RequestDto;
 
-import com.example.shortform.domain.*;
 import lombok.*;
 
-import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class ChallengeRequestDto {
-
 
     private String title;
     private String content;
@@ -28,4 +22,29 @@ public class ChallengeRequestDto {
     private String category;
     private List<String> tagChallenges;
 
+    public ChallengeRequestDto(
+
+    String title,
+    String content,
+    String challengeImage,
+    int maxMember,
+    LocalDate startDate,
+    LocalDate endDate,
+    Boolean isPrivate,
+    String password,
+    String category
+
+    ){
+        this.title=title;
+        this.content=content;
+        this.category= category;
+        this.challengeImage=challengeImage;
+        this.maxMember=maxMember;
+        this.startDate=startDate;
+        this.endDate=endDate;
+        this.isPrivate=isPrivate;
+        this.password=password;
+        this.tagChallenges=null;
+
+    }
 }

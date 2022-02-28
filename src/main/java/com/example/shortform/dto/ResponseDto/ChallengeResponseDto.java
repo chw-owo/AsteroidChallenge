@@ -28,13 +28,14 @@ public class ChallengeResponseDto {
     private LocalDate endDate;
     private Boolean isPrivate;
     private String category;
-    private List<TagChallenge> tagChallenges;
+    private List<String> tagChallenges;
     private String status;
 
     public ChallengeResponseDto(Challenge challenge){
+        this.challengeId = challenge.getId();
         this.title=challenge.getTitle();
         this.content=challenge.getContent();
-        this.category= challenge.getCategory().getName();
+        this.category= null;//challenge.getCategory().getName();
         this.challengeImage=challenge.getChallengeImage();
         this.maxMember=challenge.getMaxMember();
         this.startDate=challenge.getStartDate();
