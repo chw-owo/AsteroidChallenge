@@ -5,6 +5,7 @@ import com.example.shortform.dto.request.SignupRequestDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.repository.UserRepository;
 import com.example.shortform.service.UserService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +37,11 @@ public class UserApiController {
         return userService.nicknameCheck(signupRequestDto);
     }
 
-
+    // 이메일 인증 확인
+    @GetMapping("/auth/check-email-token")
+    public ResponseEntity<CMResponseDto> checkEmailToken(String token, String email) {
+        return userService.checkEmailToken(token, email);
+    }
 
 }
 
