@@ -12,7 +12,7 @@ import javax.persistence.*;
 public class UserChallenge extends Timestamped{
     @Id
     @Column(name = "id", nullable = false)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO) private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

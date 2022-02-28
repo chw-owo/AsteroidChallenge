@@ -15,7 +15,7 @@ import javax.persistence.*;
 public class Comment extends Timestamped{
     @Id
     @Column(name = "id", nullable = false)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO) private Long id;
 
     @Column(name = "content", nullable = false)
     private String content;

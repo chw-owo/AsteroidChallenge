@@ -1,9 +1,9 @@
 package com.example.shortform.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.example.shortform.dto.RequestDto.CategoryRequestDto;
+import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
+import com.example.shortform.repository.CategoryRepository;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -16,8 +16,10 @@ import java.util.List;
 @Getter
 @Entity
 public class Challenge extends Timestamped{
+
     @Id
     @Column(name = "id", nullable = false)
+    @GeneratedValue (strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "title", nullable = false)
@@ -35,10 +37,10 @@ public class Challenge extends Timestamped{
     @Column(name = "current_member", nullable = false)
     private int currentMember;
 
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date")//, nullable = false)
     private LocalDate startDate;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date")//, nullable = false)
     private LocalDate endDate;
 
     @Column(name = "is_private", nullable = false)
@@ -55,7 +57,7 @@ public class Challenge extends Timestamped{
     private List<UserChallenge> userChallenges = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.MERGE, optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id", nullable = true)//false)
     private Category category;
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
@@ -70,5 +72,19 @@ public class Challenge extends Timestamped{
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Challenge(ChallengeRequestDto requestDto, Category category){//List<TagChallenge> tagChallenges) {
+        this.title=requestDto.getTitle();
+        this.content=requestDto.getContent();
+        this.category= category;
+        this.challengeImage=requestDto.getChallengeImage();
+        this.maxMember=requestDto.getMaxMember();
+        this.startDate=requestDto.getStartDate();
+        this.endDate=requestDto.getEndDate();
+        this.isPrivate=requestDto.getIsPrivate();
+        this.password=requestDto.getPassword();
+        this.tagChallenges=null;//tagChallenges;
+
     }
 }

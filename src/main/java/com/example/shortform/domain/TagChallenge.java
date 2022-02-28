@@ -15,7 +15,7 @@ import javax.persistence.*;
 public class TagChallenge extends Timestamped{
     @Id
     @Column(name = "id", nullable = false)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO) private Long id;
 
     @ManyToOne
     @JoinColumn(name = "challenge_id")
