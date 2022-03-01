@@ -43,11 +43,12 @@ public class UserApiController {
     }
 
     // 이메일 인증 재전송
-    /*@GetMapping("/auth/resend-check-email")
-    public ResponseEntity<CMResponseDto> resendCheckEmailToken() {
+    @PostMapping("/auth/resend-check-email")
+    public ResponseEntity<CMResponseDto> resendCheckEmailToken(@RequestBody SignupRequestDto signupRequestDto) {
+        return userService.resendCheckEmailToken(signupRequestDto);
+    }
 
-    }*/
-
+    // 로그인
     @PostMapping("/auth/signin")
     public ResponseEntity<TokenDto> signin(@RequestBody SigninRequestDto signinRequestDto) {
         return userService.login(signinRequestDto);

@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,7 +64,7 @@ public class UserService {
 
         // TODO 인증 메일 보내기
         savedUser.generateEmailCheckToken();
-        sendSignupConfirmEmail(email, savedUser);
+        sendSignupConfirmEmail(savedUser);
 
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
@@ -95,6 +97,7 @@ public class UserService {
     }
 
     // 닉네임 중복 체크
+    @Transactional(readOnly = true)
     public ResponseEntity<CMResponseDto> nicknameCheck(SignupRequestDto signupRequestDto) {
 
         if (!userRepository.findByNickname(signupRequestDto.getNickname()).isPresent())
@@ -103,30 +106,20 @@ public class UserService {
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
 
-    private void sendSignupConfirmEmail(String email, User savedUser) {
-        EmailMessage emailMessage = EmailMessage.builder()
-                .to(savedUser.getEmail())
-                .subject("소행성(소소한 행동 습관 형성 챌린지), 회원 가입 인증 메일")
-                .message("/auth/check-email-token?token=" + savedUser.getEmailCheckToken() +
-                        "&email=" + email)
-                .build();
+    @Transactional
+    public ResponseEntity<CMResponseDto> resendCheckEmailToken(SignupRequestDto signupRequestDto) {
+        User findUser = userRepository.findByEmail(signupRequestDto.getEmail()).orElseThrow(
+                () -> new IllegalArgumentException("가입되지 않은 이메일입니다.")
+        );
 
-        emailService.sendEmail(emailMessage);
+        if (!findUser.canSendConfirmEmail())
+            throw new IllegalArgumentException("인증 이메일은 1시간에 한번만 전송할 수 있습니다.");
+
+        // 이메일 인증 재전송
+        sendSignupConfirmEmail(findUser);
+
+        return ResponseEntity.ok(new CMResponseDto("true"));
     }
-
-    private boolean isDuplicatePassword(String rawPassword, String pwCheck) {
-        return rawPassword.equals(pwCheck);
-    }
-
-    private boolean isExistEmail(String email) {
-        return !userRepository.findByEmail(email).isPresent();
-    }
-
-    private boolean isPasswordMatched(String email, String rawPassword) {
-        String domain = email.split("@")[0];
-        return !rawPassword.contains(domain);
-    }
-
 
     @Transactional
     public ResponseEntity<TokenDto> login(SigninRequestDto signinRequestDto) {
@@ -145,5 +138,29 @@ public class UserService {
 
 
         return new ResponseEntity<>(token, httpHeaders, HttpStatus.OK);
+    }
+
+    private void sendSignupConfirmEmail(User user) {
+        EmailMessage emailMessage = EmailMessage.builder()
+                .to(user.getEmail())
+                .subject("소행성(소소한 행동 습관 형성 챌린지), 회원 가입 인증 메일")
+                .message("/auth/check-email-token?token=" + user.getEmailCheckToken() +
+                        "&email=" + user.getEmail())
+                .build();
+
+        emailService.sendEmail(emailMessage);
+    }
+
+    private boolean isDuplicatePassword(String rawPassword, String pwCheck) {
+        return rawPassword.equals(pwCheck);
+    }
+
+    private boolean isExistEmail(String email) {
+        return !userRepository.findByEmail(email).isPresent();
+    }
+
+    private boolean isPasswordMatched(String email, String rawPassword) {
+        String domain = email.split("@")[0];
+        return !rawPassword.contains(domain);
     }
 }
