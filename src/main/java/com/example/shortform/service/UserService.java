@@ -5,24 +5,31 @@ import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
 import com.example.shortform.dto.request.SignupRequestDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
+import com.example.shortform.mail.EmailMessage;
+import com.example.shortform.mail.EmailService;
 import com.example.shortform.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final JavaMailSender javaMailSender;
+    private final EmailService emailService;
 
     @Transactional
     public ResponseEntity<CMResponseDto> signup(SignupRequestDto signupRequestDto) {
@@ -99,12 +106,14 @@ public class UserService {
     }
 
     private void sendSignupConfirmEmail(String email, User savedUser) {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(savedUser.getEmail());
-        mailMessage.setSubject("소행성, 회원 가입 인증 메일");
-        mailMessage.setText("/auth/check-email-token?token=" + savedUser.getEmailCheckToken() +
-                "&email=" + email);
-        javaMailSender.send(mailMessage);
+        EmailMessage emailMessage = EmailMessage.builder()
+                .to(savedUser.getEmail())
+                .subject("소행성, 회원 가입 인증 메일")
+                .message("/auth/check-email-token?token=" + savedUser.getEmailCheckToken() +
+                        "&email=" + email)
+                .build();
+
+        emailService.sendEmail(emailMessage);
     }
 
     private boolean isDuplicatePassword(String rawPassword, String pwCheck) {
