@@ -1,16 +1,15 @@
 package com.example.shortform.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
+import java.util.*;
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @Entity
 public class TagChallenge extends Timestamped{
     @Id
@@ -24,4 +23,14 @@ public class TagChallenge extends Timestamped{
     @ManyToOne
     @JoinColumn(name = "tag_id")
     private Tag tag;
+
+    @Builder
+    public TagChallenge(Challenge challenge, Tag tag) {
+        this.challenge = challenge;
+        this.tag = tag;
+        tag.getTagChallenges().add(this);
+        challenge.getTagChallenges().add(this);
+
+    }
+
 }

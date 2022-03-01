@@ -24,17 +24,14 @@ public class ChallengeController {
     private final ChallengeService challengeService;
 
     //for test
-    @PostMapping("/category/test")
-    public boolean makeCategory(@RequestBody CategoryRequestDto requestDto){
-        return challengeService.makeCategory(requestDto);
-    }
+
     @PostMapping("/challenge")
     public ChallengeResponseDto postChallenge(@RequestBody ChallengeRequestDto requestDto){
         return challengeService.postChallenge(requestDto);
     }
 
-    @GetMapping("/challege")
-    public List<Challenge> getChallenge(){
+    @GetMapping("/challenge")
+    public List<ChallengeResponseDto> getChallenge(){
         return challengeService.getChallenge();
     }
 

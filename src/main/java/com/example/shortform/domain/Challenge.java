@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @Entity
 public class Challenge extends Timestamped{
 
@@ -56,8 +57,8 @@ public class Challenge extends Timestamped{
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<UserChallenge> userChallenges = new ArrayList<>();
 
-    @ManyToOne(cascade = CascadeType.MERGE)//, optional = false)
-    @JoinColumn(name = "category_id", nullable =true)//false)
+    @ManyToOne(cascade = CascadeType.MERGE, optional = false)
+    @JoinColumn(name = "category_id", nullable =false)
     private Category category;
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
@@ -84,8 +85,5 @@ public class Challenge extends Timestamped{
         this.endDate=requestDto.getEndDate();
         this.isPrivate=requestDto.getIsPrivate();
         this.password=requestDto.getPassword();
-        this.tagChallenges=null;//tagChallenges;
-        //category.getChallenges().add(this);
-
     }
 }

@@ -1,5 +1,6 @@
 package com.example.shortform.domain;
 
+import com.example.shortform.dto.RequestDto.CategoryRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,6 +24,12 @@ public class Tag extends Timestamped{
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "tag", orphanRemoval = true)
+    @OneToMany(mappedBy = "tag", orphanRemoval = true, targetEntity = TagChallenge.class)
     private List<TagChallenge> tagChallenges = new ArrayList<>();
+
+    @Builder
+    public Tag(String name) {
+        this.name = name;
+
+    }
 }

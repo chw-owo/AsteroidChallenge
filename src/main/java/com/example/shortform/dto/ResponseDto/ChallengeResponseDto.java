@@ -7,6 +7,7 @@ import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -35,13 +36,21 @@ public class ChallengeResponseDto {
         this.challengeId = challenge.getId();
         this.title=challenge.getTitle();
         this.content=challenge.getContent();
-        this.category= null;//challenge.getCategory().getName();
+        this.category= challenge.getCategory().getName();
         this.challengeImage=challenge.getChallengeImage();
         this.maxMember=challenge.getMaxMember();
         this.startDate=challenge.getStartDate();
         this.endDate=challenge.getEndDate();
         this.isPrivate=challenge.getIsPrivate();
-        this.tagChallenges=null;//tagChallenges;
 
+        List<String> tagChallengeStrings = new ArrayList<>();
+        List<TagChallenge> tagChallenges = challenge.getTagChallenges();
+
+        for(TagChallenge tagChallenge : tagChallenges){
+            String tagChallengeString = tagChallenge.getTag().getName();
+            tagChallengeStrings.add(tagChallengeString);
+        }
+
+        this.tagChallenges = tagChallengeStrings;
     }
 }

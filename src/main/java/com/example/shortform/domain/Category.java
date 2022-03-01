@@ -31,4 +31,9 @@ public class Category extends Timestamped{
     public Category(CategoryRequestDto requestDto) {
         this.name = requestDto.getName();
     }
+
+    @Builder
+    public Category(String name) {
+        this.name = name;
+    }
 }
