@@ -1,8 +1,10 @@
 package com.example.shortform.service;
 
-import com.example.shortform.domain.Level;
+import com.example.shortform.config.jwt.TokenDto;
+import com.example.shortform.config.jwt.JwtAuthenticationProvider;
 import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
+import com.example.shortform.dto.request.SigninRequestDto;
 import com.example.shortform.dto.request.SignupRequestDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.mail.EmailMessage;
@@ -10,17 +12,12 @@ import com.example.shortform.mail.EmailService;
 import com.example.shortform.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,6 +27,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
     @Transactional
     public ResponseEntity<CMResponseDto> signup(SignupRequestDto signupRequestDto) {
@@ -108,7 +106,7 @@ public class UserService {
     private void sendSignupConfirmEmail(String email, User savedUser) {
         EmailMessage emailMessage = EmailMessage.builder()
                 .to(savedUser.getEmail())
-                .subject("소행성, 회원 가입 인증 메일")
+                .subject("소행성(소소한 행동 습관 형성 챌린지), 회원 가입 인증 메일")
                 .message("/auth/check-email-token?token=" + savedUser.getEmailCheckToken() +
                         "&email=" + email)
                 .build();
@@ -130,5 +128,22 @@ public class UserService {
     }
 
 
+    @Transactional
+    public ResponseEntity<TokenDto> login(SigninRequestDto signinRequestDto) {
+        User userEntity = userRepository.findByEmail(signinRequestDto.getEmail()).orElseThrow(
+                () -> new IllegalArgumentException("가입되지 않은 이메일입니다.")
+        );
 
+        if (!passwordEncoder.matches(signinRequestDto.getPassword(), userEntity.getPassword()))
+            throw new IllegalArgumentException("패스워드가 일치하지 않습니다.");
+
+        // 토큰 정보 생성
+        TokenDto token = jwtAuthenticationProvider.createToken(userEntity);
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(JwtAuthenticationProvider.AUTHORIZATION_HEADER, "Bearer "+ token);
+
+
+        return new ResponseEntity<>(token, httpHeaders, HttpStatus.OK);
+    }
 }

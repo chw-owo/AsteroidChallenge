@@ -1,11 +1,10 @@
 package com.example.shortform.controller;
 
-import com.example.shortform.domain.User;
+import com.example.shortform.config.jwt.TokenDto;
+import com.example.shortform.dto.request.SigninRequestDto;
 import com.example.shortform.dto.request.SignupRequestDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
-import com.example.shortform.repository.UserRepository;
 import com.example.shortform.service.UserService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +40,17 @@ public class UserApiController {
     @GetMapping("/auth/check-email-token")
     public ResponseEntity<CMResponseDto> checkEmailToken(String token, String email) {
         return userService.checkEmailToken(token, email);
+    }
+
+    // 이메일 인증 재전송
+    /*@GetMapping("/auth/resend-check-email")
+    public ResponseEntity<CMResponseDto> resendCheckEmailToken() {
+
+    }*/
+
+    @PostMapping("/auth/signin")
+    public ResponseEntity<TokenDto> signin(@RequestBody SigninRequestDto signinRequestDto) {
+        return userService.login(signinRequestDto);
     }
 
 }
