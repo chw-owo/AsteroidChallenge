@@ -16,8 +16,8 @@ import java.util.List;
 @Entity
 public class Level extends Timestamped{
     @Id
-    @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false)
     private Long id;
 
     @Column(name = "name", nullable = false)

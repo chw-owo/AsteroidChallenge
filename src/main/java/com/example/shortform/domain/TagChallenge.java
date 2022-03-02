@@ -13,8 +13,9 @@ import java.util.*;
 @Entity
 public class TagChallenge extends Timestamped{
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO) private Long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "challenge_id")
@@ -24,6 +25,7 @@ public class TagChallenge extends Timestamped{
     @JoinColumn(name = "tag_id")
     private Tag tag;
 
+
     @Builder
     public TagChallenge(Challenge challenge, Tag tag) {
         this.challenge = challenge;
@@ -32,5 +34,6 @@ public class TagChallenge extends Timestamped{
         challenge.getTagChallenges().add(this);
 
     }
+
 
 }

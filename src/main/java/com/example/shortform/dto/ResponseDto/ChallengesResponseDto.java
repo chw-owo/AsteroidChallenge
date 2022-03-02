@@ -22,7 +22,7 @@ public class ChallengesResponseDto {
 
     private String title;
     private String content;
-    private String challengeImage;
+    private List<String> challengeImage;
     private int maxMember;
     private int currentDate;
     private String startDate; //LocalDate
@@ -37,7 +37,7 @@ public class ChallengesResponseDto {
         this.title=challenge.getTitle();
         this.content=challenge.getContent();
         this.category= challenge.getCategory().getName();
-        this.challengeImage=challenge.getChallengeImage().getFilePath();
+        //this.challengeImage=challenge.getChallengeImage().getFilePath();
         this.maxMember=challenge.getMaxMember();
         this.startDate=challenge.getStartDate();
         this.endDate=challenge.getEndDate();
@@ -53,4 +53,5 @@ public class ChallengesResponseDto {
 
         this.tagChallenges = tagChallengeStrings;
     }
+
 }

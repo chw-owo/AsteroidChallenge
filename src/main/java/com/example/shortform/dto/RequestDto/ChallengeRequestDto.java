@@ -15,7 +15,7 @@ public class ChallengeRequestDto {
 
     private String title;
     private String content;
-    private MultipartFile challengeImage;
+    private List<MultipartFile> challengeImages;
     private int maxMember;
     private String startDate; //LocalDate
     private String endDate; //LocalDate

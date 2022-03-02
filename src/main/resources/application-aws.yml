@@ -1,7 +1,7 @@
 cloud:
   aws:
     s3:
-      bucket: clone-project
+      bucket: asteroid-challenge
     region:
       static: ap-northeast-2
     stack:

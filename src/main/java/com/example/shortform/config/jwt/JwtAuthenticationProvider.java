@@ -1,6 +1,5 @@
 package com.example.shortform.config.jwt;
 
-
 import com.example.shortform.config.auth.PrincipalDetailsService;
 import com.example.shortform.domain.User;
 import io.jsonwebtoken.*;
