@@ -11,10 +11,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.CorsUtils;
+
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
+
     @Bean
     public BCryptPasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
@@ -31,8 +34,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/h2-console/**")
-                .antMatchers("/**"); //지워야됨. for test
+        web.ignoring().antMatchers("/h2-console/**");
+
 
     }
 
@@ -49,10 +52,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .authorizeRequests()
                 .antMatchers("/auth/**").permitAll()
-                .antMatchers("/**").permitAll() //지워야됨. for test
-                .anyRequest()
-                .authenticated()
 
+                .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+                .anyRequest()
+                //.authenticated()
+                .permitAll()
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtAuthenticationProvider),
                         UsernamePasswordAuthenticationFilter.class);
@@ -64,7 +68,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOriginPattern("*");
+
+        configuration.addAllowedOrigin("http://localhost:3000");
+
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.addExposedHeader("*");

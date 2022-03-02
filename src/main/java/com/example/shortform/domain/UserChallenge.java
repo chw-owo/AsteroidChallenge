@@ -11,6 +11,7 @@ import javax.persistence.*;
 @Entity
 public class UserChallenge extends Timestamped{
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO) private Long id;
 
@@ -21,4 +22,9 @@ public class UserChallenge extends Timestamped{
     @ManyToOne
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
+
+    public UserChallenge(Challenge challenge, User user) {
+        this.challenge = challenge;
+        this.user = user;
+    }
 }

@@ -1,14 +1,13 @@
-package com.example.shortform.dto.RequestDto;
+package com.example.shortform.dto.request;
 
 import lombok.*;
-
-import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class PasswordDto {
+public class SigninRequestDto {
+    private String email;
     private String password;
 }

@@ -16,6 +16,7 @@ import java.util.List;
 @Entity
 public class Level extends Timestamped{
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -29,6 +30,6 @@ public class Level extends Timestamped{
     @Column(name = "experience_point", nullable = false)
     private int experiencePoint;
 
-    @OneToMany(mappedBy = "level", orphanRemoval = true)
-    private List<User> users = new ArrayList<>();
+    //@OneToMany(mappedBy = "level", orphanRemoval = true)
+    //private List<User> users = new ArrayList<>();
 }
