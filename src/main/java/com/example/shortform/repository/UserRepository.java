@@ -8,4 +8,5 @@ import java.util.*;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findTop5ByOrderByPoint();
+    User findByEmail(String email);
 }

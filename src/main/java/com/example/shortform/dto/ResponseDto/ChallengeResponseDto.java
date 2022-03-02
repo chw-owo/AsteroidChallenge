@@ -44,6 +44,7 @@ public class ChallengeResponseDto {
         this.startDate=challenge.getStartDate();
         this.endDate=challenge.getEndDate();
         this.isPrivate=challenge.getIsPrivate();
+        
 
         this.userId = null;
         this.members = null;

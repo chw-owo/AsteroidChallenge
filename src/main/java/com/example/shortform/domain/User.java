@@ -29,6 +29,10 @@ public class User extends Timestamped{
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "role", nullable = false)
+    private String role;
+
+
     @Column(name = "point", nullable = false)
     private int point;
 
@@ -50,5 +54,9 @@ public class User extends Timestamped{
 
     public void setChallenges(List<Challenge> challenges) {
         this.challenges = challenges;
+    }
+
+    public Object getRole() {
+        return this.role;
     }
 }

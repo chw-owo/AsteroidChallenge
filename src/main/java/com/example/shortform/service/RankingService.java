@@ -23,6 +23,7 @@ public class RankingService {
             for (User u:users) {
                 rankings.add(new RankingResponseDto(u));
             }
+            //rankings.add(new RankingResponseDto(로그인된user));
             return rankings;
         }
     }

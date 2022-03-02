@@ -55,13 +55,8 @@ public class Challenge extends Timestamped{
 
     //수정해야됨
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = true)// false)
+    @Column(name = "status", nullable =  false)
     private ChallengeStatus status;
-
-    //수정해야됨
-    @OneToMany(orphanRemoval = true)//(mappedBy = "challenge", orphanRemoval = true)
-    @JoinColumn(name = "challenge", nullable = true)
-    private List<UserChallenge> userChallenges = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.MERGE, optional = false)
     @JoinColumn(name = "category_id", nullable =false)
@@ -69,8 +64,6 @@ public class Challenge extends Timestamped{
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<TagChallenge> tagChallenges = new ArrayList<>();
-    //중복 태그 금지도 넣어야되지 않나?
-
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
@@ -79,6 +72,12 @@ public class Challenge extends Timestamped{
     @ManyToOne//(optional = false)
     @JoinColumn(name = "user_id", nullable = true)
     private User user;
+
+    //수정해야됨
+    @OneToMany(mappedBy = "challenge", orphanRemoval = true)
+    @JoinColumn(name = "challenge", nullable = true)
+    private List<UserChallenge> userChallenges = new ArrayList<>();
+
 
     public Challenge(ChallengeRequestDto requestDto, Category category){
         this.title=requestDto.getTitle();

@@ -12,13 +12,18 @@ import com.example.shortform.repository.ChallengeRepository;
 import com.example.shortform.repository.TagChallengeRepository;
 import com.example.shortform.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -33,9 +38,7 @@ public class ChallengeService {
     private final TagChallengeRepository tagChallengeRepository;
     private final ImageFileService imageFileService;
 
-    private final String DIR_NAME = "tmp";
-
-    //에러처리도 해야됨 ㅎㅎㅎㅎ
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
     public ChallengesResponseDto postChallenge(ChallengeRequestDto requestDto,
@@ -53,30 +56,29 @@ public class ChallengeService {
             tagRepository.save(tag);
 
             TagChallenge tagChallenge = new TagChallenge(challenge, tag);
-            if (!tagChallenges.contains(tagChallenge)){ // 중복태그 방지
+            if (!tagChallenges.contains(tagChallenge)){ // 한 게시물 내부의 중복태그 방지
                 tagChallenges.add(tagChallenge);
                 tagChallengeRepository.save(tagChallenge);
             }
         }
         challenge.setTagChallenges(tagChallenges);
 
-        // 방 비밀번호 암호화
-
-
-        // 유저 등록, 매니저 등록 => 로그인 구현 되면 하자
-        // 날짜는 무슨 형식으로 받지?
-
-
         //챌린지 저장
         challengeRepository.save(challenge);
+
+        // 방 비밀번호 암호화
+        String encPassword = passwordEncoder.encode(requestDto.getPassword());
+        challenge.setPassword(encPassword);
 
         // 이미지 업로드
         ImageFile imageFileUpload = imageFileService.upload(multipartFile, challenge);
         challenge.setChallengeImage(imageFileUpload);
         ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge);
 
-        return responseDto;
+        // 날짜 받기 근데 무슨 형식으로 받지...?
+        // 유저 등록, 매니저 등록 => 로그인이랑 합치고 하자
 
+        return responseDto;
 
     }
 
