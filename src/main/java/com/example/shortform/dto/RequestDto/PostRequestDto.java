@@ -10,14 +10,12 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PostRequestDto implements Serializable {
+public class PostRequestDto {
     private String content;
-    private String postImage;
 
     public Post toEntity(Challenge challenge) {
         return Post.builder()
                 .challenge(challenge)
-                .postImage(postImage)
                 .content(content)
                 .build();
     }

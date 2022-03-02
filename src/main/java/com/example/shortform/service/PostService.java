@@ -2,9 +2,10 @@ package com.example.shortform.service;
 
 import com.example.shortform.domain.Challenge;
 import com.example.shortform.domain.Comment;
+import com.example.shortform.domain.ImageFile;
 import com.example.shortform.domain.Post;
 import com.example.shortform.dto.RequestDto.PostRequestDto;
-import com.example.shortform.dto.ResponseDto.CommentDetailResponseDto;
+import com.example.shortform.dto.ResponseDto.CommentResponseDto;
 import com.example.shortform.dto.ResponseDto.PostResponseDto;
 import com.example.shortform.repository.ChallengeRepository;
 import com.example.shortform.repository.CommentRepository;
@@ -12,8 +13,11 @@ import com.example.shortform.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,23 +26,32 @@ public class PostService {
     private final PostRepository postRepository;
     private final ChallengeRepository challengeRepository;
     private final CommentRepository commentRepository;
+    private final ImageFileService imageFileService;
 
     @Autowired
     public PostService(PostRepository postRepository,
                        ChallengeRepository challengeRepository,
-                       CommentRepository commentRepository) {
+                       CommentRepository commentRepository,
+                       ImageFileService imageFileService) {
         this.postRepository = postRepository;
         this.challengeRepository = challengeRepository;
         this.commentRepository = commentRepository;
+        this.imageFileService = imageFileService;
     }
 
     @Transactional
-    public ResponseEntity<?> writePost(Long challengeId, PostRequestDto requestDto) {
+    public ResponseEntity<?> writePost(Long challengeId,
+                                       @RequestPart("post") PostRequestDto requestDto,
+                                       @RequestPart(value = "image",required = false) MultipartFile multipartFile) throws IOException {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NullPointerException("챌린지가 존재하지 않습니다.")
         );
 
         Post post = postRepository.save(requestDto.toEntity(challenge));
+
+        ImageFile imageFile = imageFileService.upload(multipartFile, post);
+
+        post.setImageFile(imageFile);
 
         return ResponseEntity.ok(post.toResponse());
     }
@@ -71,12 +84,12 @@ public class PostService {
 
         List<Post> postList = postRepository.findAllByChallenge(challenge);
         List<PostResponseDto> responseDtoList = new ArrayList<>();
-        List<CommentDetailResponseDto> commentDetailList = new ArrayList<>();
+        List<CommentResponseDto> commentDetailList = new ArrayList<>();
 
         for (Post post : postList) {
             List<Comment> commentList = commentRepository.findAllByPost(post);
             for (Comment comment : commentList) {
-                CommentDetailResponseDto commentDetailResponseDto = comment.toResponse();
+                CommentResponseDto commentDetailResponseDto = comment.toResponse();
                 String commentCreatedAt = commentDetailResponseDto.getCreatedAt();
                 String year = commentCreatedAt.substring(0,4) + "년";
                 String month = commentCreatedAt.substring(5,7) + "월";

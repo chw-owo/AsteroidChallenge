@@ -1,10 +1,15 @@
 package com.example.shortform.controller;
 
 import com.example.shortform.dto.RequestDto.ChallengeModifyRequestDto;
+import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
 import com.example.shortform.service.ChallengeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 public class ChallengeController {
@@ -20,14 +25,22 @@ public class ChallengeController {
         return challengeService.getChallenge(challengeId);
     }
 
+    @PostMapping("/challenge")
+    public ResponseEntity<?> createChallenge(@RequestPart(value = "imageFile", required = false) List<MultipartFile> multipartFileList,
+                                             @RequestPart("challenge")ChallengeRequestDto requestDto) throws IOException {
+        return challengeService.createChallenge(multipartFileList, requestDto);
+    }
+
     @PostMapping("/challenge/{challengeId}/user")
     public ResponseEntity<?> participateChallenge(@PathVariable Long challengeId) {
         return challengeService.participateChallenge(challengeId);
     }
 
     @PutMapping("/challenge/{challengeId}")
-    public ResponseEntity<?> modifyChallenge(@PathVariable Long challengeId, @RequestBody ChallengeModifyRequestDto requestDto) {
-        return challengeService.modifyChallenge(challengeId, requestDto);
+    public ResponseEntity<?> modifyChallenge(@PathVariable Long challengeId,
+                                             @RequestPart("challenge") ChallengeModifyRequestDto requestDto,
+                                             @RequestPart(value = "imageFile", required = false) List<MultipartFile> multipartFileList) throws IOException {
+        return challengeService.modifyChallenge(challengeId, requestDto, multipartFileList);
     }
 
     @DeleteMapping("/challenge/{challengeId}/user")

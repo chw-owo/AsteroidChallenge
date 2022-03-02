@@ -33,8 +33,8 @@ public class User extends Timestamped{
     @Column(name = "point", nullable = false)
     private int point;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "level_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "level_id")
     private Level level;
 
     @OneToMany(mappedBy = "user", orphanRemoval = true)

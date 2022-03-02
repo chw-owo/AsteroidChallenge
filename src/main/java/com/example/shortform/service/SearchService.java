@@ -2,6 +2,7 @@ package com.example.shortform.service;
 
 import com.example.shortform.domain.Challenge;
 import com.example.shortform.domain.Tag;
+import com.example.shortform.domain.TagChallenge;
 import com.example.shortform.domain.User;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.MemberResponseDto;
@@ -40,16 +41,16 @@ public class SearchService {
         TagNameResponseDto tagNameResponseDto;
 
         for (Challenge challenge : challengeList) {
-            List<Tag> tagList = tagChallengeRepository.findAllByChallenge(challenge);
-            for (Tag tag : tagList) {
-                tagNameResponseDto = tag.toResponse();
+            List<TagChallenge> tagChallengeList = tagChallengeRepository.findAllByChallenge(challenge);
+            for (TagChallenge tagChallenge : tagChallengeList) {
+                tagNameResponseDto = tagChallenge.getTag().toResponse();
                 tagNameList.add(tagNameResponseDto);
             }
             List<User> userList = userChallengeRepository.findAllByChallenge(challenge);
             for (User user : userList) {
                 memberList.add(user.toMemberResponse());
             }
-            ChallengeResponseDto challengeResponseDto = challenge.toResponse(tagNameList, memberList);
+            ChallengeResponseDto challengeResponseDto = challenge.toSearchResponse(tagNameList, memberList);
             challengeResponseDtoList.add(challengeResponseDto);
         }
 

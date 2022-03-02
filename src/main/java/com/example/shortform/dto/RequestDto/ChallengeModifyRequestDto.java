@@ -17,7 +17,6 @@ import java.util.List;
 public class ChallengeModifyRequestDto {
     private String title;
     private String content;
-    private String challengeImage;
     private String category;
     private List<String> tagName;
 }

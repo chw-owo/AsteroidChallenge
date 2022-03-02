@@ -1,7 +1,7 @@
 package com.example.shortform.domain;
 
 import com.example.shortform.dto.RequestDto.PostRequestDto;
-import com.example.shortform.dto.ResponseDto.CommentDetailResponseDto;
+import com.example.shortform.dto.ResponseDto.CommentResponseDto;
 import com.example.shortform.dto.ResponseDto.PostIdResponseDto;
 import com.example.shortform.dto.ResponseDto.PostResponseDto;
 import lombok.*;
@@ -17,25 +17,30 @@ import java.util.List;
 @Entity
 public class Post extends Timestamped{
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "post_image")
-    private String postImage;
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "post", orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToOne(mappedBy = "post", orphanRemoval = true)
+    private ImageFile imageFile;
+
+    public void setImageFile(ImageFile imageFile) {
+        this.imageFile = imageFile;
+    }
 
     public PostIdResponseDto toResponse() {
         return PostIdResponseDto.builder()
@@ -45,13 +50,11 @@ public class Post extends Timestamped{
 
     public void update(PostRequestDto requestDto) {
         this.content = requestDto.getContent();
-        this.postImage = requestDto.getPostImage();
     }
 
-    public PostResponseDto toResponse(List<CommentDetailResponseDto> commentList) {
+    public PostResponseDto toResponse(List<CommentResponseDto> commentList) {
         return PostResponseDto.builder()
                 .content(content)
-                .postImage(postImage)
                 .profileImage(user.getProfileImage())
                 .nickname(user.getNickname())
                 .comments(commentList)

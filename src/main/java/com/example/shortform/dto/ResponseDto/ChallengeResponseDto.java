@@ -12,14 +12,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Getter
-@Setter
-public class ChallengeResponseDto implements Serializable {
+public class ChallengeResponseDto{
     private Long challengeId;
     private Long userId;
     private String title;
     private String content;
-    private String challengeImage;
     private int maxMember;
     private int currentMember;
     private LocalDate startDate;
@@ -29,4 +26,5 @@ public class ChallengeResponseDto implements Serializable {
     private List<TagNameResponseDto> tagNameList;
     private List<MemberResponseDto> members;
     private String status;
+    private List<String> imageUrlList;
 }

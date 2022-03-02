@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -19,7 +18,7 @@ public class PostResponseDto {
     private String postImage;
     private String content;
     private String createdAt;
-    private List<CommentDetailResponseDto> comments;
+    private List<CommentResponseDto> comments;
 
     public PostResponseDto setCreatedAt(String createdAt) {
         return PostResponseDto.builder()

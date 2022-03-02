@@ -12,22 +12,33 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Getter
 @Entity
-public class TagChallenge extends Timestamped{
+public class ImageFile {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "original_file_name")
+    private String originalFileName;
+
+    @Column(name = "converted_file_name")
+    private String convertedFileName;
+
+    @Column(name = "file_path")
+    private String filePath;
+
+    @Column(name = "file_size")
+    private Long fileSize;
+
     @ManyToOne
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 
-    @ManyToOne
-    @JoinColumn(name = "tag_id")
-    private Tag tag;
+    @OneToOne(orphanRemoval = true)
+    @JoinColumn(name = "post_id")
+    private Post post;
 
-    public TagChallenge(Challenge challenge, Tag tag) {
-        this.challenge = challenge;
-        this.tag = tag;
+    public void setPost(Post post) {
+        this.post = post;
     }
 }
