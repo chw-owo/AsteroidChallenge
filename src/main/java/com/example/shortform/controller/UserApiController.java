@@ -60,5 +60,11 @@ public class UserApiController {
     public ResponseEntity<CMResponseDto> sendTempPassword(@RequestBody EmailRequestDto emailRequestDto) {
         return userService.sendTempPassword(emailRequestDto);
     }
+
+    // 카카오 로그인
+    @GetMapping("/auth/kakao/callback")
+    public ResponseEntity<TokenDto> kakaoCallback(String code) {
+        return userService.kakaoLogin(code);
+    }
 }
 

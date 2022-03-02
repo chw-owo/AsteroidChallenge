@@ -1,5 +1,7 @@
 package com.example.shortform.service;
 
+import com.example.shortform.config.auth.kakao.KakaoProfile;
+import com.example.shortform.config.auth.kakao.OAuthToken;
 import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
 import com.example.shortform.domain.Role;
@@ -11,16 +13,22 @@ import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.mail.EmailMessage;
 import com.example.shortform.mail.EmailService;
 import com.example.shortform.repository.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Random;
 import java.util.UUID;
@@ -151,7 +159,7 @@ public class UserService {
                 () -> new IllegalArgumentException("가입되지 않은 이메일 입니다.")
         );
 
-        // 인증 이메일 1시간 여부 체크
+        // 인증 이메일 1시간 지났는지 체크
         if (!findUser.canSendConfirmEmail())
             throw new IllegalArgumentException("인증 이메일은 1시간에 한번만 전송할 수 있습니다.");
 
@@ -163,7 +171,7 @@ public class UserService {
         findUser.changeTempPassword(tempEncPassword);
 
         // 이메일 전송
-        sendTempPasswordFonfirmEmail(findUser, tempPassword);
+        sendTempPasswordConfirmEmail(findUser, tempPassword);
 
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
@@ -179,11 +187,11 @@ public class UserService {
         emailService.sendEmail(emailMessage);
     }
 
-    private void sendTempPasswordFonfirmEmail(User user, String tempPwd) {
+    private void sendTempPasswordConfirmEmail(User user, String tempPwd) {
         EmailMessage emailMessage = EmailMessage.builder()
                 .to(user.getEmail())
                 .subject("소행성(소소한 행동 습관 형성 챌린지), 임시 비밀번호 발급")
-                .message("<p>임시 비밀번호는 <b>" + tempPwd + "</b> 입니다.</p>" +
+                .message("<p>임시 비밀번호: <b>" + tempPwd + "</b></p><br>" +
                         "<p>로그인 후 비밀번호를 변경해주세요.</p>")
                 .build();
 
@@ -203,6 +211,7 @@ public class UserService {
         return !rawPassword.contains(domain);
     }
 
+    // 임시 비밀번호 생성 메서드
     private String temporaryPassword(int size) {
         StringBuffer buffer = new StringBuffer();
         Random random = new Random();
@@ -211,10 +220,113 @@ public class UserService {
         for (int i = 0; i < size; i++) {
             buffer.append(chars[random.nextInt(chars.length)]);
         }
-
         buffer.append("!a1");
-
         return buffer.toString();
     }
 
+    @Transactional
+    public ResponseEntity<TokenDto> kakaoLogin(String code) {
+
+        // POST 방식으로 key=value 데이터를 요청 (카카오쪽으로)
+        // RestTemplate
+
+        // HttpHeader 오브젝트 생성
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        // HttpBody 오브젝트 생성
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+
+        params.add("grant_type", "authorization_code");
+        params.add("client_id", "8ff3bc07db2d56b28fc82cb026ccd135");
+        params.add("redirect_uri", "http://localhost:8080/auth/kakao/callback");
+        params.add("code", code);
+
+        // HttpHeader와 HttpBody를 하나의 오브젝트에 담기
+        HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest =
+                new HttpEntity<>(params, headers);
+
+        // Http 요청하기 - Post, response변수의 응답 받음
+        ResponseEntity<String> response = restTemplate.exchange(
+                "https://kauth.kakao.com/oauth/token",
+                HttpMethod.POST,
+                kakaoTokenRequest,
+                String.class
+        );
+
+        // 데이터를 오브젝트에 담는다.
+        // Gson, Json Simple, ObjectMapper
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        OAuthToken oAuthToken = null;
+
+        try {
+            oAuthToken = objectMapper.readValue(response.getBody(), OAuthToken.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        RestTemplate restTemplate2 = new RestTemplate();
+
+        HttpHeaders headers2 = new HttpHeaders();
+        headers2.add("Authorization", "Bearer "+oAuthToken.getAccess_token());
+        headers2.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+
+        // HttpHeader와 HttpBody를 하나의 오브젝트에 담기
+        HttpEntity<MultiValueMap<String, String>> kakaoProfileRequest =
+                new HttpEntity<>(headers2);
+
+        // Http 요청하기 - Post, response변수의 응답 받음
+        ResponseEntity<String> response2 = restTemplate2.exchange(
+                "https://kapi.kakao.com/v2/user/me",
+                HttpMethod.POST,
+                kakaoProfileRequest,
+                String.class
+        );
+
+        ObjectMapper objectMapper2 = new ObjectMapper();
+        objectMapper2.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        KakaoProfile kakaoProfile = null;
+
+        try {
+            kakaoProfile = objectMapper2.readValue(response2.getBody(), KakaoProfile.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        log.info("kakao email: {}", kakaoProfile.getKakaoAccount().getEmail());
+        log.info("kakao nickname: {}", kakaoProfile.getKakaoAccount().getProfile().getNickname());
+
+        User userEntity = userRepository.findByProviderId(String.valueOf(kakaoProfile.getId()));
+
+        // 가입되어있는지 확인
+        if (userEntity == null) {
+
+            String nickname = kakaoProfile.getKakaoAccount().getEmail().split("@")[0];
+
+            // 강제 로그인 진행
+            userEntity = User.builder()
+                    .email(kakaoProfile.getKakaoAccount().getEmail())
+                    .password(passwordEncoder.encode("1234")) // TODO 패스워드 properties에 입력
+                    .nickname(nickname)
+                    .point(0)
+                    .emailVerified(true)
+                    .role(Role.ROLE_USER)
+                    .provider("kakao")
+                    .providerId(String.valueOf(kakaoProfile.getId()))
+                    .build();
+
+            userRepository.save(userEntity);
+        }
+
+        // 토큰 정보 생성
+        TokenDto token = jwtAuthenticationProvider.createToken(userEntity);
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(JwtAuthenticationProvider.AUTHORIZATION_HEADER, "Bearer "+ token);
+
+        return new ResponseEntity<>(token, httpHeaders, HttpStatus.OK);
+    }
 }
