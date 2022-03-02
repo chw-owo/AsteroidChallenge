@@ -198,32 +198,6 @@ public class UserService {
         emailService.sendEmail(emailMessage);
     }
 
-    private boolean isDuplicatePassword(String rawPassword, String pwCheck) {
-        return rawPassword.equals(pwCheck);
-    }
-
-    private boolean isExistEmail(String email) {
-        return !userRepository.findByEmail(email).isPresent();
-    }
-
-    private boolean isPasswordMatched(String email, String rawPassword) {
-        String domain = email.split("@")[0];
-        return !rawPassword.contains(domain);
-    }
-
-    // 임시 비밀번호 생성 메서드
-    private String temporaryPassword(int size) {
-        StringBuffer buffer = new StringBuffer();
-        Random random = new Random();
-        String chars[] = ("A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z," +
-                "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,0,1,2,3,4,5,6,7,8,9").split(",");
-        for (int i = 0; i < size; i++) {
-            buffer.append(chars[random.nextInt(chars.length)]);
-        }
-        buffer.append("!a1");
-        return buffer.toString();
-    }
-
     @Transactional
     public ResponseEntity<TokenDto> kakaoLogin(String code) {
 
@@ -328,5 +302,31 @@ public class UserService {
         httpHeaders.add(JwtAuthenticationProvider.AUTHORIZATION_HEADER, "Bearer "+ token);
 
         return new ResponseEntity<>(token, httpHeaders, HttpStatus.OK);
+    }
+
+    private boolean isDuplicatePassword(String rawPassword, String pwCheck) {
+        return rawPassword.equals(pwCheck);
+    }
+
+    private boolean isExistEmail(String email) {
+        return !userRepository.findByEmail(email).isPresent();
+    }
+
+    private boolean isPasswordMatched(String email, String rawPassword) {
+        String domain = email.split("@")[0];
+        return !rawPassword.contains(domain);
+    }
+
+    // 임시 비밀번호 생성 메서드
+    private String temporaryPassword(int size) {
+        StringBuffer buffer = new StringBuffer();
+        Random random = new Random();
+        String chars[] = ("A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z," +
+                "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,0,1,2,3,4,5,6,7,8,9").split(",");
+        for (int i = 0; i < size; i++) {
+            buffer.append(chars[random.nextInt(chars.length)]);
+        }
+        buffer.append("!a1");
+        return buffer.toString();
     }
 }
