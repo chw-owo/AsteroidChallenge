@@ -1,5 +1,10 @@
 package com.example.shortform.domain;
 
+import com.example.shortform.dto.RequestDto.ChallengeModifyRequestDto;
+import com.example.shortform.dto.ResponseDto.ChallengeIdResponseDto;
+import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
+import com.example.shortform.dto.ResponseDto.MemberResponseDto;
+import com.example.shortform.dto.ResponseDto.TagNameResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +22,7 @@ import java.util.List;
 @Entity
 public class Challenge extends Timestamped{
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
@@ -25,9 +31,6 @@ public class Challenge extends Timestamped{
 
     @Column(name = "content", nullable = false)
     private String content;
-
-    @Column(name = "challenge_image")
-    private String challengeImage;
 
     @Column(name = "max_member", nullable = false)
     private int maxMember;
@@ -48,7 +51,7 @@ public class Challenge extends Timestamped{
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status")
     private ChallengeStatus status;
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
@@ -64,11 +67,68 @@ public class Challenge extends Timestamped{
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
-    public void setUser(User user) {
-        this.user = user;
+    @OneToMany(mappedBy = "challenge", orphanRemoval = true)
+    private List<ImageFile> imageFiles = new ArrayList<>();
+
+    public ChallengeResponseDto toResponse(List<TagNameResponseDto> tagNameList,
+                                           List<MemberResponseDto> memberList,
+                                           List<String> imagePathList) {
+        return ChallengeResponseDto.builder()
+                .challengeId(id)
+//                .userId(user.getId())
+                .title(title)
+                .content(content)
+                .categoryName(category.getName())
+                .maxMember(maxMember)
+                .currentMember(currentMember)
+                .startDate(startDate)
+                .endDate(endDate)
+                .isPrivate(isPrivate)
+                .tagNameList(tagNameList)
+                .members(memberList)
+                .imageUrlList(imagePathList)
+                .build();
+    }
+
+    public ChallengeResponseDto toSearchResponse(List<TagNameResponseDto> tagNameList,
+                                           List<MemberResponseDto> memberList
+                                           ) {
+        return ChallengeResponseDto.builder()
+                .challengeId(id)
+//                .userId(user.getId())
+                .title(title)
+                .content(content)
+                .categoryName(category.getName())
+                .maxMember(maxMember)
+                .currentMember(currentMember)
+                .startDate(startDate)
+                .endDate(endDate)
+                .isPrivate(isPrivate)
+                .tagNameList(tagNameList)
+                .members(memberList)
+                .build();
+    }
+
+    public void update(ChallengeModifyRequestDto requestDto) {
+        this.title = requestDto.getTitle();
+        this.content = requestDto.getContent();
+        this.category.setName(requestDto.getCategory());
+    }
+
+    public ChallengeIdResponseDto toResponse() {
+        return ChallengeIdResponseDto.builder()
+                .challengeId(this.id)
+                .build();
+    }
+
+    public void setImageFiles(List<ImageFile> imageFileList) {
+        this.imageFiles = imageFileList;
+    }
+    public void setCurrentMember(int cnt) {
+        this.currentMember = cnt;
     }
 }

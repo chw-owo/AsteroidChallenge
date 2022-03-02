@@ -1,5 +1,6 @@
 package com.example.shortform.dto.request;
 
+import com.example.shortform.domain.User;
 import lombok.*;
 
 @Data
@@ -12,4 +13,13 @@ public class SignupRequestDto {
     private String nickname;
     private String password;
     private String passwordCheck;
+
+    public User toEntity(int point) {
+        return User.builder()
+                .email(email)
+                .nickname(nickname)
+                .password(password)
+                .point(point)
+                .build();
+    }
 }

@@ -1,5 +1,9 @@
 package com.example.shortform.domain;
 
+import com.example.shortform.dto.RequestDto.PostRequestDto;
+import com.example.shortform.dto.ResponseDto.CommentResponseDto;
+import com.example.shortform.dto.ResponseDto.PostIdResponseDto;
+import com.example.shortform.dto.ResponseDto.PostResponseDto;
 import lombok.*;
 
 import javax.persistence.*;
@@ -13,23 +17,47 @@ import java.util.List;
 @Entity
 public class Post extends Timestamped{
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "post_image")
-    private String postImage;
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "post", orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToOne(mappedBy = "post", orphanRemoval = true)
+    private ImageFile imageFile;
+
+    public void setImageFile(ImageFile imageFile) {
+        this.imageFile = imageFile;
+    }
+
+    public PostIdResponseDto toResponse() {
+        return PostIdResponseDto.builder()
+                .postId(id)
+                .build();
+    }
+
+    public void update(PostRequestDto requestDto) {
+        this.content = requestDto.getContent();
+    }
+
+    public PostResponseDto toResponse(List<CommentResponseDto> commentList) {
+        return PostResponseDto.builder()
+                .content(content)
+                .profileImage(user.getProfileImage())
+                .nickname(user.getNickname())
+                .comments(commentList)
+                .build();
+    }
 }

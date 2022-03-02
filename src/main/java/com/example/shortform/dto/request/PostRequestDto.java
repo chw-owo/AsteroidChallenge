@@ -1,5 +1,7 @@
 package com.example.shortform.dto.request;
 
+import com.example.shortform.domain.Challenge;
+import com.example.shortform.domain.Post;
 import lombok.*;
 
 import java.io.Serializable;
@@ -7,9 +9,14 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-public class PostRequestDto implements Serializable {
+@Builder
+public class PostRequestDto {
     private String content;
-    private String postImage;
+
+    public Post toEntity(Challenge challenge) {
+        return Post.builder()
+                .challenge(challenge)
+                .content(content)
+                .build();
+    }
 }
