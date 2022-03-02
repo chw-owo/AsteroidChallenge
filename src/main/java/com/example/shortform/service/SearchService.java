@@ -1,12 +1,9 @@
 package com.example.shortform.service;
 
-import com.example.shortform.domain.Challenge;
-import com.example.shortform.domain.Tag;
-import com.example.shortform.domain.TagChallenge;
-import com.example.shortform.domain.User;
-import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
-import com.example.shortform.dto.ResponseDto.MemberResponseDto;
-import com.example.shortform.dto.ResponseDto.TagNameResponseDto;
+import com.example.shortform.domain.*;
+import com.example.shortform.dto.resonse.ChallengeResponseDto;
+import com.example.shortform.dto.resonse.MemberResponseDto;
+import com.example.shortform.dto.resonse.TagNameResponseDto;
 import com.example.shortform.repository.ChallengeRepository;
 import com.example.shortform.repository.TagChallengeRepository;
 import com.example.shortform.repository.UserChallengeRepository;
@@ -46,10 +43,11 @@ public class SearchService {
                 tagNameResponseDto = tagChallenge.getTag().toResponse();
                 tagNameList.add(tagNameResponseDto);
             }
-            List<User> userList = userChallengeRepository.findAllByChallenge(challenge);
-            for (User user : userList) {
-                memberList.add(user.toMemberResponse());
+            List<UserChallenge> userList = userChallengeRepository.findAllByChallenge(challenge);
+            for (UserChallenge userChallenge : userList) {
+                memberList.add(userChallenge.getUser().toMemberResponse());
             }
+
             ChallengeResponseDto challengeResponseDto = challenge.toSearchResponse(tagNameList, memberList);
             challengeResponseDtoList.add(challengeResponseDto);
         }

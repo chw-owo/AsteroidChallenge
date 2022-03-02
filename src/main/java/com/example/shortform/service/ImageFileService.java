@@ -3,7 +3,7 @@ package com.example.shortform.service;
 import com.example.shortform.domain.Challenge;
 import com.example.shortform.domain.ImageFile;
 import com.example.shortform.domain.Post;
-import com.example.shortform.dto.RequestDto.ImageFileRequestDto;
+import com.example.shortform.dto.request.ImageFileRequestDto;
 import com.example.shortform.repository.ImageFileRepository;
 import com.example.shortform.util.S3Uploader;
 import org.springframework.beans.factory.annotation.Autowired;

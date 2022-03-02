@@ -1,11 +1,13 @@
 package com.example.shortform.domain;
 
-import com.example.shortform.dto.ResponseDto.MemberResponseDto;
+import com.example.shortform.dto.resonse.MemberResponseDto;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Builder
 @AllArgsConstructor
@@ -33,9 +35,26 @@ public class User extends Timestamped{
     @Column(name = "point", nullable = false)
     private int point;
 
-    @ManyToOne
-    @JoinColumn(name = "level_id")
-    private Level level;
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    // TODO level 값 생성되면 넣어주기
+    //@ManyToOne(optional = false, fetch = FetchType.LAZY)
+    //@JoinColumn(name = "level_id")
+    //private Level level;
+
+    @Setter
+    private boolean emailVerified;
+
+    private String emailCheckToken;
+
+    private LocalDateTime emailCheckTokenGeneratedAt;
+
+    // kakao
+    private String provider;
+
+    private String providerId;
 
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     private List<UserChallenge> userChallenges = new ArrayList<>();
@@ -49,8 +68,21 @@ public class User extends Timestamped{
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     private List<Challenge> challenges = new ArrayList<>();
 
-    public void setChallenges(List<Challenge> challenges) {
-        this.challenges = challenges;
+    public void generateEmailCheckToken() {
+        this.emailCheckToken = UUID.randomUUID().toString();
+        this.emailCheckTokenGeneratedAt = LocalDateTime.now();
+    }
+
+    public boolean isValidToken(String token) {
+        return this.emailCheckToken.equals(token);
+    }
+
+    public boolean canSendConfirmEmail() {
+        return this.emailCheckTokenGeneratedAt.isBefore(LocalDateTime.now().minusHours(1));
+    }
+
+    public void changeTempPassword(String tempPassword) {
+        this.password = tempPassword;
     }
 
     public MemberResponseDto toMemberResponse() {

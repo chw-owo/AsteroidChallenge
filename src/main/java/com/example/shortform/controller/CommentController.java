@@ -1,6 +1,6 @@
 package com.example.shortform.controller;
 
-import com.example.shortform.dto.RequestDto.CommentRequestDto;
+import com.example.shortform.dto.request.CommentRequestDto;
 import com.example.shortform.service.CommentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

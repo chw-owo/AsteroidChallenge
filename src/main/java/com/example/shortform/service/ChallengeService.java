@@ -1,12 +1,12 @@
 package com.example.shortform.service;
 
 import com.example.shortform.domain.*;
-import com.example.shortform.dto.RequestDto.ChallengeModifyRequestDto;
-import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
-import com.example.shortform.dto.RequestDto.PasswordDto;
-import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
-import com.example.shortform.dto.ResponseDto.MemberResponseDto;
-import com.example.shortform.dto.ResponseDto.TagNameResponseDto;
+import com.example.shortform.dto.request.ChallengeModifyRequestDto;
+import com.example.shortform.dto.request.ChallengeRequestDto;
+import com.example.shortform.dto.request.PasswordDto;
+import com.example.shortform.dto.resonse.ChallengeResponseDto;
+import com.example.shortform.dto.resonse.MemberResponseDto;
+import com.example.shortform.dto.resonse.TagNameResponseDto;
 import com.example.shortform.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

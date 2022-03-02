@@ -1,8 +1,8 @@
 package com.example.shortform.controller;
 
-import com.example.shortform.dto.RequestDto.ChallengeModifyRequestDto;
-import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
-import com.example.shortform.dto.RequestDto.PasswordDto;
+import com.example.shortform.dto.request.ChallengeModifyRequestDto;
+import com.example.shortform.dto.request.ChallengeRequestDto;
+import com.example.shortform.dto.request.PasswordDto;
 import com.example.shortform.service.ChallengeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

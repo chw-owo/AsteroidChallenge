@@ -1,10 +1,7 @@
-package com.example.shortform.dto.ResponseDto;
+package com.example.shortform.dto.resonse;
 
-import com.example.shortform.domain.Tag;
-import com.example.shortform.domain.User;
 import lombok.*;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 

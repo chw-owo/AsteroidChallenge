@@ -1,10 +1,10 @@
 package com.example.shortform.domain;
 
-import com.example.shortform.dto.RequestDto.ChallengeModifyRequestDto;
-import com.example.shortform.dto.ResponseDto.ChallengeIdResponseDto;
-import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
-import com.example.shortform.dto.ResponseDto.MemberResponseDto;
-import com.example.shortform.dto.ResponseDto.TagNameResponseDto;
+import com.example.shortform.dto.request.ChallengeModifyRequestDto;
+import com.example.shortform.dto.resonse.ChallengeIdResponseDto;
+import com.example.shortform.dto.resonse.ChallengeResponseDto;
+import com.example.shortform.dto.resonse.MemberResponseDto;
+import com.example.shortform.dto.resonse.TagNameResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -2,7 +2,7 @@ package com.example.shortform.service;
 
 import com.example.shortform.domain.Comment;
 import com.example.shortform.domain.Post;
-import com.example.shortform.dto.RequestDto.CommentRequestDto;
+import com.example.shortform.dto.request.CommentRequestDto;
 import com.example.shortform.repository.CommentRepository;
 import com.example.shortform.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;

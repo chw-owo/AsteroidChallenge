@@ -1,4 +1,4 @@
-package com.example.shortform.dto.ResponseDto;
+package com.example.shortform.dto.resonse;
 
 import lombok.*;
 
