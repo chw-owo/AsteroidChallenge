@@ -1,4 +1,4 @@
-package com.example.shortform.dto.RequestDto;
+package com.example.shortform.dto.request;
 
 import com.example.shortform.domain.Comment;
 import com.example.shortform.domain.Post;

@@ -1,9 +1,7 @@
-package com.example.shortform.dto.RequestDto;
+package com.example.shortform.dto.request;
 
 import com.example.shortform.domain.User;
 import lombok.*;
-
-import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
