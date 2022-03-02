@@ -5,6 +5,7 @@ import com.example.shortform.dto.request.EmailRequestDto;
 import com.example.shortform.dto.request.SigninRequestDto;
 import com.example.shortform.dto.request.SignupRequestDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
+import com.example.shortform.service.KakaoService;
 import com.example.shortform.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserApiController {
 
     private final UserService userService;
+    private final KakaoService kakaoService;
 
     // 회원가입
     @PostMapping("/auth/signup")
@@ -64,7 +66,7 @@ public class UserApiController {
     // 카카오 로그인
     @GetMapping("/auth/kakao/callback")
     public ResponseEntity<TokenDto> kakaoCallback(String code) {
-        return userService.kakaoLogin(code);
+        return kakaoService.kakaoLogin(code);
     }
 }
 
