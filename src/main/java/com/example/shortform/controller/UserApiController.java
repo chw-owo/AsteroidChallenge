@@ -1,6 +1,7 @@
 package com.example.shortform.controller;
 
 import com.example.shortform.config.jwt.TokenDto;
+import com.example.shortform.dto.request.EmailRequestDto;
 import com.example.shortform.dto.request.SigninRequestDto;
 import com.example.shortform.dto.request.SignupRequestDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
@@ -44,8 +45,8 @@ public class UserApiController {
 
     // 이메일 인증 재전송
     @PostMapping("/auth/resend-check-email")
-    public ResponseEntity<CMResponseDto> resendCheckEmailToken(@RequestBody SignupRequestDto signupRequestDto) {
-        return userService.resendCheckEmailToken(signupRequestDto);
+    public ResponseEntity<CMResponseDto> resendCheckEmailToken(@RequestBody EmailRequestDto emailRequestDto) {
+        return userService.resendCheckEmailToken(emailRequestDto);
     }
 
     // 로그인
@@ -54,5 +55,10 @@ public class UserApiController {
         return userService.login(signinRequestDto);
     }
 
+    // 임시 비밀번호 발급
+    @PostMapping("/auth/send-temp-password")
+    public ResponseEntity<CMResponseDto> sendTempPassword(@RequestBody EmailRequestDto emailRequestDto) {
+        return userService.sendTempPassword(emailRequestDto);
+    }
 }
 

@@ -4,6 +4,7 @@ import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
 import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
+import com.example.shortform.dto.request.EmailRequestDto;
 import com.example.shortform.dto.request.SigninRequestDto;
 import com.example.shortform.dto.request.SignupRequestDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
@@ -20,6 +21,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Random;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -107,8 +111,8 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<CMResponseDto> resendCheckEmailToken(SignupRequestDto signupRequestDto) {
-        User findUser = userRepository.findByEmail(signupRequestDto.getEmail()).orElseThrow(
+    public ResponseEntity<CMResponseDto> resendCheckEmailToken(EmailRequestDto emailRequestDto) {
+        User findUser = userRepository.findByEmail(emailRequestDto.getEmail()).orElseThrow(
                 () -> new IllegalArgumentException("가입되지 않은 이메일입니다.")
         );
 
@@ -140,12 +144,47 @@ public class UserService {
         return new ResponseEntity<>(token, httpHeaders, HttpStatus.OK);
     }
 
+    @Transactional
+    public ResponseEntity<CMResponseDto> sendTempPassword(EmailRequestDto emailRequestDto) {
+        // 이메일이 유효한지 체크
+        User findUser = userRepository.findByEmail(emailRequestDto.getEmail()).orElseThrow(
+                () -> new IllegalArgumentException("가입되지 않은 이메일 입니다.")
+        );
+
+        // 인증 이메일 1시간 여부 체크
+        if (!findUser.canSendConfirmEmail())
+            throw new IllegalArgumentException("인증 이메일은 1시간에 한번만 전송할 수 있습니다.");
+
+        // 임시 비밀번호 발급
+        String tempPassword = temporaryPassword(10); // 8글자 랜덤으로 임시 비밀번호 생성
+
+        // 유저의 비밀번호를 임시 비밀번호로 변경
+        String tempEncPassword = passwordEncoder.encode(tempPassword); // 암호화
+        findUser.changeTempPassword(tempEncPassword);
+
+        // 이메일 전송
+        sendTempPasswordFonfirmEmail(findUser, tempPassword);
+
+        return ResponseEntity.ok(new CMResponseDto("true"));
+    }
+
     private void sendSignupConfirmEmail(User user) {
         EmailMessage emailMessage = EmailMessage.builder()
                 .to(user.getEmail())
                 .subject("소행성(소소한 행동 습관 형성 챌린지), 회원 가입 인증 메일")
                 .message("/auth/check-email-token?token=" + user.getEmailCheckToken() +
                         "&email=" + user.getEmail())
+                .build();
+
+        emailService.sendEmail(emailMessage);
+    }
+
+    private void sendTempPasswordFonfirmEmail(User user, String tempPwd) {
+        EmailMessage emailMessage = EmailMessage.builder()
+                .to(user.getEmail())
+                .subject("소행성(소소한 행동 습관 형성 챌린지), 임시 비밀번호 발급")
+                .message("<p>임시 비밀번호는 <b>" + tempPwd + "</b> 입니다.</p>" +
+                        "<p>로그인 후 비밀번호를 변경해주세요.</p>")
                 .build();
 
         emailService.sendEmail(emailMessage);
@@ -163,4 +202,19 @@ public class UserService {
         String domain = email.split("@")[0];
         return !rawPassword.contains(domain);
     }
+
+    private String temporaryPassword(int size) {
+        StringBuffer buffer = new StringBuffer();
+        Random random = new Random();
+        String chars[] = ("A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z," +
+                "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,0,1,2,3,4,5,6,7,8,9").split(",");
+        for (int i = 0; i < size; i++) {
+            buffer.append(chars[random.nextInt(chars.length)]);
+        }
+
+        buffer.append("!a1");
+
+        return buffer.toString();
+    }
+
 }
