@@ -56,7 +56,7 @@ public class Challenge extends Timestamped{
     //수정해야됨
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable =  false)
-    private ChallengeStatus status;
+    private String status;
 
     @ManyToOne(cascade = CascadeType.MERGE, optional = false)
     @JoinColumn(name = "category_id", nullable =false)
