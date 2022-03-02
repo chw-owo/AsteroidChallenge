@@ -2,6 +2,7 @@ package com.example.shortform.controller;
 
 import com.example.shortform.dto.RequestDto.ChallengeModifyRequestDto;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
+import com.example.shortform.dto.RequestDto.PasswordDto;
 import com.example.shortform.service.ChallengeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,11 @@ public class ChallengeController {
     @PostMapping("/challenge/{challengeId}/user")
     public ResponseEntity<?> participateChallenge(@PathVariable Long challengeId) {
         return challengeService.participateChallenge(challengeId);
+    }
+
+    @PostMapping("/challenge/{challengeId}/private")
+    public ResponseEntity<?> privateParticipateChallenge(@PathVariable Long challengeId, @RequestBody PasswordDto passwordDto) {
+        return challengeService.privateParticipateChallenge(challengeId, passwordDto);
     }
 
     @PutMapping("/challenge/{challengeId}")

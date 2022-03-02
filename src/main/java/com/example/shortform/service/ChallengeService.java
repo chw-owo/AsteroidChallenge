@@ -3,6 +3,7 @@ package com.example.shortform.service;
 import com.example.shortform.domain.*;
 import com.example.shortform.dto.RequestDto.ChallengeModifyRequestDto;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
+import com.example.shortform.dto.RequestDto.PasswordDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.MemberResponseDto;
 import com.example.shortform.dto.ResponseDto.TagNameResponseDto;
@@ -134,5 +135,17 @@ public class ChallengeService {
         List<ImageFile> imageFileList = imageFileService.uploadImage(multipartFileList, challenge);
         challenge.setImageFiles(imageFileList);
         return ResponseEntity.ok(challenge.toResponse());
+    }
+
+    public ResponseEntity<?> privateParticipateChallenge(Long challengeId, PasswordDto passwordDto) {
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
+                () -> new NullPointerException("찿는 챌린지가 존재하지 않습니다.")
+        );
+
+        if (challenge.getPassword().equals(passwordDto.getPassword())) {
+            return ResponseEntity.ok(true);
+        } else {
+            throw new IllegalArgumentException("비밀번호가 틀렸습니다");
+        }
     }
 }
