@@ -8,6 +8,6 @@ import java.util.*;
 
 public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
 
-    List<Challenge> findByTagChallenges(Tag tag);
+    List<Challenge> findAllByOrderByCreatedAt();
 
 }

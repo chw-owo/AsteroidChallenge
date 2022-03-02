@@ -2,6 +2,7 @@ package com.example.shortform.dto.ResponseDto;
 
 import lombok.*;
 
+import java.util.*;
 import java.nio.file.FileStore;
 
 @Data
@@ -11,7 +12,5 @@ import java.nio.file.FileStore;
 @Setter
 @Builder
 public class TagResponseDto {
-    private String name;
-
-
+    private List<String> names;
 }

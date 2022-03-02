@@ -23,3 +23,10 @@ spring:
 
   datasource:
     url: jdbc:h2:mem:testdb
+
+  profiles:
+    include:
+      - aws
+      - credentials
+
+

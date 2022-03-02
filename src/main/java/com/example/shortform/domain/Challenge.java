@@ -4,6 +4,7 @@ import com.example.shortform.dto.RequestDto.CategoryRequestDto;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
 import com.example.shortform.repository.CategoryRepository;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -29,32 +30,37 @@ public class Challenge extends Timestamped{
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "challenge_image", nullable =true )
-    private String challengeImage;
+    @OneToOne(mappedBy = "challenge", orphanRemoval = true)
+    private ImageFile challengeImage;
 
-    @Column(name = "max_member", nullable =true)//, nullable = false)
+    @Column(name = "max_member", nullable = false)
     private int maxMember;
 
-    @Column(name = "current_member", nullable =true)//, nullable = false)
+    @Column(name = "current_member", nullable = false)
     private int currentMember;
 
-    @Column(name = "start_date", nullable =true)//, nullable = false)
-    private LocalDate startDate;
+    //수정해야됨
+    @Column(name = "start_date", nullable = false)
+    private String startDate; //LocalDate
 
-    @Column(name = "end_date", nullable =true)//, nullable = false)
-    private LocalDate endDate;
+    //수정해야됨
+    @Column(name = "end_date", nullable = false)
+    private String endDate; //LocalDate
 
-    @Column(name = "is_private", nullable =true)//, nullable = false)
+    @Column(name = "is_private", nullable = false)
     private Boolean isPrivate = false;
 
-    @Column(name = "password", nullable =true)
+    @Column(name = "password", nullable =false)
     private String password;
 
+    //수정해야됨
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable =true)//, nullable = false)
+    @Column(name = "status", nullable = true)// false)
     private ChallengeStatus status;
 
-    @OneToMany(mappedBy = "challenge", orphanRemoval = true)
+    //수정해야됨
+    @OneToMany(orphanRemoval = true)//(mappedBy = "challenge", orphanRemoval = true)
+    @JoinColumn(name = "challenge", nullable = true)
     private List<UserChallenge> userChallenges = new ArrayList<>();
 
     @ManyToOne(cascade = CascadeType.MERGE, optional = false)
@@ -63,23 +69,22 @@ public class Challenge extends Timestamped{
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<TagChallenge> tagChallenges = new ArrayList<>();
+    //중복 태그 금지도 넣어야되지 않나?
+
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
+    // 수정해야됨
     @ManyToOne//(optional = false)
-    @JoinColumn(name = "user_id", nullable =true)//, nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Challenge(ChallengeRequestDto requestDto, Category category){//List<TagChallenge> tagChallenges) {
+    public Challenge(ChallengeRequestDto requestDto, Category category){
         this.title=requestDto.getTitle();
         this.content=requestDto.getContent();
         this.category= category;
-        this.challengeImage=requestDto.getChallengeImage();
+        this.challengeImage= (ImageFile) requestDto.getChallengeImage();
         this.maxMember=requestDto.getMaxMember();
         this.startDate=requestDto.getStartDate();
         this.endDate=requestDto.getEndDate();

@@ -3,7 +3,7 @@ package com.example.shortform.controller;
 import com.example.shortform.domain.Category;
 import com.example.shortform.dto.RequestDto.CategoryRequestDto;
 import com.example.shortform.dto.ResponseDto.CategoryResponseDto;
-import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
+import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
 import com.example.shortform.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
