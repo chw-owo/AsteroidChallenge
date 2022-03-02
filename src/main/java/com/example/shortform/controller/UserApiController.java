@@ -1,14 +1,17 @@
 package com.example.shortform.controller;
 
+import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.dto.request.EmailRequestDto;
 import com.example.shortform.dto.request.SigninRequestDto;
 import com.example.shortform.dto.request.SignupRequestDto;
+import com.example.shortform.dto.request.UserInfo;
 import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.service.KakaoService;
 import com.example.shortform.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -67,6 +70,12 @@ public class UserApiController {
     @GetMapping("/auth/kakao/callback")
     public ResponseEntity<TokenDto> kakaoCallback(String code) {
         return kakaoService.kakaoLogin(code);
+    }
+
+    // 로그인 유저 정보 확인
+    @GetMapping("/auth/user-info")
+    public ResponseEntity<UserInfo> findUserInfo(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(userService.findUserInfo(principalDetails.getUser()));
     }
 }
 

@@ -9,6 +9,7 @@ import com.example.shortform.domain.User;
 import com.example.shortform.dto.request.EmailRequestDto;
 import com.example.shortform.dto.request.SigninRequestDto;
 import com.example.shortform.dto.request.SignupRequestDto;
+import com.example.shortform.dto.request.UserInfo;
 import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.mail.EmailMessage;
 import com.example.shortform.mail.EmailService;
@@ -222,5 +223,10 @@ public class UserService {
         }
         buffer.append("!a1");
         return buffer.toString();
+    }
+
+    // 로그인한 유저 정보 가져오기
+    public UserInfo findUserInfo(User user) {
+        return UserInfo.of(user);
     }
 }
