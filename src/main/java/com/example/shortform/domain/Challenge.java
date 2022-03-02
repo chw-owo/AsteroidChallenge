@@ -55,8 +55,9 @@ public class Challenge extends Timestamped{
 
     //수정해야됨
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable =  false)
-    private String status;
+    @Column(name = "status", nullable =  true)
+    private ChallengeStatus status;
+
 
     @ManyToOne(cascade = CascadeType.MERGE, optional = false)
     @JoinColumn(name = "category_id", nullable =false)
@@ -64,6 +65,7 @@ public class Challenge extends Timestamped{
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<TagChallenge> tagChallenges = new ArrayList<>();
+
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
@@ -75,7 +77,6 @@ public class Challenge extends Timestamped{
 
     //수정해야됨
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
-    @JoinColumn(name = "challenge", nullable = true)
     private List<UserChallenge> userChallenges = new ArrayList<>();
 
 

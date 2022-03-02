@@ -31,7 +31,7 @@ public class ChallengeResponseDto {
     private Boolean isPrivate;
     private String category;
     private List<String> tagChallenges;
-    private String status;
+    //private String status;
     private List<String> members;
 
     public ChallengeResponseDto(Challenge challenge){
@@ -44,7 +44,7 @@ public class ChallengeResponseDto {
         this.startDate=challenge.getStartDate();
         this.endDate=challenge.getEndDate();
         this.isPrivate=challenge.getIsPrivate();
-        this.status = challenge.getStatus();
+        //this.status = challenge.getStatus();
 
         this.userId = null;
         this.members = null;
