@@ -75,7 +75,16 @@ public class UserApiController {
     // 로그인 유저 정보 확인
     @GetMapping("/auth/user-info")
     public ResponseEntity<UserInfo> findUserInfo(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        if (principalDetails == null)
+            throw new IllegalArgumentException("유저 정보가 없습니다.");
         return ResponseEntity.ok(userService.findUserInfo(principalDetails.getUser()));
+    }
+
+    // 비밀번호 확인
+    @PostMapping("/users/password-check")
+    public ResponseEntity<CMResponseDto> passwordCheck(@AuthenticationPrincipal PrincipalDetails principalDetails,
+                                                       @RequestBody SigninRequestDto requestDto) {
+        return userService.passwordCheck(principalDetails.getUser(), requestDto);
     }
 }
 
