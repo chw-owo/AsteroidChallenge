@@ -2,20 +2,17 @@ package com.example.shortform.controller;
 
 import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.config.jwt.TokenDto;
-import com.example.shortform.dto.request.EmailRequestDto;
-import com.example.shortform.dto.request.SigninRequestDto;
-import com.example.shortform.dto.request.SignupRequestDto;
-import com.example.shortform.dto.request.UserInfo;
+import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.service.KakaoService;
 import com.example.shortform.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RequiredArgsConstructor
 @RestController
@@ -84,7 +81,18 @@ public class UserApiController {
     @PostMapping("/users/password-check")
     public ResponseEntity<CMResponseDto> passwordCheck(@AuthenticationPrincipal PrincipalDetails principalDetails,
                                                        @RequestBody SigninRequestDto requestDto) {
+        // PrincipalDetails는 상태값이 디테치드 상태, 영속화 되어있지는 않음
+        // 아무리 변경하더라도 변경을 감지 하지 않음
+        // save를 호출해서 넣어주자.
         return userService.passwordCheck(principalDetails.getUser(), requestDto);
+    }
+
+    // 회원 프로필 수정
+    @PutMapping("/users/{userId}")
+    public ResponseEntity<CMResponseDto> updateProfile(@PathVariable Long userId,
+                                                           @RequestPart("profile") ProfileRequestDto requestDto,
+                                                           @RequestPart(value = "profileImage", required = false) MultipartFile multipartFile) throws IOException {
+        return userService.updateProfile(userId, requestDto, multipartFile);
     }
 }
 
