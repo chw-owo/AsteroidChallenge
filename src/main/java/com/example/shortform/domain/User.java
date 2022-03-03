@@ -33,7 +33,7 @@ public class User extends Timestamped{
     private String password;
 
     @ManyToOne
-    @JoinColumn(name = "level_id", nullable =true)
+    @JoinColumn(name = "level_id")
     private Level level;
 
 
@@ -43,11 +43,6 @@ public class User extends Timestamped{
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    // TODO level 값 생성되면 넣어주기
-    //@ManyToOne(optional = false, fetch = FetchType.LAZY)
-    //@JoinColumn(name = "level_id")
-    //private Level level;
 
     @Setter
     private boolean emailVerified;

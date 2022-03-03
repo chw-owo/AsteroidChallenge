@@ -4,6 +4,7 @@ import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
+import com.example.shortform.dto.resonse.UserProfileInfo;
 import com.example.shortform.service.KakaoService;
 import com.example.shortform.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -90,9 +91,16 @@ public class UserApiController {
     // 회원 프로필 수정
     @PutMapping("/users/{userId}")
     public ResponseEntity<CMResponseDto> updateProfile(@PathVariable Long userId,
-                                                           @RequestPart("profile") ProfileRequestDto requestDto,
-                                                           @RequestPart(value = "profileImage", required = false) MultipartFile multipartFile) throws IOException {
+                                                       @RequestPart("profile") ProfileRequestDto requestDto,
+                                                       @RequestPart(value = "profileImage", required = false) MultipartFile multipartFile) throws IOException {
         return userService.updateProfile(userId, requestDto, multipartFile);
     }
+
+    // 유저 정보 조회
+    @GetMapping("/mypage/users/{userId}")
+    public ResponseEntity<UserProfileInfo> getUserProfile(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUserProfile(userId));
+    }
+
 }
 

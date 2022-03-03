@@ -2,13 +2,15 @@ package com.example.shortform.service;
 
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
 import com.example.shortform.config.jwt.TokenDto;
-import com.example.shortform.domain.ImageFile;
+import com.example.shortform.domain.Level;
 import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
 import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
+import com.example.shortform.dto.resonse.UserProfileInfo;
 import com.example.shortform.mail.EmailMessage;
 import com.example.shortform.mail.EmailService;
+import com.example.shortform.repository.LevelRepository;
 import com.example.shortform.repository.UserRepository;
 import com.example.shortform.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Random;
 import java.util.UUID;
@@ -34,7 +37,9 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
+    private final LevelRepository levelRepository;
     private final S3Uploader s3Uploader;
+    private final HttpServletRequest request;
 
     @Transactional
     public ResponseEntity<CMResponseDto> signup(SignupRequestDto signupRequestDto) {
@@ -50,6 +55,11 @@ public class UserService {
         if(!isDuplicatePassword(rawPassword, passwordCheck))
             throw new IllegalArgumentException("비밀번호 확인이 일치하지 않습니다.");
 
+
+        Level level = levelRepository.findById(1L).orElseThrow(
+                () -> new IllegalArgumentException("해당하는 데이터가 없습니다.")
+        );
+
         // 비밀번호 암호화
         String encPassword = passwordEncoder.encode(rawPassword);
 
@@ -58,8 +68,8 @@ public class UserService {
                 .email(email)
                 .nickname(signupRequestDto.getNickname())
                 .password(encPassword)
-                //.level(null) // TODO level 값 넣어줘야 한다.
-                .point(0) // 기본 포인트 0
+                .level(level) // 기본 1레벨
+                .point(50) // 기본 포인트 50
                 .role(Role.ROLE_USER)
                 .emailVerified(false)
                 .build();
@@ -67,7 +77,6 @@ public class UserService {
         // 저장
         User savedUser = userRepository.save(user);
 
-        // TODO 인증 메일 보내기
         savedUser.generateEmailCheckToken();
         sendSignupConfirmEmail(savedUser);
 
@@ -137,6 +146,8 @@ public class UserService {
 
         // 토큰 정보 생성
         TokenDto token = jwtAuthenticationProvider.createToken(userEntity);
+        token.setEmail(signinRequestDto.getEmail());
+        token.setEmailVerified(userEntity.isEmailVerified());
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(JwtAuthenticationProvider.AUTHORIZATION_HEADER, "Bearer "+ token);
@@ -170,10 +181,13 @@ public class UserService {
     }
 
     private void sendSignupConfirmEmail(User user) {
+        String path = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+
+        // TODO 사진과 함께 보내기
         EmailMessage emailMessage = EmailMessage.builder()
                 .to(user.getEmail())
                 .subject("소행성(소소한 행동 습관 형성 챌린지), 회원 가입 인증 메일")
-                .message("/auth/check-email-token?token=" + user.getEmailCheckToken() +
+                .message(path+"/auth/check-email-token?token=" + user.getEmailCheckToken() +
                         "&email=" + user.getEmail())
                 .build();
 
@@ -256,5 +270,15 @@ public class UserService {
         findUser.setPassword(encPassword);
 
         return ResponseEntity.ok(new CMResponseDto("true"));
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileInfo getUserProfile(Long userId) {
+
+        User findUser = userRepository.findUserInfo(userId).orElseThrow(
+                () -> new IllegalArgumentException("해당하는 유저가 없습니다.")
+        );
+
+        return UserProfileInfo.of(findUser);
     }
 }
