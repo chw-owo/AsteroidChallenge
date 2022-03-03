@@ -7,6 +7,7 @@ import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
 import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
+import com.example.shortform.dto.resonse.UserProfileInfo;
 import com.example.shortform.mail.EmailMessage;
 import com.example.shortform.mail.EmailService;
 import com.example.shortform.repository.LevelRepository;
@@ -269,5 +270,15 @@ public class UserService {
         findUser.setPassword(encPassword);
 
         return ResponseEntity.ok(new CMResponseDto("true"));
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileInfo getUserProfile(Long userId) {
+
+        User findUser = userRepository.findUserInfo(userId).orElseThrow(
+                () -> new IllegalArgumentException("해당하는 유저가 없습니다.")
+        );
+
+        return UserProfileInfo.of(findUser);
     }
 }
