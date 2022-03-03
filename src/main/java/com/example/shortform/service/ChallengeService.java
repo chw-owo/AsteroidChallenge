@@ -36,6 +36,7 @@ public class ChallengeService {
   
   
     private final UserChallengeRepository userChallengeRepository;
+    private final UserRepository userRepository;
     private final ImageFileRepository imageFileRepository;
 
 
@@ -43,7 +44,8 @@ public class ChallengeService {
 
     @Transactional
     public ChallengeResponseDto postChallenge(ChallengeRequestDto requestDto,
-     List<MultipartFile> multipartFiles) throws IOException {
+                                              PrincipalDetails principal,
+                                            List<MultipartFile> multipartFiles) throws IOException {
 
         // 카테고리 받아오기
         Category category = categoryRepository.findByName(requestDto.getCategory());
@@ -77,6 +79,12 @@ public class ChallengeService {
             ImageFile imageFileUpload = imageFileService.upload(m, challenge);
             challengeImages.add(imageFileUpload.getFilePath());
         }
+
+        User user = userRepository.findByEmail(principal.getUsername()).orElseThrow(()->new IllegalArgumentException());
+        challenge.setUser(user);
+        UserChallenge userChallenge = new UserChallenge(challenge ,user);
+        userChallengeRepository.save(userChallenge);
+        challenge.setUser(user);
 
         ChallengeResponseDto responseDto = new ChallengeResponseDto(challenge,challengeImages);
 

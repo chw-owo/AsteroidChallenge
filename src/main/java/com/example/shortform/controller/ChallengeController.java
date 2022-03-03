@@ -35,8 +35,10 @@ public class ChallengeController {
     //for test
 
     @PostMapping(value= "/challenge")
-    public ChallengeResponseDto postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto, @RequestPart("challengeImage") List<MultipartFile> multipartFiles) throws IOException {
-        return challengeService.postChallenge(requestDto, multipartFiles);
+    public ChallengeResponseDto postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
+                                              @AuthenticationPrincipal PrincipalDetails principal,
+                                              @RequestPart("challengeImage") List<MultipartFile> multipartFiles) throws IOException {
+        return challengeService.postChallenge(requestDto, principal, multipartFiles);
     }
 //     @PostMapping("/challenge")
 //     public ResponseEntity<?> createChallenge(@RequestPart(value = "imageFile", required = false) List<MultipartFile> multipartFileList,

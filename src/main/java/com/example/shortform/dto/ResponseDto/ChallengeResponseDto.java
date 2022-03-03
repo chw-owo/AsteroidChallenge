@@ -46,7 +46,7 @@ public class ChallengeResponseDto {
         this.isPrivate=challenge.getIsPrivate();
         //this.status = challenge.getStatus();
 
-        this.userId = null;
+        this.userId = challenge.getUser().getId();
         this.members = null;
 
         List<String> tagChallengeStrings = new ArrayList<>();
