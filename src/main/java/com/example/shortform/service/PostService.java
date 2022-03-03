@@ -42,8 +42,8 @@ public class PostService {
 
     @Transactional
     public ResponseEntity<?> writePost(Long challengeId,
-                                       @RequestPart("post") PostRequestDto requestDto,
-                                       @RequestPart(value = "image", required = false) MultipartFile multipartFile,
+                                       PostRequestDto requestDto,
+                                       MultipartFile multipartFile,
                                        PrincipalDetails principalDetails) throws IOException {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NullPointerException("챌린지가 존재하지 않습니다.")
@@ -72,10 +72,15 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity<?> modifyPost(Long postId, PostRequestDto requestDto, PrincipalDetails principalDetails) {
+    public ResponseEntity<?> modifyPost(Long postId,
+                                        PostRequestDto requestDto,
+                                        PrincipalDetails principalDetails,
+                                        MultipartFile multipartFile) throws IOException {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NullPointerException("인증 게시글이 존재하지 않습니다.")
         );
+
+        ImageFile imageFile = imageFileService.upload(multipartFile, post);
 
         if (!principalDetails.getUser().getId().equals(post.getUser().getId())) {
             throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
