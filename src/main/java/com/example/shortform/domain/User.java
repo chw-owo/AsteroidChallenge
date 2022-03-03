@@ -91,6 +91,14 @@ public class User extends Timestamped{
         this.password = tempPassword;
     }
 
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public void setPassword(String encPassword) {
+        this.password = encPassword;
+    }
+
     public MemberResponseDto toMemberResponse() {
         return MemberResponseDto.builder()
                 .userId(id)
