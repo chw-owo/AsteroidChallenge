@@ -1,4 +1,4 @@
-package com.example.shortform.dto.request;
+package com.example.shortform.dto.RequestDto;
 
 import com.example.shortform.domain.Challenge;
 import com.example.shortform.domain.ImageFile;

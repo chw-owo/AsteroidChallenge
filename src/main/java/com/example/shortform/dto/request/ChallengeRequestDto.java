@@ -1,4 +1,4 @@
-package com.example.shortform.dto.RequestDto;
+package com.example.shortform.dto.request;
 
 import com.example.shortform.domain.Category;
 import com.example.shortform.domain.Challenge;
@@ -25,22 +25,22 @@ public class ChallengeRequestDto {
     private String category;
     private List<String> tagName;
 
-    public Challenge toEntity(Category category) {
-        return Challenge.builder()
-                .title(title)
-                .content(content)
-                .startDate(startDate)
-                .endDate(endDate)
-                .isPrivate(isPrivate)
-                .password(password)
-                .category(category)
-                .maxMember(maxMember)
-                .build();
-    }
-
-    public Category toCategory() {
-        return Category.builder()
-                .name(category)
-                .build();
-    }
+//    public Challenge toEntity(Category category) {
+//        return Challenge.builder()
+//                .title(title)
+//                .content(content)
+//                .startDate(startDate)
+//                .endDate(endDate)
+//                .isPrivate(isPrivate)
+//                .password(password)
+//                .category(category)
+//                .maxMember(maxMember)
+//                .build();
+//    }
+//
+//    public Category toCategory() {
+//        return Category.builder()
+//                .name(category)
+//                .build();
+//    }
 }

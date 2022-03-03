@@ -1,6 +1,10 @@
 package com.example.shortform.domain;
 
-import com.example.shortform.dto.ResponseDto.TagNameResponseDto;
+
+import com.example.shortform.dto.RequestDto.CategoryRequestDto;
+
+import com.example.shortform.dto.resonse.TagNameResponseDto;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,8 +28,15 @@ public class Tag extends Timestamped{
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "tag", orphanRemoval = true)
+    @OneToMany(mappedBy = "tag", orphanRemoval = true, targetEntity = TagChallenge.class)
     private List<TagChallenge> tagChallenges = new ArrayList<>();
+
+
+    @Builder
+    public Tag(String name) {
+        this.name = name;
+    }
+
 
     public void setName(String name) {
         this.name = name;
@@ -35,9 +46,7 @@ public class Tag extends Timestamped{
         return TagNameResponseDto.builder()
                 .tagName(name)
                 .build();
-    }
+    
 
-    public Tag (String tagName) {
-        this.name = tagName;
     }
 }

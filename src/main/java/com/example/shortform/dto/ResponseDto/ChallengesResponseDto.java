@@ -16,10 +16,9 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class ChallengeResponseDto {
+public class ChallengesResponseDto {
 
     private Long challengeId;
-    private Long userId;
 
     private String title;
     private String content;
@@ -32,22 +31,17 @@ public class ChallengeResponseDto {
     private String category;
     private List<String> tagChallenges;
     private String status;
-    private List<String> members;
 
-    public ChallengeResponseDto(Challenge challenge, List<String> challengeImage){
+    public ChallengesResponseDto(Challenge challenge){
         this.challengeId = challenge.getId();
         this.title=challenge.getTitle();
         this.content=challenge.getContent();
         this.category= challenge.getCategory().getName();
-        this.challengeImage= challengeImage;
+        //this.challengeImage=challenge.getChallengeImage().getFilePath();
         this.maxMember=challenge.getMaxMember();
         this.startDate=challenge.getStartDate();
         this.endDate=challenge.getEndDate();
         this.isPrivate=challenge.getIsPrivate();
-        //this.status = challenge.getStatus();
-
-        this.userId = null;
-        this.members = null;
 
         List<String> tagChallengeStrings = new ArrayList<>();
         List<TagChallenge> tagChallenges = challenge.getTagChallenges();
@@ -59,4 +53,5 @@ public class ChallengeResponseDto {
 
         this.tagChallenges = tagChallengeStrings;
     }
+
 }

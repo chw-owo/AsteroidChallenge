@@ -1,6 +1,6 @@
 package com.example.shortform.controller;
 
-import com.example.shortform.dto.RequestDto.PostRequestDto;
+import com.example.shortform.dto.request.PostRequestDto;
 import com.example.shortform.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

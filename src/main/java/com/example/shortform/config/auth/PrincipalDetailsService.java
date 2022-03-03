@@ -1,5 +1,6 @@
 package com.example.shortform.config.auth;
 
+
 import com.example.shortform.domain.User;
 import com.example.shortform.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +17,12 @@ public class PrincipalDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
         User findUser = userRepository.findByEmail(email).orElseThrow(
                 () -> new UsernameNotFoundException("가입되지 않은 이메일입니다.")
         );
 
+
         return new PrincipalDetails(findUser);
     }
 }
-

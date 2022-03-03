@@ -30,6 +30,7 @@ public class ImageFile {
     @Column(name = "file_size")
     private Long fileSize;
 
+
     @ManyToOne
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
@@ -41,4 +42,14 @@ public class ImageFile {
     public void setPost(Post post) {
         this.post = post;
     }
+
+
+    public String getOriginalFilename() {
+        return this.originalFileName;
+    }
+
+    public Long getSize() {
+        return this.fileSize;
+    }
 }
+

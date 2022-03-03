@@ -1,13 +1,10 @@
-package com.example.shortform.dto.RequestDto;
+package com.example.shortform.dto.request;
 
-import com.example.shortform.domain.Challenge;
-import com.example.shortform.domain.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.util.List;
 
 @Data

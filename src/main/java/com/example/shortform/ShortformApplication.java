@@ -10,9 +10,12 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 public class ShortformApplication {
     public static final String APPLICATION_LOCATIONS = "spring.config.location="
             + "classpath:application.yml,"
-            + "classpath:aws.yml";
+            + "classpath:application-aws.yml,"
+            + "classpath:application-credentials.yml,"
+            + "classpath:application-dev.yml";
 
     public static void main(String[] args) {
+
         new SpringApplicationBuilder(ShortformApplication.class)
                 .properties(APPLICATION_LOCATIONS)
                 .run(args);

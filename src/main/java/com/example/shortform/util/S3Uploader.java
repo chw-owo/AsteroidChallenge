@@ -3,6 +3,9 @@ package com.example.shortform.util;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+
+import com.example.shortform.domain.ImageFile;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +35,15 @@ public class S3Uploader {
         return upload(uploadFile, convertedFileName);
     }
 
+
+    public String upload(ImageFile imageFile, String convertedFileName) throws IOException {
+        File uploadFile = convert((MultipartFile)imageFile)  // 파일 변환할 수 없으면 에러
+                .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
+
+        return upload(uploadFile, convertedFileName);
+    }
+
+
     // S3로 파일 업로드하기
     private String upload(File uploadFile, String convertedFileName) {
         String fileName = imageDirName + "/" + convertedFileName;   // S3에 저장된 파일 이름
@@ -40,6 +52,7 @@ public class S3Uploader {
         removeNewFile(uploadFile);
         return uploadImageUrl;
     }
+
 
     // S3로 업로드
     private String putS3(File uploadFile, String fileName) {

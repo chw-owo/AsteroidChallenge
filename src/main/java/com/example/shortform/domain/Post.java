@@ -1,9 +1,9 @@
 package com.example.shortform.domain;
 
-import com.example.shortform.dto.RequestDto.PostRequestDto;
-import com.example.shortform.dto.ResponseDto.CommentResponseDto;
-import com.example.shortform.dto.ResponseDto.PostIdResponseDto;
-import com.example.shortform.dto.ResponseDto.PostResponseDto;
+import com.example.shortform.dto.request.PostRequestDto;
+import com.example.shortform.dto.resonse.CommentResponseDto;
+import com.example.shortform.dto.resonse.PostIdResponseDto;
+import com.example.shortform.dto.resonse.PostResponseDto;
 import lombok.*;
 
 import javax.persistence.*;

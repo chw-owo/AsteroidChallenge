@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -104,7 +105,7 @@ public class UserService {
     public ResponseEntity<CMResponseDto> emailCheck(SignupRequestDto signupRequestDto) {
 
         if (!isExistEmail(signupRequestDto.getEmail()))
-            throw new IllegalArgumentException("이미 존재하는 아매알 입니다.");
+            throw new IllegalArgumentException("이미 존재하는 이메일 입니다.");
 
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
@@ -113,7 +114,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public ResponseEntity<CMResponseDto> nicknameCheck(SignupRequestDto signupRequestDto) {
 
-        if (!userRepository.findByNickname(signupRequestDto.getNickname()).isPresent())
+        if (userRepository.findByNickname(signupRequestDto.getNickname()).isPresent())
             throw new IllegalArgumentException("이미 존재하는 닉네임 입니다.");
 
         return ResponseEntity.ok(new CMResponseDto("true"));

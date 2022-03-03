@@ -1,5 +1,6 @@
 package com.example.shortform.config.jwt;
 
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

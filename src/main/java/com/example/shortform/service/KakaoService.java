@@ -35,9 +35,7 @@ public class KakaoService {
     @Value("${KAKAO.RAW_PASSWORD}")
     private String RAW_PASSWORD;
 
-    @Value("${KAKAO.TOKEN_PREFIX}")
-    private String TOKEN_PREFIX;
-
+    private String TOKEN_PREFIX = "Bearer ";
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;

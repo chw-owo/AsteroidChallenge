@@ -1,5 +1,6 @@
 package com.example.shortform.domain;
 
+import com.example.shortform.dto.RequestDto.CategoryRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,7 +27,19 @@ public class Category extends Timestamped{
     @OneToMany(mappedBy = "category", orphanRemoval = true)
     private List<Challenge> challenges = new ArrayList<>();
 
+
+    @Builder
+    public Category(CategoryRequestDto requestDto) {
+        this.name = requestDto.getName();
+    }
+
+    @Builder
+    public Category(String name) {
+      this.name = name;
+    }
+
     public void setName(String name) {
+
         this.name = name;
     }
 }

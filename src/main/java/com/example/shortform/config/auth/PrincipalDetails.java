@@ -1,5 +1,6 @@
 package com.example.shortform.config.auth;
 
+
 import com.example.shortform.domain.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
