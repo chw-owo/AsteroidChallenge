@@ -8,7 +8,6 @@ import lombok.*;
 @Getter
 @Setter
 public class ProfileRequestDto {
-    private String profileImage;
     private String password;
     private String passwordCheck;
 }

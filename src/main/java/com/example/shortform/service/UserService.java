@@ -2,16 +2,15 @@ package com.example.shortform.service;
 
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
 import com.example.shortform.config.jwt.TokenDto;
+import com.example.shortform.domain.ImageFile;
 import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
-import com.example.shortform.dto.request.EmailRequestDto;
-import com.example.shortform.dto.request.SigninRequestDto;
-import com.example.shortform.dto.request.SignupRequestDto;
-import com.example.shortform.dto.request.UserInfo;
+import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.mail.EmailMessage;
 import com.example.shortform.mail.EmailService;
 import com.example.shortform.repository.UserRepository;
+import com.example.shortform.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -20,8 +19,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Random;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
+    private final S3Uploader s3Uploader;
 
     @Transactional
     public ResponseEntity<CMResponseDto> signup(SignupRequestDto signupRequestDto) {
@@ -223,6 +226,35 @@ public class UserService {
     public ResponseEntity<CMResponseDto> passwordCheck(User user, SigninRequestDto requestDto) {
         if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword()))
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        return ResponseEntity.ok(new CMResponseDto("true"));
+    }
+
+    @Transactional
+    public ResponseEntity<CMResponseDto> updateProfile(Long userId, ProfileRequestDto requestDto, MultipartFile multipartFile) throws IOException {
+        // 해당하는 유저 entity 찾기
+        User findUser = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("해당하는 유저 정보가 없습니다.")
+        );
+        // 이미지 S3 업로드
+        String imgUrl;
+
+        if (multipartFile.getSize() != 0) {
+            imgUrl = s3Uploader.upload(multipartFile, UUID.randomUUID() + multipartFile.getOriginalFilename());
+            findUser.setProfileImage(imgUrl);
+        }
+        
+        // TODO valid 추가 해줘야 한다.
+        // 비밀번호 변경
+        if(!isDuplicatePassword(requestDto.getPassword(), requestDto.getPasswordCheck()))
+            throw new IllegalArgumentException("비밀번호 확인이 일치하지 않습니다.");
+
+        if (passwordEncoder.matches(requestDto.getPassword(), findUser.getPassword()))
+            throw new IllegalArgumentException("기존 비밀번호와 동일합니다.");
+
+        String encPassword = passwordEncoder.encode(requestDto.getPassword());
+
+        findUser.setPassword(encPassword);
+
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
 }
