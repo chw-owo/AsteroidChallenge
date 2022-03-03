@@ -195,6 +195,12 @@ public class ChallengeService {
             throw new IllegalArgumentException("인원이 가득차 참여할 수 없습니다.");
         }
 
+        UserChallenge userChallengeCheck = userChallengeRepository.findByUserIdAndChallengeId(user.getId(), challengeId);
+
+        if (userChallengeCheck != null) {
+            throw new IllegalArgumentException("이미 참가한 챌린지입니다.");
+        }
+
         userChallengeRepository.save(new UserChallenge(challenge, user));
         List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
         challenge.setCurrentMember(userChallenges.size());
@@ -254,6 +260,12 @@ public class ChallengeService {
         }
 
         User user = principalDetails.getUser();
+
+        UserChallenge userChallengeCheck = userChallengeRepository.findByUserIdAndChallengeId(user.getId(), challengeId);
+
+        if (userChallengeCheck != null) {
+            throw new IllegalArgumentException("이미 참가한 챌린지입니다.");
+        }
 
         if (passwordEncoder.matches(passwordDto.getPassword(), challenge.getPassword())) {
             UserChallenge userChallenge = new UserChallenge(challenge, user);
