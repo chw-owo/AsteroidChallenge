@@ -1,9 +1,7 @@
 package com.example.shortform.service;
 
-import com.example.shortform.config.auth.kakao.KakaoProfile;
-import com.example.shortform.config.auth.kakao.OAuthToken;
-import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
+import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
 import com.example.shortform.dto.request.EmailRequestDto;
@@ -14,26 +12,16 @@ import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.mail.EmailMessage;
 import com.example.shortform.mail.EmailService;
 import com.example.shortform.repository.UserRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.http.*;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Random;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -229,5 +217,12 @@ public class UserService {
     // 로그인한 유저 정보 가져오기
     public UserInfo findUserInfo(User user) {
         return UserInfo.of(user);
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<CMResponseDto> passwordCheck(User user, SigninRequestDto requestDto) {
+        if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword()))
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        return ResponseEntity.ok(new CMResponseDto("true"));
     }
 }
