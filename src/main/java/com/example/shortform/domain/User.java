@@ -1,6 +1,5 @@
 package com.example.shortform.domain;
 
-import ch.qos.logback.classic.spi.LoggerContextVO;
 import com.example.shortform.dto.resonse.MemberResponseDto;
 import lombok.*;
 

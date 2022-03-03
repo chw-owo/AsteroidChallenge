@@ -16,9 +16,4 @@ public class CommentResponseDto {
     private String profileImage;
     private String createdAt;
 
-    public CommentResponseDto setCreatedAt(String createdAt) {
-        return CommentResponseDto.builder()
-                .createdAt(createdAt)
-                .build();
-    }
 }

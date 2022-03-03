@@ -1,41 +1,26 @@
 package com.example.shortform.service;
 
+import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.domain.*;
-import com.example.shortform.dto.RequestDto.CategoryRequestDto;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
-import com.example.shortform.dto.ResponseDto.ChallengeIdResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
-import com.example.shortform.dto.ResponseDto.TagResponseDto;
 import com.example.shortform.repository.CategoryRepository;
 import com.example.shortform.repository.ChallengeRepository;
 import com.example.shortform.repository.TagChallengeRepository;
 import com.example.shortform.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import javax.servlet.http.HttpServletRequest;
+
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
 
 import com.example.shortform.dto.request.ChallengeModifyRequestDto;
 import com.example.shortform.dto.request.PasswordDto;
-import com.example.shortform.dto.resonse.MemberResponseDto;
-import com.example.shortform.dto.resonse.TagNameResponseDto;
 import com.example.shortform.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 
@@ -197,13 +182,14 @@ public class ChallengeService {
 
         return ChallengesResponseDtos;
     }
-  
-    public ResponseEntity<?> participateChallenge(Long challengeId) {
+
+    @Transactional
+    public void participateChallenge(Long challengeId, PrincipalDetails principalDetails) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NullPointerException("찾는 챌린지가 존재하지 않습니다.")
         );
 
-        User user = new User();
+        User user = principalDetails.getUser();
 
         if (challenge.getMaxMember() <= challenge.getCurrentMember()) {
             throw new IllegalArgumentException("인원이 가득차 참여할 수 없습니다.");
@@ -213,46 +199,67 @@ public class ChallengeService {
         List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
         challenge.setCurrentMember(userChallenges.size());
 
-        return ResponseEntity.ok(HttpStatus.ACCEPTED);
     }
     
 
     @Transactional
-    public ResponseEntity<?> modifyChallenge(Long challengeId, ChallengeModifyRequestDto requestDto, List<MultipartFile> multipartFileList) throws IOException {
+    public ResponseEntity<?> modifyChallenge(Long challengeId, ChallengeModifyRequestDto requestDto, List<MultipartFile> multipartFileList, PrincipalDetails principalDetails) throws IOException {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NullPointerException("찾는 챌린지가 존재하지 않습니다.")
         );
 
-        List<ImageFile> imageFileList = imageFileService.uploadImage(multipartFileList, challenge);
+        if (principalDetails.getUser().getId().equals(challenge.getUser().getId())) {
+            List<ImageFile> imageFileList = imageFileService.uploadImage(multipartFileList, challenge);
 
-        challenge.update(requestDto);
+            challenge.update(requestDto);
 
-        List<TagChallenge> tagChallenges = tagChallengeRepository.findAllByChallenge(challenge);
-        List<String> tagNames = requestDto.getTagName();
+            List<TagChallenge> tagChallenges = tagChallengeRepository.findAllByChallenge(challenge);
+            List<String> tagNames = requestDto.getTagName();
 
-        int i = 0;
+            int i = 0;
 
-        for (TagChallenge tagChallenge : tagChallenges) {
-            tagChallenge.getTag().setName(tagNames.get(i));
-            i++;
+            for (TagChallenge tagChallenge : tagChallenges) {
+                tagChallenge.getTag().setName(tagNames.get(i));
+                i++;
+            }
+
+            return ResponseEntity.ok(challenge.toResponse());
+        } else {
+            throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
         }
-
-        return ResponseEntity.ok(challenge.toResponse());
     }
 
-    public void cancelChallenge(Long challengeId) {
-        challengeRepository.deleteById(challengeId);
+    @Transactional
+    public void cancelChallenge(Long challengeId, PrincipalDetails principalDetails) {
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
+                () -> new NullPointerException("찿는 챌린지가 존재하지 않습니다.")
+        );
+        if (challenge.getUser().getId().equals(principalDetails.getUser().getId())) {
+            challengeRepository.deleteById(challengeId);
+        } else {
+            throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
+        }
     }
 
     
 
-    public ResponseEntity<?> privateParticipateChallenge(Long challengeId, PasswordDto passwordDto) {
+    @Transactional
+    public void privateParticipateChallenge(Long challengeId, PasswordDto passwordDto, PrincipalDetails principalDetails) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NullPointerException("찿는 챌린지가 존재하지 않습니다.")
         );
 
-        if (challenge.getPassword().equals(passwordDto.getPassword())) {
-            return ResponseEntity.ok(true);
+        if (challenge.getMaxMember() <= challenge.getCurrentMember()) {
+            throw new IllegalArgumentException("인원이 가득차 참여할 수 없습니다.");
+        }
+
+        User user = principalDetails.getUser();
+
+        if (passwordEncoder.matches(passwordDto.getPassword(), challenge.getPassword())) {
+            UserChallenge userChallenge = new UserChallenge(challenge, user);
+            userChallengeRepository.save(userChallenge);
+            List<UserChallenge> userChallengeList = userChallengeRepository.findAllByChallenge(challenge);
+            challenge.setCurrentMember(userChallengeList.size());
         } else {
             throw new IllegalArgumentException("비밀번호가 틀렸습니다");
         }

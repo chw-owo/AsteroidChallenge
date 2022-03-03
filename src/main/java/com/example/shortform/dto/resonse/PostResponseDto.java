@@ -20,9 +20,4 @@ public class PostResponseDto {
     private String createdAt;
     private List<CommentResponseDto> comments;
 
-    public PostResponseDto setCreatedAt(String createdAt) {
-        return PostResponseDto.builder()
-                .createdAt(createdAt)
-                .build();
-    }
 }

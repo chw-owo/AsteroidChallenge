@@ -1,8 +1,6 @@
 package com.example.shortform.domain;
 
 
-import com.example.shortform.dto.RequestDto.CategoryRequestDto;
-
 import com.example.shortform.dto.resonse.TagNameResponseDto;
 
 import lombok.AllArgsConstructor;
