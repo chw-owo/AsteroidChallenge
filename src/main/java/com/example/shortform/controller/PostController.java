@@ -22,7 +22,7 @@ public class PostController {
 
     @PostMapping("/challenge/{challengeId}/posts")
     public ResponseEntity<?> writePost(@PathVariable Long challengeId,
-                                       @RequestPart(value = "image",required = false) MultipartFile multipartFile,
+                                       @RequestPart(value = "postImage",required = false) MultipartFile multipartFile,
                                        @RequestPart("post") PostRequestDto requestDto,
                                        @AuthenticationPrincipal PrincipalDetails principalDetails) throws IOException {
         if (principalDetails != null) {
@@ -42,9 +42,12 @@ public class PostController {
     }
 
     @PutMapping("/posts/{postId}")
-    public ResponseEntity<?> modifyPost(@PathVariable Long postId, @RequestBody PostRequestDto requestDto, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<?> modifyPost(@PathVariable Long postId,
+                                        @RequestPart("post") PostRequestDto requestDto,
+                                        @RequestPart(value = "postImage",required = false) MultipartFile multipartFile,
+                                        @AuthenticationPrincipal PrincipalDetails principalDetails) throws IOException {
         if (principalDetails != null) {
-            return postService.modifyPost(postId, requestDto, principalDetails);
+            return postService.modifyPost(postId, requestDto, principalDetails, multipartFile);
         } else {
             throw new NullPointerException("로그인한 유저정보가 없습니다.");
         }

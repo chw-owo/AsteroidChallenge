@@ -95,6 +95,12 @@ public class ImageFileService {
         imageFileRequestDto.setFilePath(String.valueOf(filePath));
         imageFileRequestDto.setFileSize(multipartFile.getSize());
 
+      if (post.getImageFile() != null) {
+          ImageFile imageFile = imageFileRepository.findByPost(post);
+          imageFile.update(multipartFile.getSize(), String.valueOf(filePath), originalFileName, convertedFileName);
+          return imageFile;
+      }
+
         ImageFile imageFile = imageFileRepository.save(imageFileRequestDto.toEntity(post));
 
 
