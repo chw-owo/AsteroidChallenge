@@ -54,6 +54,8 @@ public class Post extends Timestamped{
 
     public PostResponseDto toResponse(List<CommentResponseDto> commentList) {
         return PostResponseDto.builder()
+                .postImage(imageFile.getFilePath())
+                .postId(id)
                 .content(content)
                 .profileImage(user.getProfileImage())
                 .nickname(user.getNickname())
