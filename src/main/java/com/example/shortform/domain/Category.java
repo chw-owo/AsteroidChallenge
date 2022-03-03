@@ -1,14 +1,12 @@
 package com.example.shortform.domain;
 
+import com.example.shortform.dto.RequestDto.CategoryRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +17,7 @@ import java.util.List;
 @Entity
 public class Category extends Timestamped{
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
@@ -27,4 +26,20 @@ public class Category extends Timestamped{
 
     @OneToMany(mappedBy = "category", orphanRemoval = true)
     private List<Challenge> challenges = new ArrayList<>();
+
+
+    @Builder
+    public Category(CategoryRequestDto requestDto) {
+        this.name = requestDto.getName();
+    }
+
+    @Builder
+    public Category(String name) {
+      this.name = name;
+    }
+
+    public void setName(String name) {
+
+        this.name = name;
+    }
 }

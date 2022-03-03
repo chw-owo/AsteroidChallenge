@@ -23,3 +23,16 @@ spring:
 
   datasource:
     url: jdbc:h2:mem:testdb
+
+  profiles:
+    include:
+      - aws
+      - credentials
+
+#임의로 임시 지정
+jwt:
+  secret: 12345678901234567890123456789012
+  access-token-validity-in-seconds: 1800
+  refresh-token-validity-in-seconds: 604800
+
+
