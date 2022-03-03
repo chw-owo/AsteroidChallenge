@@ -66,11 +66,11 @@ public class UserApiController {
         return userService.sendTempPassword(emailRequestDto);
     }
 
-//    // 카카오 로그인
-//    @GetMapping("/auth/kakao/callback")
-//    public ResponseEntity<TokenDto> kakaoCallback(String code) {
-//        return kakaoService.kakaoLogin(code);
-//    }
+    // 카카오 로그인
+    @GetMapping("/auth/kakao/callback")
+    public ResponseEntity<TokenDto> kakaoCallback(String code) {
+        return kakaoService.kakaoLogin(code);
+    }
 
     // 로그인 유저 정보 확인
     @GetMapping("/auth/user-info")

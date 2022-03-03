@@ -42,7 +42,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    //private final EmailService emailService;
+    private final EmailService emailService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
     @Transactional
@@ -105,7 +105,7 @@ public class UserService {
     public ResponseEntity<CMResponseDto> emailCheck(SignupRequestDto signupRequestDto) {
 
         if (!isExistEmail(signupRequestDto.getEmail()))
-            throw new IllegalArgumentException("이미 존재하는 아매알 입니다.");
+            throw new IllegalArgumentException("이미 존재하는 이메일 입니다.");
 
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
@@ -114,7 +114,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public ResponseEntity<CMResponseDto> nicknameCheck(SignupRequestDto signupRequestDto) {
 
-        if (!userRepository.findByNickname(signupRequestDto.getNickname()).isPresent())
+        if (userRepository.findByNickname(signupRequestDto.getNickname()).isPresent())
             throw new IllegalArgumentException("이미 존재하는 닉네임 입니다.");
 
         return ResponseEntity.ok(new CMResponseDto("true"));
@@ -186,7 +186,7 @@ public class UserService {
                         "&email=" + user.getEmail())
                 .build();
 
-        //emailService.sendEmail(emailMessage);
+        emailService.sendEmail(emailMessage);
     }
 
     private void sendTempPasswordConfirmEmail(User user, String tempPwd) {
@@ -197,7 +197,7 @@ public class UserService {
                         "<p>로그인 후 비밀번호를 변경해주세요.</p>")
                 .build();
 
-        //emailService.sendEmail(emailMessage);
+        emailService.sendEmail(emailMessage);
     }
 
     private boolean isDuplicatePassword(String rawPassword, String pwCheck) {
