@@ -1,10 +1,7 @@
 package com.example.shortform.service;
 
 import com.example.shortform.config.auth.PrincipalDetails;
-import com.example.shortform.domain.Challenge;
-import com.example.shortform.domain.Comment;
-import com.example.shortform.domain.ImageFile;
-import com.example.shortform.domain.Post;
+import com.example.shortform.domain.*;
 import com.example.shortform.dto.request.PostRequestDto;
 import com.example.shortform.dto.resonse.CommentResponseDto;
 import com.example.shortform.dto.resonse.PostResponseDto;
@@ -52,11 +49,15 @@ public class PostService {
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
 
+        User user = principalDetails.getUser();
+
         Post post = postRepository.save(requestDto.toEntity(challenge, principalDetails.getUser()));
 
         ImageFile imageFile = imageFileService.upload(multipartFile, post);
 
         post.setImageFile(imageFile);
+
+        user.setPoint(user.getPoint() + 1);
 
         return ResponseEntity.ok(post.toResponse());
     }

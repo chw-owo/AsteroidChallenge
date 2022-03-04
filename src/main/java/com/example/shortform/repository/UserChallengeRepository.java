@@ -10,4 +10,6 @@ import java.util.List;
 public interface UserChallengeRepository extends JpaRepository<UserChallenge, Long> {
     List<UserChallenge> findAllByChallenge(Challenge challenge);
     UserChallenge findByUserIdAndChallengeId(Long id, Long challengeId);
+
+    void deleteByUserIdAndChallengeId(Long id, Long challengeId);
 }

@@ -253,10 +253,15 @@ public class ChallengeService {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("찿는 챌린지가 존재하지 않습니다.")
         );
-        if (challenge.getUser().getId().equals(principalDetails.getUser().getId())) {
-            challengeRepository.deleteById(challengeId);
+
+        UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(),challengeId);
+        User user = principalDetails.getUser();
+
+         if (userChallenge != null){
+            userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(),challengeId);
+            user.setPoint(user.getPoint() - 50);
         } else {
-            throw new ForbiddenException("작성자만 삭제할 수 있습니다.");
+            throw new ForbiddenException("참가하지 않은 챌린지입니다.");
         }
     }
 
@@ -267,6 +272,10 @@ public class ChallengeService {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("찿는 챌린지가 존재하지 않습니다.")
         );
+
+        if (!passwordDto.getPassword().matches("^[0-9]{4}$")) {
+            throw new InvalidException("비밀번호는 숫자 4자리 형식입니다.");
+        }
 
         if (challenge.getMaxMember() <= challenge.getCurrentMember()) {
             throw new InvalidException("인원이 가득차 참여할 수 없습니다.");
