@@ -80,7 +80,9 @@ public class PostService {
                 () -> new NullPointerException("인증 게시글이 존재하지 않습니다.")
         );
 
-        ImageFile imageFile = imageFileService.upload(multipartFile, post);
+        if (multipartFile != null) {
+            ImageFile imageFile = imageFileService.upload(multipartFile, post);
+        }
 
         if (!principalDetails.getUser().getId().equals(post.getUser().getId())) {
             throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");

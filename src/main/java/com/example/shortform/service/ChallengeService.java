@@ -225,7 +225,9 @@ public class ChallengeService {
         );
 
         if (principalDetails.getUser().getId().equals(challenge.getUser().getId())) {
-            List<ImageFile> imageFileList = imageFileService.uploadImage(multipartFileList, challenge);
+            if (multipartFileList != null) {
+                List<ImageFile> imageFileList = imageFileService.uploadImage(multipartFileList, challenge);
+            }
 
             challenge.update(requestDto);
 
