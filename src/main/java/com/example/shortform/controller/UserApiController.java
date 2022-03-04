@@ -5,6 +5,7 @@ import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.dto.resonse.UserProfileInfo;
+import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.service.KakaoService;
 import com.example.shortform.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -74,7 +75,7 @@ public class UserApiController {
     @GetMapping("/auth/user-info")
     public ResponseEntity<UserInfo> findUserInfo(@AuthenticationPrincipal PrincipalDetails principalDetails) {
         if (principalDetails == null)
-            throw new IllegalArgumentException("유저 정보가 없습니다.");
+            throw new NotFoundException("존재하지 않는 유저입니다.");
         return ResponseEntity.ok(userService.findUserInfo(principalDetails.getUser()));
     }
 
