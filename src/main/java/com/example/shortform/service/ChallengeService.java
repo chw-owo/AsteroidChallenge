@@ -47,7 +47,7 @@ public class ChallengeService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public ChallengeResponseDto postChallenge(ChallengeRequestDto requestDto,
+    public void postChallenge(ChallengeRequestDto requestDto,
                                               PrincipalDetails principal,
                                             List<MultipartFile> multipartFiles) throws IOException {
 
@@ -97,9 +97,8 @@ public class ChallengeService {
         challenge.setUser(user);
 
 
-        ChallengeResponseDto responseDto = new ChallengeResponseDto(challenge,challengeImages);
+        //ChallengeResponseDto responseDto = new ChallengeResponseDto(challenge,challengeImages);
 
-        return responseDto;
 
     }
   

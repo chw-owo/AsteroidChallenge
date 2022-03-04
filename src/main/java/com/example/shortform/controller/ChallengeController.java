@@ -36,10 +36,10 @@ public class ChallengeController {
     //for test
 
     @PostMapping(value= "/challenge")
-    public ChallengeResponseDto postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
+    public void postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
                                               @AuthenticationPrincipal PrincipalDetails principal,
                                               @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException {
-        return challengeService.postChallenge(requestDto, principal, multipartFiles);
+        challengeService.postChallenge(requestDto, principal, multipartFiles);
     }
 //     @PostMapping("/challenge")
 //     public ResponseEntity<?> createChallenge(@RequestPart(value = "imageFile", required = false) List<MultipartFile> multipartFileList,

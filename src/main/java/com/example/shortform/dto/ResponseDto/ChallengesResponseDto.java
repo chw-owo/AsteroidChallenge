@@ -29,7 +29,7 @@ public class ChallengesResponseDto {
     private String endDate; //LocalDate
     private Boolean isPrivate;
     private String category;
-    private List<String> tagChallenges;
+    private List<String> tagName;
     private String status;
 
     public ChallengesResponseDto(Challenge challenge, List<String> challengeImage){
@@ -44,6 +44,7 @@ public class ChallengesResponseDto {
         this.endDate=challenge.getEndDate();
         this.isPrivate=challenge.getIsPrivate();
 
+
         List<String> tagChallengeStrings = new ArrayList<>();
         List<TagChallenge> tagChallenges = challenge.getTagChallenges();
 
@@ -52,7 +53,7 @@ public class ChallengesResponseDto {
             tagChallengeStrings.add(tagChallengeString);
         }
 
-        this.tagChallenges = tagChallengeStrings;
+        this.tagName = tagChallengeStrings;
     }
 
 }
