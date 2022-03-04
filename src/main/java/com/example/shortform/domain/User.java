@@ -68,6 +68,12 @@ public class User extends Timestamped{
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     private List<Challenge> challenges = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    private List<UserChatRoom> userChatRooms = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    private List<Message> messages = new ArrayList<>();
+
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();
         this.emailCheckTokenGeneratedAt = LocalDateTime.now();
