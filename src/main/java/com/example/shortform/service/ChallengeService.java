@@ -70,8 +70,10 @@ public class ChallengeService {
         challengeRepository.save(challenge);
 
         // 방 비밀번호 암호화
-        String encPassword = passwordEncoder.encode(requestDto.getPassword());
-        challenge.setPassword(encPassword);
+        if (requestDto.getPassword() != null){
+            String encPassword = passwordEncoder.encode(requestDto.getPassword());
+            challenge.setPassword(encPassword);
+        }
 
         // 이미지 업로드
         List<String> challengeImages = new ArrayList<>();

@@ -57,7 +57,7 @@ public class Challenge extends Timestamped{
     @Column(name = "is_private", nullable = false)
     private Boolean isPrivate = false;
 
-    @Column(name = "password", nullable =false)
+    @Column(name = "password")
     private String password;
 
     //수정해야됨
