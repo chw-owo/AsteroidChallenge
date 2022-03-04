@@ -25,7 +25,7 @@ public class RankingService {
     }
     public List<RankingResponseDto> getRanking(){
 
-            List<User> users = userRepository.findTop3ByOrderByRankingPoint();
+            List<User> users = userRepository.findTop3ByOrderByRankingPointDesc();
             List<RankingResponseDto> rankings = new ArrayList<>();
 
             for (User u:users) {

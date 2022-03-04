@@ -59,8 +59,13 @@ public class UserService {
         if(!isDuplicatePassword(rawPassword, passwordCheck))
             throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
 
-        Level level_tmp = new Level();
-        levelRepository.save(level_tmp);
+
+        //========================================================
+        if(!levelRepository.findById(1L).isPresent()){
+            Level level_tmp = new Level("temp level");
+            levelRepository.save(level_tmp);
+        }
+        //========================================================
 
         Level level = levelRepository.findById(1L).orElseThrow(
                 () -> new NotFoundException("존재하지 않는 LEVEL 입니다.")
