@@ -1,4 +1,4 @@
-package com.example.shortform.dto.resonse;
+package com.example.shortform.dto.request;
 
 import com.example.shortform.domain.User;
 import lombok.*;

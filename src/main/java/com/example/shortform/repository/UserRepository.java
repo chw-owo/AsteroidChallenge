@@ -11,7 +11,7 @@ import java.util.*;
 @Transactional(readOnly = true)
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    List<User> findTop5ByOrderByPoint();
+    List<User> findTop3ByOrderByRankingPointDesc();
     Optional<User> findByEmail(String email);
     Optional<User> findByNickname(String nickname);
     User findByProviderId(String providerId);

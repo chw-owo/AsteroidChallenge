@@ -3,6 +3,7 @@ package com.example.shortform.dto.ResponseDto;
 import com.example.shortform.domain.Challenge;
 import com.example.shortform.domain.ImageFile;
 import com.example.shortform.domain.TagChallenge;
+import com.example.shortform.dto.resonse.MemberResponseDto;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,14 +26,14 @@ public class ChallengeResponseDto {
     private String content;
     private List<String> challengeImage;
     private int maxMember;
-    private int currentDate;
+    private int currentMember;
     private String startDate; //LocalDate
     private String endDate; //LocalDate
     private Boolean isPrivate;
     private String category;
     private List<String> tagChallenges;
     private String status;
-    private List<String> members;
+    private List<MemberResponseDto> members;
 
     public ChallengeResponseDto(Challenge challenge, List<String> challengeImage){
         this.challengeId = challenge.getId();
@@ -44,10 +45,8 @@ public class ChallengeResponseDto {
         this.startDate=challenge.getStartDate();
         this.endDate=challenge.getEndDate();
         this.isPrivate=challenge.getIsPrivate();
-        //this.status = challenge.getStatus();
 
         this.userId = challenge.getUser().getId();
-        this.members = null;
 
         List<String> tagChallengeStrings = new ArrayList<>();
         List<TagChallenge> tagChallenges = challenge.getTagChallenges();

@@ -13,7 +13,7 @@ public class UserProfileInfo {
     private String email;
     private String nickname;
     private String profileUrl;
-    private String point;
+    private int rankingPoint;
 
     private String levelName; // 레벨 이름
     private String levelIcon; // 레벨 아이콘
@@ -23,6 +23,7 @@ public class UserProfileInfo {
         return UserProfileInfo.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
+                .rankingPoint(user.getRankingPoint())
                 .nickname(user.getNickname())
                 .profileUrl(user.getProfileImage())
                 .levelName(user.getLevel().getName())

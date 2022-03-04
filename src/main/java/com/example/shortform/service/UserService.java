@@ -7,7 +7,6 @@ import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
 import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
-import com.example.shortform.dto.resonse.UserInfo;
 import com.example.shortform.dto.resonse.UserProfileInfo;
 import com.example.shortform.exception.DuplicateException;
 import com.example.shortform.exception.InvalidException;
@@ -54,15 +53,20 @@ public class UserService {
         String rawPassword = signupRequestDto.getPassword();
         String passwordCheck = signupRequestDto.getPasswordCheck();
 
-        if (!isExistEmail(signupRequestDto.getEmail()))
-            throw new DuplicateException("이미 존재하는 이메일입니다.");
-
         if (!isPasswordMatched(email, rawPassword))
             throw new InvalidException("비밀번호에 아이디가 들어갈 수 없습니다.");
 
         if(!isDuplicatePassword(rawPassword, passwordCheck))
             throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
 
+
+        //test
+        //========================================================
+        if(!levelRepository.findById(1L).isPresent()){
+            Level level_tmp = new Level("temp level");
+            levelRepository.save(level_tmp);
+        }
+        //========================================================
 
         Level level = levelRepository.findById(1L).orElseThrow(
                 () -> new NotFoundException("존재하지 않는 LEVEL 입니다.")
@@ -77,7 +81,7 @@ public class UserService {
                 .nickname(signupRequestDto.getNickname())
                 .password(encPassword)
                 .level(level) // 기본 1레벨
-                .point(50) // 기본 포인트 50
+                .rankingPoint(50) // 기본 포인트 50
                 .role(Role.ROLE_USER)
                 .emailVerified(false)
                 .build();
@@ -265,6 +269,7 @@ public class UserService {
             findUser.setProfileImage(imgUrl);
         }
         
+        // TODO valid 추가 해줘야 한다.
         // 비밀번호 변경
         if(!isDuplicatePassword(requestDto.getPassword(), requestDto.getPasswordCheck()))
             throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");

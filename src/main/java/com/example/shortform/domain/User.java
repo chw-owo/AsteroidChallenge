@@ -37,8 +37,9 @@ public class User extends Timestamped{
     private Level level;
 
 
+    @Setter
     @Column(name = "point", nullable = false)
-    private int point;
+    private int rankingPoint;
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
@@ -93,6 +94,10 @@ public class User extends Timestamped{
         this.password = encPassword;
     }
 
+    public void setRankingPoint(int point) {
+        this.rankingPoint = point;
+    }
+
     public MemberResponseDto toMemberResponse() {
         return MemberResponseDto.builder()
                 .userId(id)
@@ -104,5 +109,6 @@ public class User extends Timestamped{
     public Object getRole() {
         return this.role;
     }
+
 
 }
