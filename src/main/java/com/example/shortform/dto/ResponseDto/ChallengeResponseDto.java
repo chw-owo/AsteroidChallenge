@@ -48,6 +48,8 @@ public class ChallengeResponseDto {
 
         this.userId = challenge.getUser().getId();
 
+        this.members = null;
+
         List<String> tagChallengeStrings = new ArrayList<>();
         List<TagChallenge> tagChallenges = challenge.getTagChallenges();
 

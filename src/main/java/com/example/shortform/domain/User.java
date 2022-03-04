@@ -94,10 +94,13 @@ public class User extends Timestamped{
         this.password = encPassword;
     }
 
+<<<<<<< HEAD
     public void setRankingPoint(int point) {
         this.rankingPoint = point;
     }
 
+=======
+>>>>>>> ecf03f21edbd2c31b83ef73b853ea4bc3803f623
     public MemberResponseDto toMemberResponse() {
         return MemberResponseDto.builder()
                 .userId(id)

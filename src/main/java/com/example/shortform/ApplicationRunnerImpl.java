@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class ApplicationRunnerImpl implements ApplicationRunner{
 
 
+
     @Autowired
     private CategoryRepository categoryRepository;
 
@@ -28,6 +29,7 @@ public class ApplicationRunnerImpl implements ApplicationRunner{
             }
         };
     }
+
 
 
 

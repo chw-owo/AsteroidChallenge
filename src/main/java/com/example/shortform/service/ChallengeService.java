@@ -6,6 +6,7 @@ import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
 import com.example.shortform.dto.resonse.MemberResponseDto;
+
 import com.example.shortform.repository.CategoryRepository;
 import com.example.shortform.repository.ChallengeRepository;
 import com.example.shortform.repository.TagChallengeRepository;
@@ -94,6 +95,7 @@ public class ChallengeService {
         UserChallenge userChallenge = new UserChallenge(challenge ,user);
         userChallengeRepository.save(userChallenge);
         challenge.setUser(user);
+
 
         ChallengeResponseDto responseDto = new ChallengeResponseDto(challenge,challengeImages);
 

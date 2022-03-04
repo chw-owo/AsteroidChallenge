@@ -15,6 +15,7 @@ public class UserProfileInfo {
     private String profileUrl;
     private int rankingPoint;
 
+
     private String levelName; // 레벨 이름
     private String levelIcon; // 레벨 아이콘
     private int experiencePoint; // 다음 레벨에 필요한 경험치
@@ -23,7 +24,9 @@ public class UserProfileInfo {
         return UserProfileInfo.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
+
                 .rankingPoint(user.getRankingPoint())
+
                 .nickname(user.getNickname())
                 .profileUrl(user.getProfileImage())
                 .levelName(user.getLevel().getName())
