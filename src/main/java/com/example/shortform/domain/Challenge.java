@@ -81,12 +81,15 @@ public class Challenge extends Timestamped{
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<ImageFile> challengeImage = new ArrayList<>();
 
+    @OneToMany(mappedBy = "challenge", orphanRemoval = true)
+    private List<UserChallenge> memberList = new ArrayList<>();
+
 
     public Challenge(ChallengeRequestDto requestDto, Category category){
         this.title=requestDto.getTitle();
         this.content=requestDto.getContent();
         this.category= category;
-        this.challengeImage= challengeImage;
+        //this.challengeImage= challengeImage;
         this.maxMember=requestDto.getMaxMember();
         this.startDate=requestDto.getStartDate();
         this.endDate=requestDto.getEndDate();

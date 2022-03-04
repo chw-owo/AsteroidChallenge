@@ -31,4 +31,10 @@ public class Level extends Timestamped{
 
     @OneToMany(mappedBy = "level", orphanRemoval = true)
     private List<User> users = new ArrayList<>();
+
+    public Level(String name){
+        this.name = name;
+        this.levelIcon="tmp";
+        this.experiencePoint=100;
+    }
 }

@@ -25,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -48,7 +49,7 @@ public class ChallengeController {
 //     }
 
     @GetMapping("/challenge")
-    public List<ChallengesResponseDto> getChallenges(){
+    public List<ChallengesResponseDto> getChallenges() throws ParseException {
         return challengeService.getChallenges();
     }
 
@@ -63,12 +64,12 @@ public class ChallengeController {
 //     }
 
     @GetMapping("/challenge/category/{categoryId}")
-    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Category categoryId ){
+    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Category categoryId ) throws ParseException {
         return challengeService.getCategoryChallenge(categoryId);
     }
 
     @GetMapping("/challenge/search")
-    public List<ChallengesResponseDto> getKeywordChallenge(@RequestParam("keyword") String keyword){
+    public List<ChallengesResponseDto> getKeywordChallenge(@RequestParam("keyword") String keyword) throws ParseException {
         return challengeService.getKeywordChallenge(keyword);
     }
 
