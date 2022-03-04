@@ -19,7 +19,7 @@ public class SignupRequestDto {
                 .email(email)
                 .nickname(nickname)
                 .password(password)
-                .point(point)
+                .rankingPoint(point)
                 .build();
     }
 }

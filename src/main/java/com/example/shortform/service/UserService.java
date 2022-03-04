@@ -1,37 +1,34 @@
 package com.example.shortform.service;
 
-import com.example.shortform.config.auth.kakao.KakaoProfile;
-import com.example.shortform.config.auth.kakao.OAuthToken;
-import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
+import com.example.shortform.config.jwt.TokenDto;
+import com.example.shortform.domain.Level;
 import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
-import com.example.shortform.dto.request.EmailRequestDto;
-import com.example.shortform.dto.request.SigninRequestDto;
-import com.example.shortform.dto.request.SignupRequestDto;
-import com.example.shortform.dto.request.UserInfo;
+import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
+import com.example.shortform.dto.resonse.UserProfileInfo;
+import com.example.shortform.exception.DuplicateException;
+import com.example.shortform.exception.InvalidException;
+import com.example.shortform.exception.NotFoundException;
+import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.mail.EmailMessage;
 import com.example.shortform.mail.EmailService;
+import com.example.shortform.repository.LevelRepository;
 import com.example.shortform.repository.UserRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.example.shortform.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.http.*;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.Random;
 import java.util.UUID;
 
@@ -44,6 +41,9 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
+    private final LevelRepository levelRepository;
+    private final S3Uploader s3Uploader;
+    private final HttpServletRequest request;
 
     @Transactional
     public ResponseEntity<CMResponseDto> signup(SignupRequestDto signupRequestDto) {
@@ -54,10 +54,17 @@ public class UserService {
         String passwordCheck = signupRequestDto.getPasswordCheck();
 
         if (!isPasswordMatched(email, rawPassword))
-            throw new IllegalArgumentException("비밀번호에 아이디가 들어갈 수 없습니다.");
+            throw new InvalidException("비밀번호에 아이디가 들어갈 수 없습니다.");
 
         if(!isDuplicatePassword(rawPassword, passwordCheck))
-            throw new IllegalArgumentException("비밀번호 확인이 일치하지 않습니다.");
+            throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+
+        Level level_tmp = new Level();
+        levelRepository.save(level_tmp);
+
+        Level level = levelRepository.findById(1L).orElseThrow(
+                () -> new NotFoundException("존재하지 않는 LEVEL 입니다.")
+        );
 
         // 비밀번호 암호화
         String encPassword = passwordEncoder.encode(rawPassword);
@@ -67,8 +74,8 @@ public class UserService {
                 .email(email)
                 .nickname(signupRequestDto.getNickname())
                 .password(encPassword)
-                //.level(null) // TODO level 값 넣어줘야 한다.
-                .point(0) // 기본 포인트 0
+                .level(level) // 기본 1레벨
+                .rankingPoint(50) // 기본 포인트 50
                 .role(Role.ROLE_USER)
                 .emailVerified(false)
                 .build();
@@ -76,7 +83,6 @@ public class UserService {
         // 저장
         User savedUser = userRepository.save(user);
 
-        // TODO 인증 메일 보내기
         savedUser.generateEmailCheckToken();
         sendSignupConfirmEmail(savedUser);
 
@@ -88,24 +94,24 @@ public class UserService {
     public ResponseEntity<CMResponseDto> checkEmailToken(String token, String email) {
         // 이메일이 정확하지 않은 경우에 대한 에러처리
         User findUser = userRepository.findByEmail(email).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 이메일")
+                () -> new NotFoundException("존재하지 않는 이메일입니다.")
         );
 
         // 토큰이 정확하지 않은 경우에 대한 에러처리
         if (!findUser.isValidToken(token))
-            throw new IllegalArgumentException("토큰이 정확하지 않습니다.");
+            throw new UnauthorizedException("유효하지 않는 토큰입니다.");
 
         // 인증이 완료된 유저는 true로 변경
         findUser.setEmailVerified(true);
 
-        return ResponseEntity.ok(new CMResponseDto("회원 인증 완료"));
+        return ResponseEntity.ok(new CMResponseDto("true"));
     }
 
     // 이메일 중복 체크
     public ResponseEntity<CMResponseDto> emailCheck(SignupRequestDto signupRequestDto) {
 
         if (!isExistEmail(signupRequestDto.getEmail()))
-            throw new IllegalArgumentException("이미 존재하는 이메일 입니다.");
+            throw new DuplicateException("이미 존재하는 이메일입니다.");
 
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
@@ -115,7 +121,7 @@ public class UserService {
     public ResponseEntity<CMResponseDto> nicknameCheck(SignupRequestDto signupRequestDto) {
 
         if (userRepository.findByNickname(signupRequestDto.getNickname()).isPresent())
-            throw new IllegalArgumentException("이미 존재하는 닉네임 입니다.");
+            throw new DuplicateException("이미 존재하는 닉네임입니다.");
 
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
@@ -123,11 +129,11 @@ public class UserService {
     @Transactional
     public ResponseEntity<CMResponseDto> resendCheckEmailToken(EmailRequestDto emailRequestDto) {
         User findUser = userRepository.findByEmail(emailRequestDto.getEmail()).orElseThrow(
-                () -> new IllegalArgumentException("가입되지 않은 이메일입니다.")
+                () -> new NotFoundException("존재하지 않는 이메일입니다.")
         );
 
         if (!findUser.canSendConfirmEmail())
-            throw new IllegalArgumentException("인증 이메일은 1시간에 한번만 전송할 수 있습니다.");
+            throw new InvalidException("인증 이메일은 1시간에 한번만 전송할 수 있습니다.");
 
         // 이메일 인증 재전송
         sendSignupConfirmEmail(findUser);
@@ -138,14 +144,16 @@ public class UserService {
     @Transactional
     public ResponseEntity<TokenDto> login(SigninRequestDto signinRequestDto) {
         User userEntity = userRepository.findByEmail(signinRequestDto.getEmail()).orElseThrow(
-                () -> new IllegalArgumentException("가입되지 않은 이메일입니다.")
+                () -> new NotFoundException("존재하지 않는 이메일입니다.")
         );
 
         if (!passwordEncoder.matches(signinRequestDto.getPassword(), userEntity.getPassword()))
-            throw new IllegalArgumentException("패스워드가 일치하지 않습니다.");
+            throw new InvalidException("비밀번호가 일치하지 않습니다.");
 
         // 토큰 정보 생성
         TokenDto token = jwtAuthenticationProvider.createToken(userEntity);
+        token.setEmail(signinRequestDto.getEmail());
+        token.setEmailVerified(userEntity.isEmailVerified());
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(JwtAuthenticationProvider.AUTHORIZATION_HEADER, "Bearer "+ token);
@@ -158,12 +166,12 @@ public class UserService {
     public ResponseEntity<CMResponseDto> sendTempPassword(EmailRequestDto emailRequestDto) {
         // 이메일이 유효한지 체크
         User findUser = userRepository.findByEmail(emailRequestDto.getEmail()).orElseThrow(
-                () -> new IllegalArgumentException("가입되지 않은 이메일 입니다.")
+                () -> new NotFoundException("존재하지 않는 이메일입니다.")
         );
 
         // 인증 이메일 1시간 지났는지 체크
         if (!findUser.canSendConfirmEmail())
-            throw new IllegalArgumentException("인증 이메일은 1시간에 한번만 전송할 수 있습니다.");
+            throw new InvalidException("인증 이메일은 1시간에 한번만 전송할 수 있습니다.");
 
         // 임시 비밀번호 발급
         String tempPassword = temporaryPassword(10); // 8글자 랜덤으로 임시 비밀번호 생성
@@ -179,10 +187,13 @@ public class UserService {
     }
 
     private void sendSignupConfirmEmail(User user) {
+        String path = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+
+        // TODO 사진과 함께 보내기
         EmailMessage emailMessage = EmailMessage.builder()
                 .to(user.getEmail())
                 .subject("소행성(소소한 행동 습관 형성 챌린지), 회원 가입 인증 메일")
-                .message("/auth/check-email-token?token=" + user.getEmailCheckToken() +
+                .message(path+"/auth/check-email-token?token=" + user.getEmailCheckToken() +
                         "&email=" + user.getEmail())
                 .build();
 
@@ -229,5 +240,51 @@ public class UserService {
     // 로그인한 유저 정보 가져오기
     public UserInfo findUserInfo(User user) {
         return UserInfo.of(user);
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<CMResponseDto> passwordCheck(User user, SigninRequestDto requestDto) {
+        if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword()))
+            throw new InvalidException("비밀번호가 일치하지 않습니다.");
+        return ResponseEntity.ok(new CMResponseDto("true"));
+    }
+
+    @Transactional
+    public ResponseEntity<CMResponseDto> updateProfile(Long userId, ProfileRequestDto requestDto, MultipartFile multipartFile) throws IOException {
+        // 해당하는 유저 entity 찾기
+        User findUser = userRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("존재하지 않는 유저입니다.")
+        );
+        // 이미지 S3 업로드
+        String imgUrl;
+
+        if (multipartFile.getSize() != 0) {
+            imgUrl = s3Uploader.upload(multipartFile, UUID.randomUUID() + multipartFile.getOriginalFilename());
+            findUser.setProfileImage(imgUrl);
+        }
+        
+        // TODO valid 추가 해줘야 한다.
+        // 비밀번호 변경
+        if(!isDuplicatePassword(requestDto.getPassword(), requestDto.getPasswordCheck()))
+            throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+
+        if (passwordEncoder.matches(requestDto.getPassword(), findUser.getPassword()))
+            throw new DuplicateException("기존 비밀번호와 동일합니다.");
+
+        String encPassword = passwordEncoder.encode(requestDto.getPassword());
+
+        findUser.setPassword(encPassword);
+
+        return ResponseEntity.ok(new CMResponseDto("true"));
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileInfo getUserProfile(Long userId) {
+
+        User findUser = userRepository.findUserInfo(userId).orElseThrow(
+                () -> new NotFoundException("존재하지 않는 유저입니다.")
+        );
+
+        return UserProfileInfo.of(findUser);
     }
 }

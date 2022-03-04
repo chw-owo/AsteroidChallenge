@@ -57,7 +57,7 @@ public class Challenge extends Timestamped{
     @Column(name = "is_private", nullable = false)
     private Boolean isPrivate = false;
 
-    @Column(name = "password", nullable =false)
+    @Column(name = "password")
     private String password;
 
     //수정해야됨
@@ -81,12 +81,15 @@ public class Challenge extends Timestamped{
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<ImageFile> challengeImage = new ArrayList<>();
 
+    @OneToMany(mappedBy = "challenge", orphanRemoval = true)
+    private List<UserChallenge> memberList = new ArrayList<>();
+
 
     public Challenge(ChallengeRequestDto requestDto, Category category){
         this.title=requestDto.getTitle();
         this.content=requestDto.getContent();
         this.category= category;
-        this.challengeImage= challengeImage;
+        //this.challengeImage= challengeImage;
         this.maxMember=requestDto.getMaxMember();
         this.startDate=requestDto.getStartDate();
         this.endDate=requestDto.getEndDate();

@@ -51,5 +51,12 @@ public class ImageFile {
     public Long getSize() {
         return this.fileSize;
     }
+
+    public void update(Long fileSize, String filePath, String originalFileName, String convertedFileName) {
+        this.fileSize = fileSize;
+        this.filePath = filePath;
+        this.originalFileName = originalFileName;
+        this.convertedFileName = convertedFileName;
+    }
 }
 

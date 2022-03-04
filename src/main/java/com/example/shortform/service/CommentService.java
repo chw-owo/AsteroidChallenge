@@ -1,5 +1,6 @@
 package com.example.shortform.service;
 
+import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.domain.Comment;
 import com.example.shortform.domain.Post;
 import com.example.shortform.dto.request.CommentRequestDto;
@@ -20,21 +21,25 @@ public class CommentService {
         this.postRepository = postRepository;
     }
 
-    public ResponseEntity<?> writeComment(Long postId, CommentRequestDto requestDto) {
+    public ResponseEntity<?> writeComment(Long postId, CommentRequestDto requestDto, PrincipalDetails principalDetails) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NullPointerException("존재하지 않는 글입니다.")
         );
 
-        Comment comment = commentRepository.save(requestDto.toEntity(post));
+        Comment comment = commentRepository.save(requestDto.toEntity(post, principalDetails.getUser()));
 
         return ResponseEntity.ok(comment.toPKResponse());
     }
 
 
-    public void deleteComment(Long commentId) {
+    public void deleteComment(Long commentId, PrincipalDetails principalDetails) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(
                 () -> new NullPointerException("존재하지 않는 댓글입니다.")
         );
+
+        if (!principalDetails.getUser().getId().equals(comment.getUser().getId())) {
+            throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
+        }
 
         commentRepository.deleteById(commentId);
     }

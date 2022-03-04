@@ -1,4 +1,4 @@
-package com.example.shortform.dto.resonse;
+package com.example.shortform.dto.ResponseDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,4 +16,9 @@ public class CommentResponseDto {
     private String profileImage;
     private String createdAt;
 
+    public CommentResponseDto setCreatedAt(String createdAt) {
+        return CommentResponseDto.builder()
+                .createdAt(createdAt)
+                .build();
+    }
 }

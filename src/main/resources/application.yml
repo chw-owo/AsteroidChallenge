@@ -6,6 +6,12 @@ server:
       charset: UTF-8
 
 spring:
+  profiles:
+    active: dev
+    include:
+      - aws
+      - credentials
+
   jpa:
     open-in-view: true
     database-platform: org.hibernate.dialect.H2Dialect
@@ -24,15 +30,13 @@ spring:
   datasource:
     url: jdbc:h2:mem:testdb
 
-  profiles:
-    include:
-      - aws
-      - credentials
-
-#임의로 임시 지정
 jwt:
-  secret: 12345678901234567890123456789012
+  header: Authorization
+  secret: asteroidChallengeHanghaeFinalProject
   access-token-validity-in-seconds: 1800
   refresh-token-validity-in-seconds: 604800
 
-
+KAKAO:
+  CLIENT_ID: 8ff3bc07db2d56b28fc82cb026ccd135
+  REDIRECT_URL: http://localhost:8080/auth/kakao/callback
+  RAW_PASSWORD: 1234

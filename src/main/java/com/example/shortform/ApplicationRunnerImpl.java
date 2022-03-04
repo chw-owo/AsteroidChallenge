@@ -13,8 +13,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationRunnerImpl implements ApplicationRunner{
 
+
     @Autowired
     private CategoryRepository categoryRepository;
+
 
     @Bean
     public ApplicationRunner applicationRunner() {
@@ -26,6 +28,8 @@ public class ApplicationRunnerImpl implements ApplicationRunner{
             }
         };
     }
+
+
 
     @Override
     public void run(ApplicationArguments args) throws Exception {

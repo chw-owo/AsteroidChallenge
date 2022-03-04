@@ -1,6 +1,5 @@
 package com.example.shortform.domain;
 
-import ch.qos.logback.classic.spi.LoggerContextVO;
 import com.example.shortform.dto.resonse.MemberResponseDto;
 import lombok.*;
 
@@ -34,21 +33,17 @@ public class User extends Timestamped{
     private String password;
 
     @ManyToOne
-    @JoinColumn(name = "level_id", nullable =true)
+    @JoinColumn(name = "level_id")
     private Level level;
 
 
+    @Setter
     @Column(name = "point", nullable = false)
-    private int point;
+    private int rankingPoint;
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    // TODO level 값 생성되면 넣어주기
-    //@ManyToOne(optional = false, fetch = FetchType.LAZY)
-    //@JoinColumn(name = "level_id")
-    //private Level level;
 
     @Setter
     private boolean emailVerified;
@@ -91,6 +86,18 @@ public class User extends Timestamped{
         this.password = tempPassword;
     }
 
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public void setPassword(String encPassword) {
+        this.password = encPassword;
+    }
+
+    public void setRankingPoint(int point) {
+        this.rankingPoint = point;
+    }
+
     public MemberResponseDto toMemberResponse() {
         return MemberResponseDto.builder()
                 .userId(id)
@@ -102,5 +109,6 @@ public class User extends Timestamped{
     public Object getRole() {
         return this.role;
     }
+
 
 }

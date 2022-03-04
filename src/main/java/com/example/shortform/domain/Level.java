@@ -11,7 +11,7 @@ import java.util.List;
 
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
+//@NoArgsConstructor
 @Getter
 @Entity
 public class Level extends Timestamped{
@@ -31,4 +31,10 @@ public class Level extends Timestamped{
 
     @OneToMany(mappedBy = "level", orphanRemoval = true)
     private List<User> users = new ArrayList<>();
+
+    public Level(){
+        this.name = "1";
+        this.levelIcon="tmp";
+        this.experiencePoint=0;
+    }
 }
