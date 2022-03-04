@@ -13,21 +13,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationRunnerImpl implements ApplicationRunner{
 
-/*
+
+
     @Autowired
     private CategoryRepository categoryRepository;
-*/
 
-//    @Bean
-//    public ApplicationRunner applicationRunner() {
-//        String[] categoryList = new String[]{"일상 루틴", "운동", "스터디", "식습관","힐링", "취미", "셀프케어", "펫", "친환경" };
-//        return args -> {
-//            for(String c: categoryList) {
-//                Category category = new Category(c);
-//                categoryRepository.save(category);
-//            }
-//        };
-//    }
+
+    @Bean
+    public ApplicationRunner applicationRunner() {
+        String[] categoryList = new String[]{"일상 루틴", "운동", "스터디", "식습관","힐링", "취미", "셀프케어", "펫", "친환경" };
+        return args -> {
+            for(String c: categoryList) {
+                Category category = new Category(c);
+                categoryRepository.save(category);
+            }
+        };
+    }
+
 
 
 

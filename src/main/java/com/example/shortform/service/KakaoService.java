@@ -128,7 +128,7 @@ public class KakaoService {
                     .email(kakaoProfile.getKakaoAccount().getEmail())
                     .password(passwordEncoder.encode(RAW_PASSWORD)) // TODO 패스워드 properties에 입력
                     .nickname(nickname)
-                    .point(0)
+                    .rankingPoint(0)
                     .emailVerified(true)
                     .role(Role.ROLE_USER)
                     .provider("kakao")

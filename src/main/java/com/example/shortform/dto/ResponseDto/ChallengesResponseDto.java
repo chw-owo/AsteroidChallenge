@@ -24,7 +24,7 @@ public class ChallengesResponseDto {
     private String content;
     private List<String> challengeImage;
     private int maxMember;
-    private int currentDate;
+    private int currentMember;
     private String startDate; //LocalDate
     private String endDate; //LocalDate
     private Boolean isPrivate;
@@ -32,12 +32,13 @@ public class ChallengesResponseDto {
     private List<String> tagChallenges;
     private String status;
 
-    public ChallengesResponseDto(Challenge challenge){
+    public ChallengesResponseDto(Challenge challenge, List<String> challengeImage){
         this.challengeId = challenge.getId();
         this.title=challenge.getTitle();
         this.content=challenge.getContent();
         this.category= challenge.getCategory().getName();
-        //this.challengeImage=challenge.getChallengeImage().getFilePath();
+        this.challengeImage=challengeImage;
+        this.currentMember = challenge.getCurrentMember();
         this.maxMember=challenge.getMaxMember();
         this.startDate=challenge.getStartDate();
         this.endDate=challenge.getEndDate();
