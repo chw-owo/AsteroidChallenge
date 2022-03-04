@@ -2,6 +2,7 @@ package com.example.shortform.controller;
 
 import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.dto.request.PostRequestDto;
+import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class PostController {
         if (principalDetails != null) {
             return postService.writePost(challengeId, requestDto, multipartFile, principalDetails);
         } else{
-            throw new NullPointerException("로그인한 유저정보가 없습니다.");
+            throw new UnauthorizedException("로그인한 유저정보가 없습니다.");
         }
     }
 
@@ -37,7 +38,7 @@ public class PostController {
         if (principalDetails != null) {
             postService.deletePost(postId, principalDetails);
         } else {
-            throw new NullPointerException("로그인한 유저정보가 없습니다.");
+            throw new UnauthorizedException("로그인한 유저정보가 없습니다.");
         }
     }
 
@@ -49,7 +50,7 @@ public class PostController {
         if (principalDetails != null) {
             return postService.modifyPost(postId, requestDto, principalDetails, multipartFile);
         } else {
-            throw new NullPointerException("로그인한 유저정보가 없습니다.");
+            throw new UnauthorizedException("로그인한 유저정보가 없습니다.");
         }
     }
 

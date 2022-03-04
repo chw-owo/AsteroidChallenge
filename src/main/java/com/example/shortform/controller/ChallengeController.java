@@ -9,6 +9,7 @@ import com.example.shortform.dto.ResponseDto.ChallengeIdResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
 import com.example.shortform.dto.ResponseDto.TagResponseDto;
+import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.service.ChallengeService;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.RequiredArgsConstructor;
@@ -79,7 +80,7 @@ public class ChallengeController {
             result.put("result", "true");
             return result;
         } else {
-            throw new NullPointerException("로그인 후 이용가능합니다.");
+            throw new UnauthorizedException("로그인 후 이용가능합니다.");
         }
     }
 
@@ -91,7 +92,7 @@ public class ChallengeController {
             result.put("result", "true");
             return result;
         } else {
-            throw new NullPointerException("로그인 후 이용가능합니다.");
+            throw new UnauthorizedException("로그인 후 이용가능합니다.");
         }
     }
 
@@ -103,7 +104,7 @@ public class ChallengeController {
         if (principalDetails != null) {
             return challengeService.modifyChallenge(challengeId, requestDto, multipartFileList, principalDetails);
         } else {
-            throw new NullPointerException("로그인 후 이용가능합니다.");
+            throw new UnauthorizedException("로그인 후 이용가능합니다.");
         }
     }
 
@@ -112,7 +113,7 @@ public class ChallengeController {
         if (principalDetails != null) {
             challengeService.cancelChallenge(challengeId, principalDetails);
         } else {
-            throw new NullPointerException("로그인 후 이용가능합니다.");
+            throw new UnauthorizedException("로그인 후 이용가능합니다.");
         }
     }
 
