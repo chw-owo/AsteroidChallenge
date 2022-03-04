@@ -30,6 +30,6 @@ public class ChatRoom extends Timestamped{
     private List<UserChatRoom> userChatRooms = new ArrayList<>();
 
     @OneToMany(mappedBy = "chatRoom", orphanRemoval = true)
-    private List<Message> messages = new ArrayList<>();
+    private List<ChatMessage> messages = new ArrayList<>();
 
 }

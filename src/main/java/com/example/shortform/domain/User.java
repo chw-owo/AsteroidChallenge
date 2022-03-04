@@ -72,7 +72,7 @@ public class User extends Timestamped{
     private List<UserChatRoom> userChatRooms = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", orphanRemoval = true)
-    private List<Message> messages = new ArrayList<>();
+    private List<ChatMessage> messages = new ArrayList<>();
 
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();
@@ -105,6 +105,10 @@ public class User extends Timestamped{
                 .nickname(nickname)
                 .profileImage(profileImage)
                 .build();
+    }
+
+    public void setPoint(int point) {
+        this.point = point;
     }
 
     public Object getRole() {
