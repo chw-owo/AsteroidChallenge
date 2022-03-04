@@ -19,7 +19,7 @@ public class PrincipalDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
         User findUser = userRepository.findByEmail(email).orElseThrow(
-                () -> new UsernameNotFoundException("가입되지 않은 이메일입니다.")
+                () -> new UsernameNotFoundException("존재하지 않는 이메일입니다.")
         );
 
 
