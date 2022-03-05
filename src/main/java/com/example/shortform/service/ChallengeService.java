@@ -7,6 +7,10 @@ import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
 import com.example.shortform.dto.resonse.MemberResponseDto;
 
+import com.example.shortform.exception.DuplicateException;
+import com.example.shortform.exception.ForbiddenException;
+import com.example.shortform.exception.InvalidException;
+import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.CategoryRepository;
 import com.example.shortform.repository.ChallengeRepository;
 import com.example.shortform.repository.TagChallengeRepository;
@@ -272,19 +276,19 @@ public class ChallengeService {
     @Transactional
     public void participateChallenge(Long challengeId, PrincipalDetails principalDetails) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
-                () -> new NullPointerException("찾는 챌린지가 존재하지 않습니다.")
+                () -> new NotFoundException("찾는 챌린지가 존재하지 않습니다.")
         );
 
         User user = principalDetails.getUser();
 
         if (challenge.getMaxMember() <= challenge.getCurrentMember()) {
-            throw new IllegalArgumentException("인원이 가득차 참여할 수 없습니다.");
+            throw new InvalidException("인원이 가득차 참여할 수 없습니다.");
         }
 
         UserChallenge userChallengeCheck = userChallengeRepository.findByUserIdAndChallengeId(user.getId(), challengeId);
 
         if (userChallengeCheck != null) {
-            throw new IllegalArgumentException("이미 참가한 챌린지입니다.");
+            throw new DuplicateException("이미 참가한 챌린지입니다.");
         }
 
         userChallengeRepository.save(new UserChallenge(challenge, user));
@@ -297,7 +301,7 @@ public class ChallengeService {
     @Transactional
     public ResponseEntity<?> modifyChallenge(Long challengeId, ChallengeModifyRequestDto requestDto, List<MultipartFile> multipartFileList, PrincipalDetails principalDetails) throws IOException {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
-                () -> new NullPointerException("찾는 챌린지가 존재하지 않습니다.")
+                () -> new NotFoundException("찾는 챌린지가 존재하지 않습니다.")
         );
 
         if (principalDetails.getUser().getId().equals(challenge.getUser().getId())) {
@@ -317,19 +321,24 @@ public class ChallengeService {
 
             return ResponseEntity.ok(challenge.toResponse());
         } else {
-            throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
+            throw new ForbiddenException("작성자만 수정할 수 있습니다.");
         }
     }
 
     @Transactional
     public void cancelChallenge(Long challengeId, PrincipalDetails principalDetails) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
-                () -> new NullPointerException("찿는 챌린지가 존재하지 않습니다.")
+                () -> new NotFoundException("찿는 챌린지가 존재하지 않습니다.")
         );
-        if (challenge.getUser().getId().equals(principalDetails.getUser().getId())) {
-            challengeRepository.deleteById(challengeId);
+
+        UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(),challengeId);
+        User user = principalDetails.getUser();
+
+        if (userChallenge != null){
+            userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(),challengeId);
+            user.setRankingPoint(user.getRankingPoint() - 50);
         } else {
-            throw new IllegalArgumentException("작성자만 삭제할 수 있습니다.");
+            throw new ForbiddenException("참가하지 않은 챌린지입니다.");
         }
     }
 
@@ -338,11 +347,15 @@ public class ChallengeService {
     @Transactional
     public void privateParticipateChallenge(Long challengeId, PasswordDto passwordDto, PrincipalDetails principalDetails) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
-                () -> new NullPointerException("찿는 챌린지가 존재하지 않습니다.")
+                () -> new NotFoundException("찿는 챌린지가 존재하지 않습니다.")
         );
 
+        if (!passwordDto.getPassword().matches("^[0-9]{4}$")) {
+            throw new InvalidException("비밀번호는 숫자 4자리 형식입니다.");
+        }
+
         if (challenge.getMaxMember() <= challenge.getCurrentMember()) {
-            throw new IllegalArgumentException("인원이 가득차 참여할 수 없습니다.");
+            throw new InvalidException("인원이 가득차 참여할 수 없습니다.");
         }
 
         User user = principalDetails.getUser();
@@ -350,7 +363,7 @@ public class ChallengeService {
         UserChallenge userChallengeCheck = userChallengeRepository.findByUserIdAndChallengeId(user.getId(), challengeId);
 
         if (userChallengeCheck != null) {
-            throw new IllegalArgumentException("이미 참가한 챌린지입니다.");
+            throw new DuplicateException("이미 참가한 챌린지입니다.");
         }
 
         if (passwordEncoder.matches(passwordDto.getPassword(), challenge.getPassword())) {
@@ -359,7 +372,7 @@ public class ChallengeService {
             List<UserChallenge> userChallengeList = userChallengeRepository.findAllByChallenge(challenge);
             challenge.setCurrentMember(userChallengeList.size());
         } else {
-            throw new IllegalArgumentException("비밀번호가 틀렸습니다");
+            throw new InvalidException("비밀번호가 틀렸습니다");
         }
     }
 
