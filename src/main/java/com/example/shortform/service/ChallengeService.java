@@ -140,9 +140,9 @@ public class ChallengeService {
         for(Challenge challenge: challenges){
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles =  challenge.getChallengeImage();
-            if(ImageFiles.isEmpty()){
-                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
-            }
+//            if(ImageFiles.isEmpty()){
+//                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
+//            }
             for(ImageFile image:ImageFiles){
                 challengeImages.add(image.getFilePath());
             }
@@ -161,9 +161,9 @@ public class ChallengeService {
         List<String> challengeImage = new ArrayList<>();
 
         List<ImageFile> ImageFiles = challenge.getChallengeImage();
-        if(ImageFiles.isEmpty()){
-            throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
-        }
+//        if(ImageFiles.isEmpty()){
+//            throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
+//        }
         for (ImageFile image : ImageFiles) {
             challengeImage.add(image.getFilePath());
         }
@@ -190,9 +190,9 @@ public class ChallengeService {
         for(Challenge challenge: challenges){
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles =  challenge.getChallengeImage();
-            if(ImageFiles.isEmpty()){
-                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
-            }
+//            if(ImageFiles.isEmpty()){
+//                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
+//            }
             for(ImageFile image:ImageFiles){
                 challengeImages.add(image.getFilePath());
             }
@@ -215,9 +215,9 @@ public class ChallengeService {
         for(Challenge c: challenges) {
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles = c.getChallengeImage();
-            if(ImageFiles.isEmpty()){
-                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
-            }
+//            if(ImageFiles.isEmpty()){
+//                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
+//            }
             for (ImageFile image : ImageFiles) {
                 challengeImages.add(image.getFilePath());
             }
