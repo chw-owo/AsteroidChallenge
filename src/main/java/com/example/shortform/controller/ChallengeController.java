@@ -116,7 +116,7 @@ public class ChallengeController {
     }
 
     @GetMapping("/challenge/{challengeId}/report")
-    public ReportResponseDto participateChallenge(@PathVariable Long challengeId) throws ParseException {// @AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ReportResponseDto successDate(@PathVariable Long challengeId) throws ParseException {// @AuthenticationPrincipal PrincipalDetails principalDetails) {
         //if (principalDetails != null) {
         return challengeService.successDate(challengeId);
 //            HashMap<String, Object> result = new HashMap<>();
