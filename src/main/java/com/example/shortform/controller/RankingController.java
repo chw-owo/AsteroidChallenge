@@ -16,10 +16,10 @@ public class RankingController {
 
     private final RankingService rankingService;
 
-    @PostMapping("/ranking")
+    /*@PostMapping("/ranking")
     public int setRanking(@RequestBody RankingRequestDto requestDto){
         return rankingService.setRanking(requestDto);
-    }
+    }*/
 
     @GetMapping("/ranking")
     public List<RankingResponseDto> getRanking(){

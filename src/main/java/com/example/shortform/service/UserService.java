@@ -133,9 +133,9 @@ public class UserService {
 
     // 닉네임 중복 체크
     @Transactional(readOnly = true)
-    public ResponseEntity<CMResponseDto> nicknameCheck(SignupRequestDto signupRequestDto) {
+    public ResponseEntity<CMResponseDto> nicknameCheck(NickNameRequestDto nickNameRequestDto) {
 
-        if (userRepository.findByNickname(signupRequestDto.getNickname()).isPresent())
+        if (userRepository.findByNickname(nickNameRequestDto.getNickname()).isPresent())
             throw new DuplicateException("이미 존재하는 닉네임입니다.");
 
         return ResponseEntity.ok(new CMResponseDto("true"));
@@ -258,7 +258,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<CMResponseDto> passwordCheck(User user, SigninRequestDto requestDto) {
+    public ResponseEntity<CMResponseDto> passwordCheck(User user, UserPasswordRequestDto requestDto) {
         if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword()))
             throw new InvalidException("비밀번호가 일치하지 않습니다.");
         return ResponseEntity.ok(new CMResponseDto("true"));
