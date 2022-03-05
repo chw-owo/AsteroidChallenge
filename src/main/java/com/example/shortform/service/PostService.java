@@ -1,25 +1,27 @@
 package com.example.shortform.service;
 
 import com.example.shortform.config.auth.PrincipalDetails;
-import com.example.shortform.domain.Challenge;
-import com.example.shortform.domain.Comment;
-import com.example.shortform.domain.ImageFile;
-import com.example.shortform.domain.Post;
+import com.example.shortform.domain.*;
 import com.example.shortform.dto.request.PostRequestDto;
 import com.example.shortform.dto.resonse.CommentResponseDto;
 import com.example.shortform.dto.resonse.PostResponseDto;
-import com.example.shortform.repository.ChallengeRepository;
-import com.example.shortform.repository.CommentRepository;
-import com.example.shortform.repository.PostRepository;
+import com.example.shortform.exception.NotFoundException;
+import com.example.shortform.repository.*;
+import jdk.nashorn.internal.objects.Global;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import sun.security.krb5.internal.ccache.CredentialsCache;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -28,35 +30,65 @@ public class PostService {
     private final ChallengeRepository challengeRepository;
     private final CommentRepository commentRepository;
     private final ImageFileService imageFileService;
+    private final UserRepository userRepository;
+    private final DateCheckRepository dateCheckRepository;
+
 
     @Autowired
     public PostService(PostRepository postRepository,
                        ChallengeRepository challengeRepository,
                        CommentRepository commentRepository,
-                       ImageFileService imageFileService) {
+                       ImageFileService imageFileService,
+                       UserRepository userRepository,
+                       DateCheckRepository dateCheckRepository) {
         this.postRepository = postRepository;
         this.challengeRepository = challengeRepository;
         this.commentRepository = commentRepository;
         this.imageFileService = imageFileService;
+        this.userRepository = userRepository;
+        this.dateCheckRepository = dateCheckRepository;
     }
 
     @Transactional
     public ResponseEntity<?> writePost(Long challengeId,
                                        PostRequestDto requestDto,
                                        MultipartFile multipartFile,
-                                       PrincipalDetails principalDetails) throws IOException {
+                                       PrincipalDetails principalDetails) throws IOException, ParseException {
+
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NullPointerException("챌린지가 존재하지 않습니다.")
         );
+
+        Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        if(postRepository.count()>0){
+            Post recentPost = postRepository.findTop1ByOrderByCreatedAtDesc();
+            String recentPostTime = dateFormat.format(java.sql.Timestamp.valueOf(recentPost.getCreatedAt()));
+            String nowTime = dateFormat.format(now);
+
+            if(nowTime.equals(recentPostTime)) {
+                throw new IllegalArgumentException("오늘은 이미 인증을 마쳤습니다.");
+            }
+        }
 
         Post post = postRepository.save(requestDto.toEntity(challenge, principalDetails.getUser()));
 
         ImageFile imageFile = imageFileService.upload(multipartFile, post);
 
         post.setImageFile(imageFile);
+        User user = userRepository.findByEmail(principalDetails.getUsername()).orElseThrow(()-> new NotFoundException("존재하지 않는 사용자입니다"));
 
+        user.setRankingPoint(user.getRankingPoint()+1);
+        //cerificatePost(user, post);
         return ResponseEntity.ok(post.toResponse());
     }
+
+//    public void cerificatePost(User user, Post post){
+//
+//        DateCheck dateCheck = new DateCheck(post.getCreatedAt());
+//        dateCheckRepository.save(dateCheck);
+//    }
 
     @Transactional
     public void deletePost(Long postId, PrincipalDetails principalDetails) {

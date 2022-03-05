@@ -5,6 +5,7 @@ import com.example.shortform.domain.*;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
+import com.example.shortform.dto.ResponseDto.ReportResponseDto;
 import com.example.shortform.dto.resonse.MemberResponseDto;
 
 import com.example.shortform.exception.DuplicateException;
@@ -110,6 +111,24 @@ public class ChallengeService {
         challenge.setUser(user);
 
 
+    }
+
+
+    public ReportResponseDto successDate(Long challengeId) throws ParseException {
+
+        ReportResponseDto responseDto = new ReportResponseDto();
+        List<String> successDate = new ArrayList<>();
+
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()->new NotFoundException("존재하지 않는 챌린지입니다."));
+        List<Post> posts = challenge.getPosts();
+
+        for(Post p:posts){
+            Date postDate =java.sql.Timestamp.valueOf(p.getCreatedAt());
+            successDate.add(postDate.toString());
+        }
+        responseDto.setSuccessDates(successDate);
+
+        return responseDto;
     }
 
     public String challengeStatus(Challenge challenge) throws ParseException {

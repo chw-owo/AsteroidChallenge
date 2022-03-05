@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 @RestController
 public class PostController {
@@ -24,7 +25,7 @@ public class PostController {
     public ResponseEntity<?> writePost(@PathVariable Long challengeId,
                                        @RequestPart(value = "postImage",required = false) MultipartFile multipartFile,
                                        @RequestPart("post") PostRequestDto requestDto,
-                                       @AuthenticationPrincipal PrincipalDetails principalDetails) throws IOException {
+                                       @AuthenticationPrincipal PrincipalDetails principalDetails) throws IOException, ParseException {
         if (principalDetails != null) {
             return postService.writePost(challengeId, requestDto, multipartFile, principalDetails);
         } else{
