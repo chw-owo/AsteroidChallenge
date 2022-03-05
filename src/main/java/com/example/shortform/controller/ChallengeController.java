@@ -9,6 +9,7 @@ import com.example.shortform.dto.ResponseDto.ChallengeIdResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
 import com.example.shortform.dto.ResponseDto.TagResponseDto;
+import com.example.shortform.exception.InternalServerException;
 import com.example.shortform.service.ChallengeService;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class ChallengeController {
     @PostMapping(value= "/challenge")
     public void postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
                                               @AuthenticationPrincipal PrincipalDetails principal,
-                                              @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException {
+                                              @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException {
         challengeService.postChallenge(requestDto, principal, multipartFiles);
     }
 //     @PostMapping("/challenge")
@@ -48,12 +49,12 @@ public class ChallengeController {
 //     }
 
     @GetMapping("/challenge")
-    public List<ChallengesResponseDto> getChallenges() throws ParseException {
+    public List<ChallengesResponseDto> getChallenges() throws ParseException, InternalServerException {
         return challengeService.getChallenges();
     }
 
     @GetMapping("/challenge/{challengeId}")
-    public ChallengeResponseDto getChallenge(@PathVariable Long challengeId) throws Exception {
+    public ChallengeResponseDto getChallenge(@PathVariable Long challengeId) throws Exception, InternalServerException {
         return challengeService.getChallenge(challengeId);
     }
   
@@ -63,12 +64,12 @@ public class ChallengeController {
 //     }
 
     @GetMapping("/challenge/category/{categoryId}")
-    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Category categoryId ) throws ParseException {
+    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Category categoryId ) throws ParseException, InternalServerException {
         return challengeService.getCategoryChallenge(categoryId);
     }
 
     @GetMapping("/challenge/search")
-    public List<ChallengesResponseDto> getKeywordChallenge(@RequestParam("keyword") String keyword) throws ParseException {
+    public List<ChallengesResponseDto> getKeywordChallenge(@RequestParam("keyword") String keyword) throws ParseException, InternalServerException {
         return challengeService.getKeywordChallenge(keyword);
     }
 

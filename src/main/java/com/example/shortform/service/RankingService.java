@@ -16,13 +16,13 @@ public class RankingService {
     private final UserRepository userRepository;
 
     //test
-//    public int setRanking(RankingRequestDto requestDto) {
-//        User user = userRepository.findByNickname(requestDto.getNickname()).orElseThrow(()->new IllegalArgumentException());
-//        int point = requestDto.getRankingPoint();
-//        user.setRankingPoint(point);
-//        userRepository.save(user);
-//        return user.getRankingPoint();
-//    }
+    public int setRanking(RankingRequestDto requestDto) {
+        User user = userRepository.findByNickname(requestDto.getNickname()).orElseThrow(()->new IllegalArgumentException());
+        int point = requestDto.getRankingPoint();
+        user.setRankingPoint(point);
+        userRepository.save(user);
+        return user.getRankingPoint();
+    }
 
     public List<RankingResponseDto> getRanking(){
 
