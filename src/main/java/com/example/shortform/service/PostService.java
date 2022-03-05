@@ -59,6 +59,7 @@ public class PostService {
                 () -> new NullPointerException("챌린지가 존재하지 않습니다.")
         );
 
+        //인증 게시글은 하루에 하나만==================================================
         Date now = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -71,6 +72,7 @@ public class PostService {
                 throw new IllegalArgumentException("오늘은 이미 인증을 마쳤습니다.");
             }
         }
+        //============================================================================
 
         Post post = postRepository.save(requestDto.toEntity(challenge, principalDetails.getUser()));
 
