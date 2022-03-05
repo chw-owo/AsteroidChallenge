@@ -1,5 +1,6 @@
 package com.example.shortform.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Objects;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -46,11 +48,11 @@ public class GlobalExceptionHandler {
                 HttpStatus.valueOf(e.getErrorCode().getStatus()));
     }
 
-    @ExceptionHandler(InternalServerException.class)
+    /*@ExceptionHandler(InternalServerException.class)
     public ResponseEntity<ErrorResponse> handleInternalServerException(InternalServerException e) {
         return new ResponseEntity<>(new ErrorResponse(e.getErrorCode(), e.getMessage()),
                 HttpStatus.valueOf(e.getErrorCode().getStatus()));
-    }
+    }*/
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException e) {
