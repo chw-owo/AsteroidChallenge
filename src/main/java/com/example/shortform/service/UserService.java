@@ -68,10 +68,10 @@ public class UserService {
 
         //test
         //========================================================
-//        if(!levelRepository.findById(1L).isPresent()){
-//            Level level_tmp = new Level("temp level");
-//            levelRepository.save(level_tmp);
-//        }
+        if(!levelRepository.findById(1L).isPresent()){
+            Level level_tmp = new Level("temp level");
+            levelRepository.save(level_tmp);
+        }
         //========================================================
 
 

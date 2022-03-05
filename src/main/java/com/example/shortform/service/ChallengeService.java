@@ -5,26 +5,34 @@ import com.example.shortform.domain.*;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
+import com.example.shortform.dto.ResponseDto.ReportResponseDto;
 import com.example.shortform.dto.resonse.MemberResponseDto;
 
 import com.example.shortform.exception.DuplicateException;
+
+import com.example.shortform.exception.InternalServerException;
+
 import com.example.shortform.exception.ForbiddenException;
 import com.example.shortform.exception.InvalidException;
+
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.CategoryRepository;
 import com.example.shortform.repository.ChallengeRepository;
 import com.example.shortform.repository.TagChallengeRepository;
 import com.example.shortform.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
+import org.omg.CORBA.DynAnyPackage.Invalid;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.transaction.Transactional;
+import java.awt.*;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 import com.example.shortform.dto.request.ChallengeModifyRequestDto;
 import com.example.shortform.dto.request.PasswordDto;
@@ -53,23 +61,27 @@ public class ChallengeService {
     @Transactional
     public void postChallenge(ChallengeRequestDto requestDto,
                                               PrincipalDetails principal,
-                                            List<MultipartFile> multipartFiles) throws IOException {
+                                            List<MultipartFile> multipartFiles) throws IOException, InternalServerException {
 
         // 카테고리 받아오기
+
         Category category = categoryRepository.findByName(requestDto.getCategory());
 
         // 태그 저장하기
         List<TagChallenge> tagChallenges = new ArrayList<>();
-        Challenge challenge =  new Challenge(requestDto, category);
+        Challenge challenge = new Challenge(requestDto, category);
         List<String> tagStrings = requestDto.getTagName();
-        for(String tagString:tagStrings){
+
+        for (String tagString : tagStrings) {
             Tag tag = new Tag(tagString);
             tagRepository.save(tag);
 
             TagChallenge tagChallenge = new TagChallenge(challenge, tag);
-            if (!tagChallenges.contains(tagChallenge)){ // 한 게시물 내부의 중복태그 방지
+            if (!tagChallenges.contains(tagChallenge)) { // 한 게시물 내부의 중복태그 방지
                 tagChallenges.add(tagChallenge);
                 tagChallengeRepository.save(tagChallenge);
+            } else {
+                throw new DuplicateException("중복된 태그는 사용할 수 없습니다.");
             }
         }
         challenge.setTagChallenges(tagChallenges);
@@ -78,7 +90,7 @@ public class ChallengeService {
         challengeRepository.save(challenge);
 
         // 방 비밀번호 암호화
-        if (requestDto.getPassword() != null){
+        if (requestDto.getPassword() != null) {
             String encPassword = passwordEncoder.encode(requestDto.getPassword());
             challenge.setPassword(encPassword);
         }
@@ -87,39 +99,42 @@ public class ChallengeService {
 
         List<ImageFile> imageFileList = new ArrayList<>();
         List<String> challengeImages = new ArrayList<>();
-        for(MultipartFile m : multipartFiles){
+        if (multipartFiles.isEmpty()) {
+            throw new InternalServerException("한장 이상의 이미지를 업로드 해야합니다.");
+        }
+        for (MultipartFile m : multipartFiles) {
             ImageFile imageFileUpload = imageFileService.upload(m, challenge);
             imageFileList.add(imageFileUpload);
             challengeImages.add(imageFileUpload.getFilePath());
         }
         challenge.setChallengeImage(imageFileList);
 
-        User user = userRepository.findByEmail(principal.getUsername()).orElseThrow(()->new IllegalArgumentException());
+        User user = userRepository.findByEmail(principal.getUsername()).orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
         challenge.setUser(user);
-        UserChallenge userChallenge = new UserChallenge(challenge ,user);
+        UserChallenge userChallenge = new UserChallenge(challenge, user);
         userChallengeRepository.save(userChallenge);
         challenge.setUser(user);
 
 
-        //ChallengeResponseDto responseDto = new ChallengeResponseDto(challenge,challengeImages);
-
-
     }
-  
-//     public ResponseEntity<?> createChallenge(List<MultipartFile> multipartFileList, ChallengeRequestDto requestDto) throws IOException {
-//         Category category = categoryRepository.save(requestDto.toCategory());
-//         Challenge challenge = challengeRepository.save(requestDto.toEntity(category));
-//         List<String> tagNameList = requestDto.getTagName();
-//         for (String s : tagNameList) {
-//             Tag tag = new Tag(s);
-//             tagRepository.save(tag);
-//             tagChallengeRepository.save(new TagChallenge(challenge, tag));
-//         }
 
-//        List<ImageFile> imageFileList = imageFileService.uploadImage(multipartFileList, challenge);
-//        challenge.setImageFiles(imageFileList);
-//        return ResponseEntity.ok(challenge.toResponse());
-//    }
+
+    public ReportResponseDto successDate(Long challengeId) throws ParseException {
+
+        ReportResponseDto responseDto = new ReportResponseDto();
+        List<String> successDate = new ArrayList<>();
+
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()->new NotFoundException("존재하지 않는 챌린지입니다."));
+        List<Post> posts = challenge.getPosts();
+
+        for(Post p:posts){
+            Date postDate =java.sql.Timestamp.valueOf(p.getCreatedAt());
+            successDate.add(postDate.toString());
+        }
+        responseDto.setSuccessDates(successDate);
+
+        return responseDto;
+    }
 
     public String challengeStatus(Challenge challenge) throws ParseException {
         Date now = new Date();
@@ -141,7 +156,7 @@ public class ChallengeService {
         }
     }
 
-    public List<ChallengesResponseDto> getChallenges() throws ParseException {
+    public List<ChallengesResponseDto> getChallenges() throws ParseException, InternalServerException {
         List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAt();
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
 
@@ -149,6 +164,9 @@ public class ChallengeService {
         for(Challenge challenge: challenges){
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles =  challenge.getChallengeImage();
+//            if(ImageFiles.isEmpty()){
+//                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
+//            }
             for(ImageFile image:ImageFiles){
                 challengeImages.add(image.getFilePath());
             }
@@ -162,11 +180,14 @@ public class ChallengeService {
         return challengesResponseDtos;
     }
 
-    public ChallengeResponseDto getChallenge(Long challengeId) throws Exception {
-        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new Exception());
+    public ChallengeResponseDto getChallenge(Long challengeId) throws Exception, InternalServerException {
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new NotFoundException("존재하지 않는 챌린지입니다."));
         List<String> challengeImage = new ArrayList<>();
 
         List<ImageFile> ImageFiles = challenge.getChallengeImage();
+//        if(ImageFiles.isEmpty()){
+//            throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
+//        }
         for (ImageFile image : ImageFiles) {
             challengeImage.add(image.getFilePath());
         }
@@ -180,52 +201,22 @@ public class ChallengeService {
         String status = challengeStatus(challenge);
 
         ChallengeResponseDto challengeResponseDtos = new ChallengeResponseDto(challenge, challengeImage);
-         challengeResponseDtos.setMembers(memberList);
+        challengeResponseDtos.setMembers(memberList);
         challengeResponseDtos.setStatus(status);
         return challengeResponseDtos;
     }
 
-//   @Transactional
-//     public ResponseEntity<?> getChallenge(Long challengeId) {
-//         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
-//                 () -> new NullPointerException("찾는 챌린지가 존재하지 않습니다.")
-//         );
 
-//         List<TagChallenge> tagChallengeList = tagChallengeRepository.findAllByChallenge(challenge);
-//         List<TagNameResponseDto> tagNameList = new ArrayList<>();
-
-//         for (TagChallenge tagChallenge : tagChallengeList) {
-//             TagNameResponseDto responseDto = tagChallenge.getTag().toResponse();
-//             tagNameList.add(responseDto);
-//         }
-
-//         List<UserChallenge> userChallengeList = userChallengeRepository.findAllByChallenge(challenge);
-//         List<MemberResponseDto> memberList = new ArrayList<>();
-
-//         for (UserChallenge userChallenge : userChallengeList) {
-//             memberList.add(userChallenge.getUser().toMemberResponse());
-//         }
-
-//         List<ImageFile> imageFileList = imageFileRepository.findAllByChallenge(challenge);
-//         List<String> imagePathList = new ArrayList<>();
-//         for (ImageFile imageFile : imageFileList) {
-//             imagePathList.add(imageFile.getFilePath());
-//         }
-
-//         ChallengeResponseDto challengeResponseDto = challenge.toResponse(tagNameList, memberList, imagePathList);
-//         return ResponseEntity.ok(challengeResponseDto);
-//     }
-
-    public List<ChallengesResponseDto> getCategoryChallenge(Category categoryId) throws ParseException {
-        List<Challenge> challenges = challengeRepository.findAll();
+    public List<ChallengesResponseDto> getCategoryChallenge(Category categoryId) throws ParseException, InternalServerException {
+        List<Challenge> challenges = challengeRepository.findAllByCategoryId(categoryId);
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
-
-
-
 
         for(Challenge challenge: challenges){
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles =  challenge.getChallengeImage();
+//            if(ImageFiles.isEmpty()){
+//                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
+//            }
             for(ImageFile image:ImageFiles){
                 challengeImages.add(image.getFilePath());
             }
@@ -241,16 +232,16 @@ public class ChallengeService {
         return ChallengesResponseDtos;
     }
 
-    public List<ChallengesResponseDto> getKeywordChallenge(String keyword) throws ParseException {
+    public List<ChallengesResponseDto> getKeywordChallenge(String keyword) throws ParseException, InternalServerException {
         List<Challenge> challenges = challengeRepository.findAll();
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
-
-
-
 
         for(Challenge c: challenges) {
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles = c.getChallengeImage();
+//            if(ImageFiles.isEmpty()){
+//                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
+//            }
             for (ImageFile image : ImageFiles) {
                 challengeImages.add(image.getFilePath());
             }

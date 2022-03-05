@@ -6,11 +6,13 @@ import com.example.shortform.domain.User;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
 public class PostRequestDto {
     private String content;
 
