@@ -6,38 +6,25 @@ import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
 import com.example.shortform.dto.ResponseDto.ReportResponseDto;
+import com.example.shortform.dto.request.ChallengeModifyRequestDto;
+import com.example.shortform.dto.request.PasswordDto;
+import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.dto.resonse.MemberResponseDto;
-
-import com.example.shortform.exception.DuplicateException;
-
-import com.example.shortform.exception.InternalServerException;
-
-import com.example.shortform.exception.ForbiddenException;
-import com.example.shortform.exception.InvalidException;
-
-import com.example.shortform.exception.NotFoundException;
-import com.example.shortform.repository.CategoryRepository;
-import com.example.shortform.repository.ChallengeRepository;
-import com.example.shortform.repository.TagChallengeRepository;
-import com.example.shortform.repository.TagRepository;
+import com.example.shortform.exception.*;
+import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.omg.CORBA.DynAnyPackage.Invalid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.transaction.Transactional;
-import java.awt.*;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-
-import com.example.shortform.dto.request.ChallengeModifyRequestDto;
-import com.example.shortform.dto.request.PasswordDto;
-import com.example.shortform.repository.*;
-import org.springframework.http.ResponseEntity;
 
 
 @Service
@@ -138,7 +125,7 @@ public class ChallengeService {
 
     public String challengeStatus(Challenge challenge) throws ParseException {
         Date now = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
         Date startDate = dateFormat.parse(challenge.getStartDate());
         Date endDate = dateFormat.parse(challenge.getEndDate());
 
@@ -367,4 +354,23 @@ public class ChallengeService {
         }
     }
 
+    public ResponseEntity<CMResponseDto> deleteChallenge(Long challengeId, PrincipalDetails principalDetails) throws ParseException {
+
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
+                () -> new NotFoundException("찿는 챌린지가 존재하지 않습니다.")
+        );
+
+        // 방장 아닐 경우
+        if (!principalDetails.getUser().getId().equals(challenge.getUser().getId()))
+            throw new InvalidException("방장만 삭제할 수 있습니다.");
+
+        // 모집중이 아닐 경우
+        if (!"모집중".equals(challengeStatus(challenge)))
+            throw new InvalidException("모집기간일 때만 삭제할 수 있습니다.");
+
+        // 해당 챌린지 삭제
+        challengeRepository.delete(challenge);
+
+        return ResponseEntity.ok(new CMResponseDto("true"));
+    }
 }

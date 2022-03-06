@@ -6,7 +6,9 @@ import com.example.shortform.domain.Challenge;
 import com.example.shortform.dto.RequestDto.CategoryRequestDto;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
 import com.example.shortform.dto.ResponseDto.*;
+import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.exception.InternalServerException;
+import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.service.ChallengeService;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.RequiredArgsConstructor;
@@ -126,6 +128,15 @@ public class ChallengeController {
 //            throw new NullPointerException("로그인 후 이용가능합니다.");
 //        }
 
+    }
+
+    @DeleteMapping("/challenge/{challengeId}")
+    public ResponseEntity<CMResponseDto> deleteChallenge(@PathVariable Long challengeId,
+                                                         @AuthenticationPrincipal PrincipalDetails principalDetails) throws ParseException {
+        if (principalDetails != null)
+            return challengeService.deleteChallenge(challengeId, principalDetails);
+        else
+            throw new NotFoundException("로그인 후 이용가능합니다.");
     }
 }
 
