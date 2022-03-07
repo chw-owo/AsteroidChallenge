@@ -95,6 +95,7 @@ public class Challenge extends Timestamped{
         this.endDate=requestDto.getEndDate();
         this.isPrivate=requestDto.getIsPrivate();
         this.password=requestDto.getPassword();
+        this.currentMember = 1; // 참가인원 방장 포함
     }
 
     @ManyToOne

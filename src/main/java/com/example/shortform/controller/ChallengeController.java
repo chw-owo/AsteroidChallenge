@@ -36,10 +36,10 @@ public class ChallengeController {
     //for test
 
     @PostMapping(value = "/challenge")
-    public void postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
-                              @AuthenticationPrincipal PrincipalDetails principal,
-                              @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException {
-        challengeService.postChallenge(requestDto, principal, multipartFiles);
+    public ResponseEntity<CMResponseDto> postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
+                                                       @AuthenticationPrincipal PrincipalDetails principal,
+                                                       @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException {
+        return challengeService.postChallenge(requestDto, principal, multipartFiles);
     }
 //     @PostMapping("/challenge")
 //     public ResponseEntity<?> createChallenge(@RequestPart(value = "imageFile", required = false) List<MultipartFile> multipartFileList,
@@ -109,9 +109,9 @@ public class ChallengeController {
     }
 
     @DeleteMapping("/challenge/{challengeId}/user")
-    public void cancelChallenge(@PathVariable Long challengeId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public ResponseEntity<CMResponseDto> cancelChallenge(@PathVariable Long challengeId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         if (principalDetails != null) {
-            challengeService.cancelChallenge(challengeId, principalDetails);
+            return challengeService.cancelChallenge(challengeId, principalDetails);
         } else {
             throw new NullPointerException("로그인 후 이용가능합니다.");
         }

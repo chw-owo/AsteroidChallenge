@@ -46,7 +46,7 @@ public class ChallengeService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public void postChallenge(ChallengeRequestDto requestDto,
+    public ResponseEntity<CMResponseDto> postChallenge(ChallengeRequestDto requestDto,
                                               PrincipalDetails principal,
                                             List<MultipartFile> multipartFiles) throws IOException, InternalServerException {
 
@@ -102,7 +102,7 @@ public class ChallengeService {
         userChallengeRepository.save(userChallenge);
         challenge.setUser(user);
 
-
+        return ResponseEntity.ok(new CMResponseDto("true"));
     }
 
 
@@ -304,7 +304,7 @@ public class ChallengeService {
     }
 
     @Transactional
-    public void cancelChallenge(Long challengeId, PrincipalDetails principalDetails) {
+    public ResponseEntity<CMResponseDto> cancelChallenge(Long challengeId, PrincipalDetails principalDetails) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("찿는 챌린지가 존재하지 않습니다.")
         );
@@ -315,9 +315,12 @@ public class ChallengeService {
         if (userChallenge != null){
             userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(),challengeId);
             user.setRankingPoint(user.getRankingPoint() - 50);
+            challenge.setCurrentMember(challenge.getCurrentMember() - 1);
         } else {
             throw new ForbiddenException("참가하지 않은 챌린지입니다.");
         }
+
+        return ResponseEntity.ok(new CMResponseDto("true"));
     }
 
     
