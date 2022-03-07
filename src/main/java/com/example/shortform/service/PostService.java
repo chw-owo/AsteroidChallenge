@@ -1,16 +1,17 @@
 package com.example.shortform.service;
 
 import com.example.shortform.config.auth.PrincipalDetails;
-import com.example.shortform.domain.*;
+import com.example.shortform.domain.Challenge;
+import com.example.shortform.domain.Comment;
+import com.example.shortform.domain.ImageFile;
+import com.example.shortform.domain.Post;
 import com.example.shortform.dto.request.PostRequestDto;
 import com.example.shortform.dto.resonse.CommentResponseDto;
 import com.example.shortform.dto.resonse.PostResponseDto;
-import com.example.shortform.exception.ForbiddenException;
-import com.example.shortform.exception.NotFoundException;
-import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.repository.ChallengeRepository;
 import com.example.shortform.repository.CommentRepository;
 import com.example.shortform.repository.PostRepository;
+import com.example.shortform.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -28,6 +32,9 @@ public class PostService {
     private final ChallengeRepository challengeRepository;
     private final CommentRepository commentRepository;
     private final ImageFileService imageFileService;
+    private final UserRepository userRepository;
+    private final DateCheckRepository dateCheckRepository;
+
 
     @Autowired
     public PostService(PostRepository postRepository,
@@ -38,29 +45,48 @@ public class PostService {
         this.challengeRepository = challengeRepository;
         this.commentRepository = commentRepository;
         this.imageFileService = imageFileService;
+        this.userRepository = userRepository;
+        this.dateCheckRepository = dateCheckRepository;
     }
 
     @Transactional
     public ResponseEntity<?> writePost(Long challengeId,
                                        PostRequestDto requestDto,
                                        MultipartFile multipartFile,
-                                       PrincipalDetails principalDetails) throws IOException {
+                                       PrincipalDetails principalDetails) throws IOException, ParseException {
+
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
 
-        User user = principalDetails.getUser();
+        Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        if(postRepository.count()>0){
+            Post recentPost = postRepository.findTop1ByOrderByCreatedAtDesc();
+            String recentPostTime = dateFormat.format(java.sql.Timestamp.valueOf(recentPost.getCreatedAt()));
+            String nowTime = dateFormat.format(now);
+
+            if(nowTime.equals(recentPostTime)) {
+                throw new IllegalArgumentException("오늘은 이미 인증을 마쳤습니다.");
+            }
+        }
+
 
         Post post = postRepository.save(requestDto.toEntity(challenge, principalDetails.getUser()));
 
         ImageFile imageFile = imageFileService.upload(multipartFile, post);
 
         post.setImageFile(imageFile);
+        User user = userRepository.findByEmail(principalDetails.getUsername()).orElseThrow(()-> new NotFoundException("존재하지 않는 사용자입니다"));
 
-        user.setPoint(user.getRankingPoint() + 1);
+
+        user.setRankingPoint(user.getRankingPoint()+1);
 
         return ResponseEntity.ok(post.toResponse());
     }
+
+
 
     @Transactional
     public void deletePost(Long postId, PrincipalDetails principalDetails) {
@@ -84,9 +110,7 @@ public class PostService {
                 () -> new NotFoundException("인증 게시글이 존재하지 않습니다.")
         );
 
-        if (multipartFile != null) {
-            ImageFile imageFile = imageFileService.upload(multipartFile, post);
-        }
+        ImageFile imageFile = imageFileService.upload(multipartFile, post);
 
         if (!principalDetails.getUser().getId().equals(post.getUser().getId())) {
             throw new ForbiddenException("작성자만 수정할 수 있습니다.");

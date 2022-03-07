@@ -40,8 +40,8 @@ public class UserApiController {
 
     // 닉네임 중복체크
     @PostMapping("/auth/nickname-check")
-    public ResponseEntity<CMResponseDto> nicknameCheck(@RequestBody @Valid SignupRequestDto signupRequestDto) {
-        return userService.nicknameCheck(signupRequestDto);
+    public ResponseEntity<CMResponseDto> nicknameCheck(@RequestBody @Valid NickNameRequestDto nickNameRequestDto) {
+        return userService.nicknameCheck(nickNameRequestDto);
     }
 
     // 이메일 인증 확인
@@ -85,7 +85,7 @@ public class UserApiController {
     // 비밀번호 확인
     @PostMapping("/users/password-check")
     public ResponseEntity<CMResponseDto> passwordCheck(@AuthenticationPrincipal PrincipalDetails principalDetails,
-                                                       @RequestBody @Valid SigninRequestDto requestDto) {
+                                                       @RequestBody @Valid UserPasswordRequestDto requestDto) {
 
         // PrincipalDetails는 상태값이 디테치드 상태, 영속화 되어있지는 않음
         // 아무리 변경하더라도 변경을 감지 하지 않음

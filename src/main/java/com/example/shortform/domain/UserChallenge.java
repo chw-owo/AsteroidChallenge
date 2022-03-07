@@ -3,11 +3,13 @@ package com.example.shortform.domain;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.*;
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @Entity
 public class UserChallenge extends Timestamped{
     @Id
@@ -22,6 +24,7 @@ public class UserChallenge extends Timestamped{
     @ManyToOne
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
+
 
     public UserChallenge(Challenge challenge, User user) {
         this.challenge = challenge;

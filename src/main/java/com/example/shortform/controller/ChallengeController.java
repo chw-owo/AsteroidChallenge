@@ -5,6 +5,10 @@ import com.example.shortform.domain.Category;
 import com.example.shortform.domain.Challenge;
 import com.example.shortform.dto.RequestDto.CategoryRequestDto;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
+import com.example.shortform.dto.ResponseDto.*;
+import com.example.shortform.dto.resonse.CMResponseDto;
+import com.example.shortform.exception.InternalServerException;
+import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.dto.ResponseDto.ChallengeIdResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
@@ -36,11 +40,11 @@ public class ChallengeController {
 
     //for test
 
-    @PostMapping(value= "/challenge")
-    public ChallengeResponseDto postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
-                                              @AuthenticationPrincipal PrincipalDetails principal,
-                                              @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException {
-        return challengeService.postChallenge(requestDto, principal, multipartFiles);
+    @PostMapping(value = "/challenge")
+    public void postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
+                              @AuthenticationPrincipal PrincipalDetails principal,
+                              @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException {
+        challengeService.postChallenge(requestDto, principal, multipartFiles);
     }
 //     @PostMapping("/challenge")
 //     public ResponseEntity<?> createChallenge(@RequestPart(value = "imageFile", required = false) List<MultipartFile> multipartFileList,
@@ -49,27 +53,27 @@ public class ChallengeController {
 //     }
 
     @GetMapping("/challenge")
-    public List<ChallengesResponseDto> getChallenges() throws ParseException {
+    public List<ChallengesResponseDto> getChallenges() throws ParseException, InternalServerException {
         return challengeService.getChallenges();
     }
 
     @GetMapping("/challenge/{challengeId}")
-    public ChallengeResponseDto getChallenge(@PathVariable Long challengeId) throws Exception {
+    public ChallengeResponseDto getChallenge(@PathVariable Long challengeId) throws Exception, InternalServerException {
         return challengeService.getChallenge(challengeId);
     }
-  
+
 //     @GetMapping("/challenge/{challengeId}")
 //     public ResponseEntity<?> getChallenge(@PathVariable Long challengeId) {
 //         return challengeService.getChallenge(challengeId);
 //     }
 
     @GetMapping("/challenge/category/{categoryId}")
-    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Category categoryId ) throws ParseException {
+    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Category categoryId) throws ParseException, InternalServerException {
         return challengeService.getCategoryChallenge(categoryId);
     }
 
     @GetMapping("/challenge/search")
-    public List<ChallengesResponseDto> getKeywordChallenge(@RequestParam("keyword") String keyword) throws ParseException {
+    public List<ChallengesResponseDto> getKeywordChallenge(@RequestParam("keyword") String keyword) throws ParseException, InternalServerException {
         return challengeService.getKeywordChallenge(keyword);
     }
 
@@ -118,4 +122,25 @@ public class ChallengeController {
         }
     }
 
+    @GetMapping("/challenge/{challengeId}/report")
+    public ReportResponseDto successDate(@PathVariable Long challengeId) throws ParseException {// @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        //if (principalDetails != null) {
+        return challengeService.successDate(challengeId);
+//            HashMap<String, Object> result = new HashMap<>();
+//            result.put("result", "true");
+//            return result;
+//        } else {
+//            throw new NullPointerException("로그인 후 이용가능합니다.");
+//        }
+
+    }
+
+    @DeleteMapping("/challenge/{challengeId}")
+    public ResponseEntity<CMResponseDto> deleteChallenge(@PathVariable Long challengeId,
+                                                         @AuthenticationPrincipal PrincipalDetails principalDetails) throws ParseException {
+        if (principalDetails != null)
+            return challengeService.deleteChallenge(challengeId, principalDetails);
+        else
+            throw new NotFoundException("로그인 후 이용가능합니다.");
+    }
 }

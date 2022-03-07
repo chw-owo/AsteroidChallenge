@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findAllByChallengeId(Long challengeId);
+
+    Post findTop1ByOrderByCreatedAtDesc();
 }

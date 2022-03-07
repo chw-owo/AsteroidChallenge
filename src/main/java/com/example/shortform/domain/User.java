@@ -104,16 +104,13 @@ public class User extends Timestamped{
         this.rankingPoint = point;
     }
 
+
     public MemberResponseDto toMemberResponse() {
         return MemberResponseDto.builder()
                 .userId(id)
                 .nickname(nickname)
                 .profileImage(profileImage)
                 .build();
-    }
-
-    public void setPoint(int point) {
-        this.rankingPoint = point;
     }
 
     public Object getRole() {
