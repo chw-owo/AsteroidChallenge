@@ -130,4 +130,10 @@ public class JwtAuthenticationProvider implements InitializingBean{
             return e.getClaims();
         }
     }
+
+    public String getUser(String token) {
+        UserDetails userDetails = principalDetailsService
+                .loadUserByUsername(getClaims(token).get("email").toString());
+        return userDetails.getUsername();
+    }
 }

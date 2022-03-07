@@ -57,7 +57,7 @@ public class PostService {
 
         post.setImageFile(imageFile);
 
-        user.setPoint(user.getPoint() + 1);
+        user.setPoint(user.getRankingPoint() + 1);
 
         return ResponseEntity.ok(post.toResponse());
     }

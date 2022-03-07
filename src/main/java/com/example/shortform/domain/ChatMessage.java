@@ -13,17 +13,20 @@ import javax.persistence.*;
 @Getter
 @Entity
 public class ChatMessage extends Timestamped{
+    public enum MessageType{
+        ENTER,
+        TALK,
+        QUIT
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "message_type", nullable = false)
-    private MessageType messageType;
-
     @Column(name = "content", nullable = false)
     private String content;
+
+    private MessageType type;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -32,5 +35,8 @@ public class ChatMessage extends Timestamped{
     @ManyToOne
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
+
+    @Column(name = "room_id", nullable = false)
+    private String roomId;
 
 }

@@ -84,6 +84,9 @@ public class Challenge extends Timestamped{
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<UserChallenge> memberList = new ArrayList<>();
 
+    @OneToOne(mappedBy = "challenge", orphanRemoval = true)
+    private ChatRoom chatRoom;
+
 
     public Challenge(ChallengeRequestDto requestDto, Category category){
         this.title=requestDto.getTitle();
