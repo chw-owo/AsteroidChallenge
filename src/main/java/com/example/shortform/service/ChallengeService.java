@@ -283,7 +283,28 @@ public class ChallengeService {
         );
 
         if (principalDetails.getUser().getId().equals(challenge.getUser().getId())) {
-            List<ImageFile> imageFileList = imageFileService.uploadImage(multipartFileList, challenge);
+
+            // 기존 이미지가 있을 경우
+            if (requestDto.getImage() != null) {
+
+                // 해당 챌린지에 있는 이미지 중에서 받아온 기존이미지 말고는 다 삭제해주기
+                for (ImageFile imageFile : challenge.getChallengeImage()) {
+                    boolean isEmpty = true;
+                    for (String imageUrl : requestDto.getImage()) {
+                        if (imageFile.getFilePath().equals(imageUrl)) {
+                            isEmpty = false;
+                            break;
+                        }
+                    }
+
+                    if (isEmpty)
+                        imageFileRepository.deleteById(imageFile.getId()); // TODO S3에서도 삭제하기
+                }
+            }
+
+            // 수정할 이미지가 있으면 challenge 에서 image 가져오기
+            if (multipartFileList != null)
+                imageFileService.uploadImage(multipartFileList, challenge);
 
             challenge.update(requestDto);
 
