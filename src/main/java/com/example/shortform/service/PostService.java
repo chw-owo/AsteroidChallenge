@@ -107,11 +107,12 @@ public class PostService {
                 () -> new NotFoundException("인증 게시글이 존재하지 않습니다.")
         );
 
-        ImageFile imageFile = imageFileService.upload(multipartFile, post);
-
         if (!principalDetails.getUser().getId().equals(post.getUser().getId())) {
             throw new ForbiddenException("작성자만 수정할 수 있습니다.");
         }
+
+        if (multipartFile != null)
+            imageFileService.upload(multipartFile, post);
 
         post.update(requestDto);
 
