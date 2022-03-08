@@ -94,11 +94,15 @@ public class UserApiController {
     }
 
     // 회원 프로필 수정
-    @PutMapping("/users/{userId}")
+    @PatchMapping("/users/{userId}")
     public ResponseEntity<CMResponseDto> updateProfile(@PathVariable Long userId,
-                                                       @RequestPart("profile") @Valid ProfileRequestDto requestDto,
-                                                       @RequestPart(value = "profileImage", required = false) MultipartFile multipartFile) throws IOException {
-        return userService.updateProfile(userId, requestDto, multipartFile);
+                                                       @RequestPart("profile") ProfileRequestDto requestDto,
+                                                       @RequestPart(value = "profileImage", required = false) MultipartFile multipartFile,
+                                                       @AuthenticationPrincipal PrincipalDetails principalDetails) throws IOException {
+        if (principalDetails == null)
+            throw new NotFoundException("존재하지 않는 유저입니다.");
+
+        return userService.updateProfile(userId, requestDto, multipartFile, principalDetails);
     }
 
     // 유저 정보 조회
