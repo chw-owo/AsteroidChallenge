@@ -24,7 +24,7 @@ public class ImageFile {
     @Column(name = "converted_file_name")
     private String convertedFileName;
 
-    @Column(name = "file_path")
+    @Column(name = "file_path", columnDefinition = "TEXT")
     private String filePath;
 
     @Column(name = "file_size")

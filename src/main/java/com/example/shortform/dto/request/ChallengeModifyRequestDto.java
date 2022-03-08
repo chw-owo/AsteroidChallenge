@@ -16,4 +16,5 @@ public class ChallengeModifyRequestDto {
     private String content;
     private String category;
     private List<String> tagName;
+    private List<String> image;
 }
