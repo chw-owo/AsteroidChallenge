@@ -17,6 +17,9 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
+import java.time.LocalDate;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -55,19 +58,23 @@ public class PostService {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
-      
-        Date now = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        //인증 게시글은 하루에 하나만==================================================
+        LocalDate now = LocalDate.now();
 
         if(postRepository.count()>0){
-            Post recentPost = postRepository.findTop1ByOrderByCreatedAtDesc();
-            String recentPostTime = dateFormat.format(java.sql.Timestamp.valueOf(recentPost.getCreatedAt()));
-            String nowTime = dateFormat.format(now);
+            List<Post> Posts = postRepository.findAllByUser(principalDetails.getUser());
 
-            if(nowTime.equals(recentPostTime)) {
-                throw new IllegalArgumentException("오늘은 이미 인증을 마쳤습니다.");
+            for(Post p: Posts){
+                LocalDate postTime = p.getCreatedAt().toLocalDate();
+                if(now.equals(postTime) && p.getChallenge().getId().equals(challengeId)) {
+                    throw new IllegalArgumentException("인증은 하루에 1회만 가능합니다.");
+                }
             }
         }
+        //============================================================================
+
+
 
 
         Post post = postRepository.save(requestDto.toEntity(challenge, principalDetails.getUser()));

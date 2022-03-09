@@ -1,8 +1,6 @@
 package com.example.shortform.repository;
 
-import com.example.shortform.domain.Category;
 import com.example.shortform.domain.Challenge;
-import com.example.shortform.domain.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
@@ -15,5 +13,5 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
 
     List<Challenge> findAllByTitleContaining(String search);
 
-    List<Challenge> findAllByCategoryId(Category categoryId);
+    List<Challenge> findAllByCategoryId(Long categoryId);
 }

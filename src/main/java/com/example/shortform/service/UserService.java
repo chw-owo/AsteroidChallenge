@@ -65,18 +65,20 @@ public class UserService {
             throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
 
 
+        Level level = new Level();
         //test
         //========================================================
         if(!levelRepository.findById(1L).isPresent()){
-            Level level_tmp = new Level("temp level");
-            levelRepository.save(level_tmp);
+            level = new Level("temp level");
+            levelRepository.save(level);
+        }else{
+            level = levelRepository.findById(1L).orElseThrow(
+                    () -> new NotFoundException("존재하지 않는 LEVEL 입니다.")
+            );
         }
+
         //========================================================
 
-
-        Level level = levelRepository.findById(1L).orElseThrow(
-                () -> new NotFoundException("존재하지 않는 LEVEL 입니다.")
-        );
 
         // 비밀번호 암호화
         String encPassword = passwordEncoder.encode(rawPassword);

@@ -196,7 +196,7 @@ public class ChallengeService {
     }
 
 
-    public List<ChallengesResponseDto> getCategoryChallenge(Category categoryId) throws ParseException, InternalServerException {
+    public List<ChallengesResponseDto> getCategoryChallenge(Long categoryId) throws ParseException, InternalServerException {
         List<Challenge> challenges = challengeRepository.findAllByCategoryId(categoryId);
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
 
