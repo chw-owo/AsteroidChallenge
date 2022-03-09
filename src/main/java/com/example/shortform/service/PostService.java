@@ -6,6 +6,7 @@ import com.example.shortform.dto.request.PostRequestDto;
 import com.example.shortform.dto.resonse.CommentResponseDto;
 import com.example.shortform.dto.resonse.PostResponseDto;
 import com.example.shortform.exception.ForbiddenException;
+import com.example.shortform.exception.InvalidException;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +67,7 @@ public class PostService {
             for(Post p: Posts){
                 LocalDate postTime = p.getCreatedAt().toLocalDate();
                 if(now.equals(postTime) && p.getChallenge().getId().equals(challengeId)) {
-                    throw new IllegalArgumentException("인증은 하루에 1회만 가능합니다.");
+                    throw new InvalidException("인증은 하루에 1회만 가능합니다.");
                 }
             }
         }
