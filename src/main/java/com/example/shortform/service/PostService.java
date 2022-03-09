@@ -1,17 +1,13 @@
 package com.example.shortform.service;
 
 import com.example.shortform.config.auth.PrincipalDetails;
-import com.example.shortform.domain.Challenge;
-import com.example.shortform.domain.Comment;
-import com.example.shortform.domain.ImageFile;
-import com.example.shortform.domain.Post;
+import com.example.shortform.domain.*;
 import com.example.shortform.dto.request.PostRequestDto;
 import com.example.shortform.dto.resonse.CommentResponseDto;
 import com.example.shortform.dto.resonse.PostResponseDto;
-import com.example.shortform.repository.ChallengeRepository;
-import com.example.shortform.repository.CommentRepository;
-import com.example.shortform.repository.PostRepository;
-import com.example.shortform.repository.UserRepository;
+import com.example.shortform.exception.ForbiddenException;
+import com.example.shortform.exception.NotFoundException;
+import com.example.shortform.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -40,7 +36,9 @@ public class PostService {
     public PostService(PostRepository postRepository,
                        ChallengeRepository challengeRepository,
                        CommentRepository commentRepository,
-                       ImageFileService imageFileService) {
+                       ImageFileService imageFileService,
+                       UserRepository userRepository,
+                       DateCheckRepository dateCheckRepository) {
         this.postRepository = postRepository;
         this.challengeRepository = challengeRepository;
         this.commentRepository = commentRepository;

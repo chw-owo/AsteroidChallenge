@@ -1,6 +1,7 @@
 package com.example.shortform.domain;
 
 import com.example.shortform.dto.resonse.ChatRoomListResponseDto;
+import com.example.shortform.dto.resonse.ChatRoomMemberDto;
 import com.example.shortform.dto.resonse.ChatRoomResponseDto;
 import com.example.shortform.dto.resonse.MemberResponseDto;
 import lombok.AllArgsConstructor;
@@ -24,8 +25,8 @@ public class ChatRoom extends Timestamped{
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "room_name", nullable = false)
-    private String roomName;
+//    @Column(name = "room_name", nullable = false)
+//    private String roomName;
 
     @Column(name = "room_image")
     private String roomImage;
@@ -40,25 +41,26 @@ public class ChatRoom extends Timestamped{
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 
-    public ChatRoomListResponseDto toResponseList(String username,
-                                                  List<MemberResponseDto> memberList,
-                                                  LocalDateTime createdAt,
-                                                  LocalDateTime modifiedAt) {
+    public ChatRoomListResponseDto toResponseList(LocalDateTime createdAt,
+                                                  List<String> imageList,
+                                                  int currentMember,
+                                                  List<ChatRoomMemberDto> roomMemberDto,
+                                                  String message) {
         return ChatRoomListResponseDto.builder()
                 .roomId(id)
-                .roomName(roomName)
-                .roomImage(roomImage)
-                .username(username)
-                .MemberList(memberList)
-                .createdAt(createdAt)
-                .modifiedAt(modifiedAt)
+                .chatRoomName(challenge.getTitle())
+                .chatRoomImg(imageList)
+                .currentMember(currentMember)
+                .createdAt(createdAt.toString())
+                .recentMessage(message)
+                .user(roomMemberDto)
                 .build();
     }
 
-    public ChatRoomResponseDto toRespose(MemberResponseDto member) {
+    public ChatRoomResponseDto toRespnose(MemberResponseDto member) {
         return ChatRoomResponseDto.builder()
                 .roomId(id)
-                .roomName(roomName)
+                .roomName(challenge.getTitle())
                 .roomImage(roomImage)
                 .member(member)
                 .build();

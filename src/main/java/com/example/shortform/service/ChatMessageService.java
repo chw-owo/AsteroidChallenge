@@ -1,16 +1,20 @@
 package com.example.shortform.service;
 
 import com.example.shortform.domain.ChatMessage;
+import com.example.shortform.domain.ChatRoom;
 import com.example.shortform.domain.User;
 import com.example.shortform.dto.request.ChatMessageRequestDto;
+import com.example.shortform.dto.resonse.ChatMessageResponseDto;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.ChatMessageRepository;
+import com.example.shortform.repository.ChatRoomRepository;
 import com.example.shortform.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -23,7 +27,9 @@ public class ChatMessageService {
     private final RedisTemplate redisTemplate;
     private final ChannelTopic channelTopic;
     private final UserRepository userRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
+    @Transactional
     public String getRoomId(String destination) {
         int lastIndex = destination.lastIndexOf('/');
         System.out.println("룸 아이디 destination" + destination);
@@ -35,6 +41,7 @@ public class ChatMessageService {
         }
     }
 
+    @Transactional
     public ChatMessage saveDB(ChatMessageRequestDto requestDto, String email) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new NotFoundException("유저정보가 존재하지 않습니다.")
@@ -47,17 +54,19 @@ public class ChatMessageService {
         String dateResult = sdf.format(date);
         requestDto.setCreatedAt(dateResult);
 
-        if (ChatMessage.MessageType.ENTER.equals(requestDto.getType())) {
-            requestDto.setMessage(user.getNickname() + "님이 방에 입장했습니다.");
-        } else if (ChatMessage.MessageType.QUIT.equals(requestDto.getType())) {
-            requestDto.setMessage(user.getNickname() + "님이 방에서 나갔습니다.");
-        }
-
-        ChatMessage chatMessage = requestDto.toEntity(user);
+        ChatRoom chatRoom = chatRoomRepository.findById(Long.valueOf(requestDto.getRoomId())).orElseThrow(
+                () -> new NotFoundException("")
+        );
+        ChatMessage chatMessage = requestDto.toEntity(user, chatRoom);
         return chatMessageRepository.save(chatMessage);
     }
 
-    public void sendChatMessage(ChatMessage chatMessage) {
-        redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
+    @Transactional
+    public void sendChatMessage(ChatMessageRequestDto requestDto) {
+        User user = userRepository.findById(requestDto.getUserId()).orElseThrow(
+                () -> new NotFoundException("")
+        );
+
+        redisTemplate.convertAndSend(channelTopic.getTopic(), requestDto);
     }
 }

@@ -1,14 +1,12 @@
 package com.example.shortform.service;
 
 import com.example.shortform.config.auth.PrincipalDetails;
-import com.example.shortform.domain.ChatRoom;
-import com.example.shortform.domain.User;
-import com.example.shortform.domain.UserChatRoom;
+import com.example.shortform.domain.*;
 import com.example.shortform.dto.request.ChatRoomRequestDto;
-import com.example.shortform.dto.resonse.ChatRoomListResponseDto;
-import com.example.shortform.dto.resonse.ChatRoomResponseDto;
-import com.example.shortform.dto.resonse.MemberResponseDto;
+import com.example.shortform.dto.resonse.*;
 import com.example.shortform.exception.NotFoundException;
+import com.example.shortform.repository.ChallengeRepository;
+import com.example.shortform.repository.ChatMessageRepository;
 import com.example.shortform.repository.ChatRoomRepository;
 import com.example.shortform.repository.UserChatRoomRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +14,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,40 +24,63 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final UserChatRoomRepository userChatRoomRepository;
+    private final ChallengeRepository challengeRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
-    public Long crateChatRoom(ChatRoomRequestDto requestDto, PrincipalDetails principalDetails) {
+    @Transactional
+    public Long createChatRoom(ChatRoomRequestDto requestDto, PrincipalDetails principalDetails) {
         User user = principalDetails.getUser();
-        ChatRoom chatRoom = requestDto.toEntity();
+        Challenge challenge = challengeRepository.findById(requestDto.getChallengeId()).orElseThrow(
+                () -> new NotFoundException("챌린지가 존재하지 않습니다.")
+        );
+        ChatRoom chatRoom = requestDto.toEntity(user.getProfileImage(), challenge);
         chatRoomRepository.save(chatRoom);
         UserChatRoom userChatRoom = requestDto.toEntity(chatRoom, user);
         userChatRoomRepository.save(userChatRoom);
         return chatRoom.getId();
     }
 
+    @Transactional
     public List<ChatRoomListResponseDto> getAllMyRooms(PrincipalDetails principalDetails) {
         User user = principalDetails.getUser();
         List<UserChatRoom> userChatRooms = userChatRoomRepository.findAllByUser(user);
         List<ChatRoomListResponseDto> chatRoomResponseDtoList = new ArrayList<>();
 
         for (UserChatRoom userChatRoom : userChatRooms) {
-            List<MemberResponseDto> memberList = new ArrayList<>();
+            List<String> profileImageList = new ArrayList<>();
+            List<ChatRoomMemberDto> memberList = new ArrayList<>();
             ChatRoom chatRoom = userChatRoom.getChatRoom();
             List<UserChatRoom> userList = userChatRoomRepository.findAllByChatRoom(chatRoom);
             for (UserChatRoom room : userList) {
                 User member = room.getUser();
-                memberList.add(member.toMemberResponse());
+                memberList.add(member.toChatMemberResponse());
+                profileImageList.add(member.getProfileImage());
             }
-            ChatRoomListResponseDto chatRoomResponseDto = chatRoom.toResponseList(
-                    user.getNickname(),
-                    memberList,
-                    chatRoom.getCreatedAt(),
-                    chatRoom.getModifiedAt()
-            );
+            List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoom(chatRoom);
+            ChatRoomListResponseDto chatRoomResponseDto;
+            if (chatMessageList.size() == 0) {
+                chatRoomResponseDto = chatRoom.toResponseList(
+                        chatRoom.getCreatedAt(),
+                        profileImageList,
+                        memberList.size(),
+                        memberList,
+                        null
+                );
+            } else {
+                chatRoomResponseDto = chatRoom.toResponseList(
+                        chatRoom.getCreatedAt(),
+                        profileImageList,
+                        memberList.size(),
+                        memberList,
+                        chatMessageList.get(1).getContent()
+                );
+            }
             chatRoomResponseDtoList.add(chatRoomResponseDto);
         }
         return chatRoomResponseDtoList;
     }
 
+    @Transactional
     public ChatRoomResponseDto getRoom(Long roomId, PrincipalDetails principalDetails) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new NotFoundException("채팅방이 존재하지 않습니다.")
@@ -67,8 +89,44 @@ public class ChatRoomService {
         User user = principalDetails.getUser();
         MemberResponseDto member = user.toMemberResponse();
 
-        ChatRoomResponseDto chatRoomResponseDto = chatRoom.toRespose(member);
+        ChatRoomResponseDto chatRoomResponseDto = chatRoom.toRespnose(member);
 
         return chatRoomResponseDto;
+    }
+
+    @Transactional
+    public ChatMessageListDto getAllMessages(Long roomId, PrincipalDetails principalDetails) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
+                () -> new NotFoundException("채팅방이 존재하지 않습니다.")
+        );
+
+        User user = principalDetails.getUser();
+
+        List<ChatMessage> messageList = chatMessageRepository.findAllByChatRoom(chatRoom);
+        List<UserChatRoom> memberList = userChatRoomRepository.findAllByChatRoom(chatRoom);
+
+        List<ChatMessageResponseDto> responseDtoList = new ArrayList<>();
+
+        for (ChatMessage chatMessage : messageList) {
+            ChatMessageResponseDto responseDto = chatMessage.toResponse(chatMessage.getCreatedAt().toString(), chatMessage.getUser().toChatMemberResponse());
+            responseDtoList.add(responseDto);
+        }
+
+        ChatMessageListDto chatMessageList = ChatMessageListDto.builder()
+                .roomName(chatRoom.getChallenge().getTitle())
+                .messageList(responseDtoList)
+                .currentMember(memberList.size())
+                .roomId(roomId)
+                .build();
+
+        return chatMessageList;
+    }
+
+    @Transactional
+    public void deleteRoom(Long roomId, PrincipalDetails principalDetails) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
+                () -> new NotFoundException("채팅방이 존재하지 않습니다.")
+        );
+        chatRoomRepository.deleteById(roomId);
     }
 }

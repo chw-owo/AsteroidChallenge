@@ -1,19 +1,25 @@
 package com.example.shortform.dto.request;
 
+import com.example.shortform.domain.Challenge;
 import com.example.shortform.domain.ChatRoom;
 import com.example.shortform.domain.User;
 import com.example.shortform.domain.UserChatRoom;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ChatRoomRequestDto {
-    String roomName;
-    String image;
+    private Long challengeId;
 
-    public ChatRoom toEntity() {
+    public ChatRoom toEntity(String profileImage, Challenge challenge) {
         return ChatRoom.builder()
-                .roomImage(roomName)
-                .roomName(roomName)
+                .roomImage(profileImage)
+                .challenge(challenge)
                 .build();
     }
 

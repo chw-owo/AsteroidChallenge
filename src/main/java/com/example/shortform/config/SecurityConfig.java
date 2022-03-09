@@ -41,17 +41,34 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.httpBasic().disable()
                 .cors().configurationSource(corsConfigurationSource());
 
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                .and()
+//                .formLogin().disable()
+//
+//                .authorizeRequests()
+//                .antMatchers("/auth/**").permitAll()
+//                .antMatchers("*").permitAll()
+//
+//                .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+//                .anyRequest()
+//                //.authenticated()
+//                .permitAll()
+//                .and()
+//                .addFilterBefore(new JwtAuthenticationFilter(jwtAuthenticationProvider),
+//                        UsernamePasswordAuthenticationFilter.class);
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용 안함.
                 .and()
-                .formLogin().disable()
-
+                .formLogin().disable() // 기본 로그인 방식 안쓸거임.
                 .authorizeRequests()
-                .antMatchers("/auth/**").permitAll()
-
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+                .antMatchers("/auth/**").permitAll()
+                .antMatchers("/chatting/**").permitAll()
+                .antMatchers("*").permitAll()
+                .antMatchers("/chat/message").permitAll()
+                //.antMatchers(HttpMethod.OPTIONS, "/test/**").permitAll()
                 .anyRequest()
-                //.authenticated()
                 .permitAll()
+                .and().cors().configurationSource(corsConfigurationSource())    // 추가
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtAuthenticationProvider),
                         UsernamePasswordAuthenticationFilter.class);

@@ -1,5 +1,6 @@
 package com.example.shortform.domain;
 
+import com.example.shortform.dto.resonse.ChatRoomMemberDto;
 import com.example.shortform.dto.resonse.MemberResponseDto;
 import lombok.*;
 
@@ -110,6 +111,15 @@ public class User extends Timestamped{
                 .userId(id)
                 .nickname(nickname)
                 .profileImage(profileImage)
+                .build();
+    }
+
+    public ChatRoomMemberDto toChatMemberResponse() {
+        return ChatRoomMemberDto.builder()
+                .profileUrl(profileImage)
+                .email(email)
+                .userId(id)
+                .nickname(nickname)
                 .build();
     }
 

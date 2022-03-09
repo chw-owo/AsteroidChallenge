@@ -1,11 +1,14 @@
 package com.example.shortform.domain;
 
+import com.example.shortform.dto.resonse.ChatMessageResponseDto;
+import com.example.shortform.dto.resonse.ChatRoomMemberDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -26,6 +29,7 @@ public class ChatMessage extends Timestamped{
     @Column(name = "content", nullable = false)
     private String content;
 
+    @Enumerated(EnumType.STRING)
     private MessageType type;
 
     @ManyToOne
@@ -38,5 +42,18 @@ public class ChatMessage extends Timestamped{
 
     @Column(name = "room_id", nullable = false)
     private String roomId;
+
+    public ChatMessageResponseDto toResponse(String createdAt,
+                                             ChatRoomMemberDto memberDto) {
+        return ChatMessageResponseDto.builder()
+                .message(content)
+                .roomId(roomId)
+                .createdAt(createdAt)
+                .type(type)
+                .sender(user.getNickname())
+                .id(id)
+                .user(memberDto)
+                .build();
+    }
 
 }

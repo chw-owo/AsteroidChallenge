@@ -3,6 +3,7 @@ package com.example.shortform.handler;
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
 import com.example.shortform.domain.ChatMessage;
 import com.example.shortform.domain.User;
+import com.example.shortform.dto.request.ChatMessageRequestDto;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.repository.RedisRepository;
@@ -36,42 +37,71 @@ public class StompHandler implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
 
-        log.info("Web Socket 들어올 때 token 검증 = {}", message.getHeaders());
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        String jwtToken = accessor.getFirstNativeHeader("authorization");
+        jwtAuthenticationProvider.validateToken(jwtToken);
+        log.info("Web Socket 들어올 때 token 검증 = {}", message.getHeaders());
+        log.info("Web Socket 들어올 때 token 검증 = {}", jwtToken);
 
         if (StompCommand.CONNECT == accessor.getCommand()) {
-            String jwtToken = accessor.getFirstNativeHeader("Authorization");
-            log.info("Web Socket 들어올 때 token 검증 = {}", jwtToken);
-            jwtAuthenticationProvider.validateToken(jwtToken);
-
+            log.info("connect 진입");
+            log.info("Connect 시 email= {}", jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("authorization")));
             if (jwtToken == null) {
                 throw new UnauthorizedException("로그인 후 이용가능합니다.");
             }
 
         } else if (StompCommand.SUBSCRIBE == accessor.getCommand()) {
+            log.info("Subscribe token 검증 = {}", jwtToken);
             String destination = Optional.ofNullable((String) message.getHeaders().get("simpDestination")).orElse("InvalidRoomId");
             String roomId = chatMessageService.getRoomId(destination);
+            log.info("sub destination roomId = {} {}", destination, roomId);
 
             if (roomId != null) {
+                log.info("sub if문 진입");
                 String sessionId = (String) message.getHeaders().get("simpSessionId");
-                String username = jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("Authorization"));
-                User user = userRepository.findByEmail(username).orElseThrow(
+                log.info("sub sessionId = {}", destination);
+                String email = jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("authorization"));
+                log.info("sub email = {}", email);
+                User user = userRepository.findByEmail(email).orElseThrow(
                         () -> new NotFoundException("")
                 );
 
                 redisRepository.setUserEnterInfo(sessionId, roomId);
 
-                chatMessageService.sendChatMessage(ChatMessage.builder()
-                        .roomId(roomId)
-                        .user(user)
+//                ChatMessage chatMessage = ChatMessage.builder()
+//                        .roomId(roomId)
+//                        .user(user)
+//                        .type(ChatMessage.MessageType.ENTER)
+//                        .build();
+
+                ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
                         .type(ChatMessage.MessageType.ENTER)
-                        .build());
+                        .roomId(roomId)
+                        .userId(user.getId())
+                        .build();
+
+                chatMessageService.sendChatMessage(requestDto);
+                log.info("SUBSCRIBED {}, {}", user.getNickname(), roomId);
             }
         } else if (StompCommand.DISCONNECT == accessor.getCommand()) {
             String sessionId = (String) message.getHeaders().get("simpSessionId");
             String roomId = redisRepository.getUserEnterRoomId(sessionId);
 
+            String email = jwtAuthenticationProvider.getUser(jwtToken);
+            User user = userRepository.findByEmail(email).orElseThrow(
+                    () -> new NotFoundException("로그인 하지 않은 유저입니다.")
+            );
+
+            ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
+                    .type(ChatMessage.MessageType.QUIT)
+                    .roomId(roomId)
+                    .userId(user.getId())
+                    .build();
+
+            chatMessageService.sendChatMessage(requestDto);
+
             redisRepository.removeUserEnterInfo(sessionId);
+            log.info("DISCONNECT {}, {}", sessionId, roomId);
         }
 
         return message;

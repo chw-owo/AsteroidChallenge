@@ -1,6 +1,7 @@
 package com.example.shortform.pubsub;
 
 import com.example.shortform.domain.ChatMessage;
+import com.example.shortform.dto.resonse.ChatMessageResponseDto;
 import com.example.shortform.repository.ChatMessageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +29,13 @@ public class RedisSubscriber {
         log.info("데이터가 잘왔나요? publishMessage={}", publishMessage);
         try {
             // ChatMessage 객채로 맵핑
-            ChatMessage chatMessage = objectMapper.readValue(publishMessage, ChatMessage.class);
+//            ChatMessage chatMessage = objectMapper.readValue(publishMessage, ChatMessage.class);
+            ChatMessageResponseDto chatMessageResponseDto = objectMapper.readValue(publishMessage, ChatMessageResponseDto.class);
+            log.info("objectMapper = {}", chatMessageResponseDto);
             // 채팅방을 구독한 클라이언트에게 메시지 발송
-            messagingTemplate.convertAndSend("/sub/chat/rooms/" + chatMessage.getRoomId(), chatMessage);
+//            messagingTemplate.convertAndSend("/sub/chat/rooms/" + chatMessage.getRoomId(), chatMessage);
+            messagingTemplate.convertAndSend("/sub/chat/rooms/" + chatMessageResponseDto.getRoomId(), chatMessageResponseDto);
+            log.info("subscriber 완료");
         } catch (Exception e) {
             log.error("Exception {}", e);
         }

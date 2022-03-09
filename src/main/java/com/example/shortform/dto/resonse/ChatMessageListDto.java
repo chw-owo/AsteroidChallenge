@@ -5,19 +5,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ChatRoomListResponseDto {
+public class ChatMessageListDto {
+    private String roomName;
     private Long roomId;
-    private String chatRoomName;
-    private List<String> chatRoomImg;
-    private String recentMessage;
     private int currentMember;
-    private List<ChatRoomMemberDto> user;
-    private String createdAt;
+    private List<ChatMessageResponseDto> messageList;
+
+//    public ChatMessageListDto(String roomName, String roomId, int currentMember) {
+//
+//    }
 }
