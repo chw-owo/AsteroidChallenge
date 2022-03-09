@@ -59,7 +59,7 @@ public class ChallengeController {
 //     }
 
     @GetMapping("/challenge/category/{categoryId}")
-    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Category categoryId) throws ParseException, InternalServerException {
+    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Long categoryId) throws ParseException, InternalServerException {
         return challengeService.getCategoryChallenge(categoryId);
     }
 

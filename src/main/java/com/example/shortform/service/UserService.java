@@ -1,5 +1,6 @@
 package com.example.shortform.service;
 
+import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
 import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.domain.Level;
@@ -7,9 +8,7 @@ import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
 import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
-
 import com.example.shortform.dto.resonse.UserInfo;
-
 import com.example.shortform.dto.resonse.UserProfileInfo;
 import com.example.shortform.exception.DuplicateException;
 import com.example.shortform.exception.InvalidException;
@@ -265,7 +264,12 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<CMResponseDto> updateProfile(Long userId, ProfileRequestDto requestDto, MultipartFile multipartFile) throws IOException {
+    public ResponseEntity<CMResponseDto> updateProfile(Long userId, ProfileRequestDto requestDto, MultipartFile multipartFile,
+                                                       PrincipalDetails principalDetails) throws IOException {
+
+        if (!principalDetails.getUser().getId().equals(userId))
+            throw new InvalidException("다른 사용자의 정보는 수정할 수 없습니다.");
+
         // 해당하는 유저 entity 찾기
         User findUser = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("존재하지 않는 유저입니다.")
@@ -273,24 +277,26 @@ public class UserService {
         // 이미지 S3 업로드
         String imgUrl;
 
-        if (multipartFile.getSize() != 0) {
+        // 이미지 변경해주기
+        if (multipartFile != null) {
             imgUrl = s3Uploader.upload(multipartFile, UUID.randomUUID() + multipartFile.getOriginalFilename());
             findUser.setProfileImage(imgUrl);
         }
-        
-
-        // TODO valid 추가 해줘야 한다.
 
         // 비밀번호 변경
-        if(!isDuplicatePassword(requestDto.getPassword(), requestDto.getPasswordCheck()))
-            throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        if (!"".equals(requestDto.getPassword().trim()) ||
+                !"".equals(requestDto.getPasswordCheck().trim())) {
 
-        if (passwordEncoder.matches(requestDto.getPassword(), findUser.getPassword()))
-            throw new DuplicateException("기존 비밀번호와 동일합니다.");
+            if(!isDuplicatePassword(requestDto.getPassword(), requestDto.getPasswordCheck()))
+                throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
 
-        String encPassword = passwordEncoder.encode(requestDto.getPassword());
+            if (passwordEncoder.matches(requestDto.getPassword(), findUser.getPassword()))
+                throw new DuplicateException("기존 비밀번호와 동일합니다.");
 
-        findUser.setPassword(encPassword);
+            String encPassword = passwordEncoder.encode(requestDto.getPassword());
+
+            findUser.setPassword(encPassword);
+        }
 
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
