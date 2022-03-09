@@ -40,10 +40,10 @@ public class RankingService {
 
         //======================================================
 
-        List<User> users = userRepository.findTop3ByOrderByRankingPointDesc();
+        List<User> top3Users = userRepository.findTop3ByOrderByRankingPointDesc();
         for(int i =0; i<3; i++) {
 
-            User u = users.get(i);
+            User u = top3Users.get(i);
             RankingResponseDto rankingDto = new RankingResponseDto(u);
 
             int yesterdayRank = yesterdayList.getUsers().indexOf(u);
@@ -67,20 +67,32 @@ public class RankingService {
 
         //=====================================================
 
-        User user = userRepository.findByEmail(principalDetails.getUsername()).orElseThrow(()->new NotFoundException("존재하지 않는 이메일입니다."));
+        User user = userRepository.findByEmail(principalDetails.getUser().getEmail()).orElseThrow(()->new NotFoundException("존재하지 않는 사용자입니다."));
         RankingResponseDto rankingDto = new RankingResponseDto(user);
 
+        List<User> users = userRepository.findAllByOrderByRankingPointDesc();
+        int todayRank = 1;
+
+        for(User u:users){
+            if(user.getRankingPoint() == u.getRankingPoint()){
+                break;
+            }
+            todayRank++;
+        }
+
         int yesterdayRank = yesterdayList.getUsers().indexOf(user);
-        System.out.println(yesterdayRank);
         String status = "";
+
+        System.out.print(todayRank);
+        System.out.println(yesterdayRank);
 
         if (yesterdayRank == -1) {
             status = "new";
-        } else if (yesterdayRank > 3) {
+        } else if (yesterdayRank > todayRank) {
             status = "상승";
-        } else if (yesterdayRank == 3) {
+        } else if (yesterdayRank == todayRank) {
             status = "유지";
-        } else if (yesterdayRank < 3) {
+        } else if (yesterdayRank < todayRank) {
             status = "하강";
         }
 
