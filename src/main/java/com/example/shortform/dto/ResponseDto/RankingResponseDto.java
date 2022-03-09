@@ -17,6 +17,7 @@ public class RankingResponseDto {
     private String profileImage;
     private int rankingPoint;
     private String level;
+    private String rank;
 
     public RankingResponseDto(User user){
         this.userId = user.getId();
@@ -24,5 +25,6 @@ public class RankingResponseDto {
         this.profileImage = user.getProfileImage();
         this.rankingPoint = user.getRankingPoint();
         this.level = user.getLevel().getName();
+
     }
 }

@@ -41,6 +41,7 @@ public class ChallengeResponseDto {
         this.content=challenge.getContent();
         this.category= challenge.getCategory().getName();
         this.challengeImage= challengeImage;
+        this.currentMember = challenge.getCurrentMember();
         this.maxMember=challenge.getMaxMember();
         this.startDate=challenge.getStartDate();
         this.endDate=challenge.getEndDate();

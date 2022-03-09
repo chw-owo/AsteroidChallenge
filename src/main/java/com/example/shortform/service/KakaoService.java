@@ -35,7 +35,7 @@ public class KakaoService {
     @Value("${KAKAO.RAW_PASSWORD}")
     private String RAW_PASSWORD;
 
-    private String TOKEN_PREFIX = "Bearer ";
+    private  String TOKEN_PREFIX = "Bearer ";
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -126,7 +126,7 @@ public class KakaoService {
             // 강제 로그인 진행
             userEntity = User.builder()
                     .email(kakaoProfile.getKakaoAccount().getEmail())
-                    .password(passwordEncoder.encode(RAW_PASSWORD)) // TODO 패스워드 properties에 입력
+                    .password(passwordEncoder.encode(RAW_PASSWORD))
                     .nickname(nickname)
                     .rankingPoint(0)
                     .emailVerified(true)

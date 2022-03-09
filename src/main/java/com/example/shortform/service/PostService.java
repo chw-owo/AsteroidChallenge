@@ -5,29 +5,19 @@ import com.example.shortform.domain.*;
 import com.example.shortform.dto.request.PostRequestDto;
 import com.example.shortform.dto.resonse.CommentResponseDto;
 import com.example.shortform.dto.resonse.PostResponseDto;
-
-import com.example.shortform.exception.NotFoundException;
-import com.example.shortform.repository.*;
-import jdk.nashorn.internal.objects.Global;
-
 import com.example.shortform.exception.ForbiddenException;
 import com.example.shortform.exception.NotFoundException;
-import com.example.shortform.repository.ChallengeRepository;
-import com.example.shortform.repository.CommentRepository;
-import com.example.shortform.repository.PostRepository;
-
+import com.example.shortform.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
-import sun.security.krb5.internal.ccache.CredentialsCache;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -68,20 +58,21 @@ public class PostService {
         );
 
         //인증 게시글은 하루에 하나만==================================================
-
-        Date now = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        LocalDate now = LocalDate.now();
 
         if(postRepository.count()>0){
-            Post recentPost = postRepository.findTop1ByOrderByCreatedAtDesc();
-            String recentPostTime = dateFormat.format(java.sql.Timestamp.valueOf(recentPost.getCreatedAt()));
-            String nowTime = dateFormat.format(now);
+            List<Post> Posts = postRepository.findAllByUser(principalDetails.getUser());
 
-            if(nowTime.equals(recentPostTime)) {
-                throw new IllegalArgumentException("오늘은 이미 인증을 마쳤습니다.");
+            for(Post p: Posts){
+                LocalDate postTime = p.getCreatedAt().toLocalDate();
+                if(now.equals(postTime) && p.getChallenge().getId().equals(challengeId)) {
+                    throw new IllegalArgumentException("인증은 하루에 1회만 가능합니다.");
+                }
             }
         }
         //============================================================================
+
+
 
 
         Post post = postRepository.save(requestDto.toEntity(challenge, principalDetails.getUser()));
@@ -121,11 +112,12 @@ public class PostService {
                 () -> new NotFoundException("인증 게시글이 존재하지 않습니다.")
         );
 
-        ImageFile imageFile = imageFileService.upload(multipartFile, post);
-
         if (!principalDetails.getUser().getId().equals(post.getUser().getId())) {
             throw new ForbiddenException("작성자만 수정할 수 있습니다.");
         }
+
+        if (multipartFile != null)
+            imageFileService.upload(multipartFile, post);
 
         post.update(requestDto);
 

@@ -5,6 +5,7 @@ import com.example.shortform.domain.ImageFile;
 import com.example.shortform.domain.Post;
 import com.example.shortform.dto.RequestDto.ImageFileRequestDto;
 
+import com.example.shortform.dto.request.ChallengeModifyRequestDto;
 import com.example.shortform.repository.ImageFileRepository;
 import com.example.shortform.util.S3Uploader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +34,6 @@ public class ImageFileService {
     public List<ImageFile> uploadImage(List<MultipartFile> multipartFileList, Challenge challenge) throws IOException {
 
         List<ImageFile> challengeImageList = new ArrayList<>();
-        if (challenge.getChallengeImage() != null) {
-
-//         List<ImageFile> imageFileList = new ArrayList<>();
-//         if (challenge.getImageFiles() != null) {
-
-            imageFileRepository.deleteAllByChallenge(challenge);
-        }
 
         for (MultipartFile multipartFile : multipartFileList) {
             String originalFileName = multipartFile.getOriginalFilename();
