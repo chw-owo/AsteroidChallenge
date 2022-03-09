@@ -102,6 +102,9 @@ public class PostService {
         if (!principalDetails.getUser().getId().equals(post.getUser().getId())) {
             throw new ForbiddenException("작성자만 삭제할 수 있습니다.");
         }
+        User user = userRepository.findByEmail(principalDetails.getUsername()).orElseThrow(()-> new NotFoundException("존재하지 않는 사용자입니다"));
+        user.setRankingPoint(user.getRankingPoint()-1);
+
 
         postRepository.deleteById(postId);
     }
