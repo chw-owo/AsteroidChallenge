@@ -60,6 +60,8 @@ public class PostService {
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
 
+        // TODO 멤버 아닌경우 인증게시글 못올리도록 수정
+
         //인증 게시글은 하루에 하나만==================================================
         LocalDate now = LocalDate.now();
 
@@ -146,9 +148,9 @@ public class PostService {
             for (Comment comment : commentList) {
                 CommentResponseDto commentDetailResponseDto = comment.toResponse();
                 String commentCreatedAt = comment.getCreatedAt().toString();
-                String year = commentCreatedAt.substring(0,4) + "년";
-                String month = commentCreatedAt.substring(5,7) + "월";
-                String day = commentCreatedAt.substring(8,10) + "일";
+                String year = commentCreatedAt.substring(0,4) + ".";
+                String month = commentCreatedAt.substring(5,7) + ".";
+                String day = commentCreatedAt.substring(8,10) + " ";
                 String time = commentCreatedAt.substring(11,19);
                 commentCreatedAt = year + month + day + time;
                 commentDetailResponseDto.setCreatedAt(commentCreatedAt);
@@ -156,9 +158,9 @@ public class PostService {
             }
             PostResponseDto postResponseDto = post.toResponse(commentDetailList);
             String postCreatedAt = post.getCreatedAt().toString();
-            String year = postCreatedAt.substring(0,4) + "년";
-            String month = postCreatedAt.substring(5,7) + "월";
-            String day = postCreatedAt.substring(8,10) + "일";
+            String year = postCreatedAt.substring(0,4) + ".";
+            String month = postCreatedAt.substring(5,7) + ".";
+            String day = postCreatedAt.substring(8,10) + " ";
             String time = postCreatedAt.substring(11,19);
             postCreatedAt = year + month + day + time;
             postResponseDto.setCreatedAt(postCreatedAt);

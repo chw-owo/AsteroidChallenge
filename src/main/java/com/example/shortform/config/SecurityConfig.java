@@ -47,11 +47,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .authorizeRequests()
                 .antMatchers("/auth/**").permitAll()
-
+                .antMatchers("/challenge/**").permitAll()
+                .antMatchers("/category/**", "/users/**", "/chat/**").permitAll()
+                .antMatchers("/ranking/**", "/posts/**", "/mypage/**").permitAll()
+                .antMatchers("/pub/**", "/sub/**").permitAll()
+                .antMatchers("/h2-console/**").permitAll()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .anyRequest()
-                //.authenticated()
-                .permitAll()
+                .authenticated()
+                //.permitAll()
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtAuthenticationProvider),
                         UsernamePasswordAuthenticationFilter.class);
