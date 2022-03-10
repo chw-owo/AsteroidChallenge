@@ -152,13 +152,13 @@ public class PostService {
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
 
-        List<Post> postList = postRepository.findAllByChallengeId(challengeId);
+        List<Post> postList = postRepository.findAllByChallengeIdOrderByCreatedAtDesc(challengeId);
         List<PostResponseDto> responseDtoList = new ArrayList<>();
 
 
         for (Post post : postList) {
             List<CommentResponseDto> commentDetailList = new ArrayList<>();
-            List<Comment> commentList = commentRepository.findAllByPostId(post.getId());
+            List<Comment> commentList = commentRepository.findAllByPostIdOrderByCreatedAtDesc(post.getId());
             for (Comment comment : commentList) {
                 CommentResponseDto commentDetailResponseDto = comment.toResponse();
                 String commentCreatedAt = comment.getCreatedAt().toString();
