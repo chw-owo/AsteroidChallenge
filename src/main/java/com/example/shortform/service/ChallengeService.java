@@ -147,7 +147,7 @@ public class ChallengeService {
     }
 
     public List<ChallengesResponseDto> getChallenges() throws ParseException, InternalServerException {
-        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAt();
+        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
 
 
@@ -198,7 +198,7 @@ public class ChallengeService {
 
 
     public List<ChallengesResponseDto> getCategoryChallenge(Long categoryId) throws ParseException, InternalServerException {
-        List<Challenge> challenges = challengeRepository.findAllByCategoryId(categoryId);
+        List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(categoryId);
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
 
         for(Challenge challenge: challenges){
@@ -223,7 +223,7 @@ public class ChallengeService {
     }
 
     public List<ChallengesResponseDto> getKeywordChallenge(String keyword) throws ParseException, InternalServerException {
-        List<Challenge> challenges = challengeRepository.findAll();
+        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
 
         for(Challenge c: challenges) {
