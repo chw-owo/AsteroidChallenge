@@ -21,6 +21,8 @@ public class Ranking extends Timestamped{
     @JoinColumn(name="users")
     private List<User> users;
 
+
+
     public Ranking(List<User> users) {
         this.users = users;
     }

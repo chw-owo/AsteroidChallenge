@@ -26,7 +26,7 @@ public class RankingService {
     private final RankingRepository rankRepository;
     private final UserRepository userRepository;
 
-    @Scheduled(fixedDelay = 10000)//cron = "0 0 0 * * *")
+    @Scheduled(fixedDelay = 20000)//cron = "0 0 0 * * *")
     public void updateRank(){
         List<User> users = userRepository.findAllByOrderByRankingPointDesc();
         Ranking rank = new Ranking(users);
@@ -44,25 +44,38 @@ public class RankingService {
         List<User> top3Users = userRepository.findTop3ByOrderByRankingPointDesc();
         for(int i =0; i<3; i++) {
 
-            User u = top3Users.get(i);
-            RankingResponseDto rankingDto = new RankingResponseDto(u);
+            User user = top3Users.get(i);
+            RankingResponseDto rankingDto = new RankingResponseDto(user);
+            List<User> users = userRepository.findAllByOrderByRankingPointDesc();
+            int todayRank = 1;
+            int yesterdayRank = user.getYesterdayRank();
 
-            int yesterdayRank = yesterdayList.getUsers().indexOf(u);
-            System.out.println(yesterdayRank);
+            for(User u:users){
+                if(user.getRankingPoint() == u.getRankingPoint()){
+                    break;
+                }
+                todayRank++;
+            }
+
             String status = "";
 
-            if (yesterdayRank == -1) {
+            System.out.print(yesterdayRank);
+            System.out.println(todayRank);
+            System.out.println("==================================");
+
+            if (!(yesterdayList.getUsers().contains(user))) {
                 status = "new";
             }
-            else if (yesterdayRank > i) {
+            else if (yesterdayRank > todayRank) {
                 status = "상승";
-            } else if (yesterdayRank == i) {
+            } else if (yesterdayRank == todayRank) {
                 status = "유지";
-            } else if (yesterdayRank < i) {
+            } else if (yesterdayRank < todayRank) {
                 status = "하강";
             }
 
-            rankingDto.setRank(status);
+            rankingDto.setStatus(status);
+            rankingDto.setRank(todayRank);
             rankDtos.add(rankingDto);
         }
 
@@ -71,23 +84,25 @@ public class RankingService {
         User user = userRepository.findByEmail(principalDetails.getUser().getEmail()).orElseThrow(()->new NotFoundException("존재하지 않는 사용자입니다."));
         RankingResponseDto rankingDto = new RankingResponseDto(user);
 
+
         List<User> users = userRepository.findAllByOrderByRankingPointDesc();
+        int yesterdayRank = user.getYesterdayRank();
         int todayRank = 1;
 
         for(User u:users){
-            if(user.getRankingPoint() == u.getRankingPoint()){
+            if(!(user.getRankingPoint() > u.getRankingPoint())){
                 break;
             }
             todayRank++;
         }
 
-        int yesterdayRank = yesterdayList.getUsers().indexOf(user);
         String status = "";
 
-        System.out.print(todayRank);
-        System.out.println(yesterdayRank);
 
-        if (yesterdayRank == -1) {
+        System.out.print(yesterdayRank);
+        System.out.println(todayRank);
+        System.out.println("==================================");
+        if (!(yesterdayList.getUsers().contains(user))) {
             status = "new";
         } else if (yesterdayRank > todayRank) {
             status = "상승";
@@ -97,7 +112,9 @@ public class RankingService {
             status = "하강";
         }
 
-        rankingDto.setRank(status);
+        rankingDto.setStatus(status);
+        rankingDto.setRank(todayRank);
+        user.setYesterdayRank(todayRank);
         rankDtos.add(rankingDto);
 
         return rankDtos;
