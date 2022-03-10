@@ -33,6 +33,7 @@ public class PostService {
     private final ImageFileService imageFileService;
     private final UserRepository userRepository;
     private final DateCheckRepository dateCheckRepository;
+    private final UserChallengeRepository userChallengeRepository;
 
 
     @Autowired
@@ -41,13 +42,15 @@ public class PostService {
                        CommentRepository commentRepository,
                        ImageFileService imageFileService,
                        UserRepository userRepository,
-                       DateCheckRepository dateCheckRepository) {
+                       DateCheckRepository dateCheckRepository,
+                       UserChallengeRepository userChallengeRepository) {
         this.postRepository = postRepository;
         this.challengeRepository = challengeRepository;
         this.commentRepository = commentRepository;
         this.imageFileService = imageFileService;
         this.userRepository = userRepository;
         this.dateCheckRepository = dateCheckRepository;
+        this.userChallengeRepository = userChallengeRepository;
     }
 
     @Transactional
@@ -67,6 +70,11 @@ public class PostService {
 
         if(postRepository.count()>0){
             List<Post> Posts = postRepository.findAllByUser(principalDetails.getUser());
+
+            // 해당 게시글에 인증하면 당일 인증여부 체크
+            UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(), challengeId);
+            userChallenge.setDailyAuthenticated(true);
+            userChallenge.setAuthCount(userChallenge.getAuthCount() + 1);
 
             for(Post p: Posts){
                 LocalDate postTime = p.getCreatedAt().toLocalDate();
@@ -109,6 +117,12 @@ public class PostService {
 
 
         postRepository.deleteById(postId);
+
+        // // 해당 게시글에 인증삭제하면 당일 인증여부 체크
+        UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(), post.getChallenge().getId());
+        userChallenge.setDailyAuthenticated(false);
+        userChallenge.setAuthCount(userChallenge.getAuthCount() - 1);
+
     }
 
     @Transactional

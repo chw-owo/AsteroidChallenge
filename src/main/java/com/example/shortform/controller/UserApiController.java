@@ -5,9 +5,11 @@ import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
 
+import com.example.shortform.dto.resonse.UserChallengeInfo;
 import com.example.shortform.dto.resonse.UserInfo;
 import com.example.shortform.dto.resonse.UserProfileInfo;
 import com.example.shortform.exception.NotFoundException;
+import com.example.shortform.service.ChallengeService;
 import com.example.shortform.service.KakaoService;
 import com.example.shortform.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -25,6 +29,7 @@ public class UserApiController {
 
     private final UserService userService;
     private final KakaoService kakaoService;
+    private final ChallengeService challengeService;
 
     // 회원가입
     @PostMapping("/auth/signup")
@@ -111,5 +116,10 @@ public class UserApiController {
         return ResponseEntity.ok(userService.getUserProfile(userId));
     }
 
+    // 유저 챌린지 조회
+    @GetMapping("/mypage/challenge/{userId}")
+    public ResponseEntity<List<UserChallengeInfo>> getUserChallenge(@PathVariable Long userId) throws ParseException {
+        return challengeService.getUserChallenge(userId);
+    }
 }
 
