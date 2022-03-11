@@ -30,7 +30,8 @@ public class RankingService {
     private final UserChallengeRepository userChallengeRepository;
 
 
-    @Scheduled(fixedDelay = 10000)//(cron = "0 0 0 * * *")//
+    //@Scheduled(fixedDelay = 10000)//(cron = "0 0 0 * * *")//
+    @Scheduled(cron = "0 0 0 * * *")
     public void updateRank() {
         List<User> users = userRepository.findAllByOrderByRankingPointDesc();
 //        Ranking rank = new Ranking(users);

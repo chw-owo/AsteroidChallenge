@@ -97,6 +97,7 @@ public class UserService {
                 .level(level) // 기본 1레벨
 
                 .rankingPoint(50) // 기본 포인트 50
+                .yesterdayRankingPoint(50) // 이전 포인트도 50으로 설정
 
                 .role(Role.ROLE_USER)
                 .emailVerified(false)
