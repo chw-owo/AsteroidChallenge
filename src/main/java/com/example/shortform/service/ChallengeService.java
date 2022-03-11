@@ -89,13 +89,14 @@ public class ChallengeService {
 
         List<ImageFile> imageFileList = new ArrayList<>();
         List<String> challengeImages = new ArrayList<>();
-        if (multipartFiles.isEmpty()) {
-            throw new InternalServerException("한장 이상의 이미지를 업로드 해야합니다.");
-        }
+
         for (MultipartFile m : multipartFiles) {
-            ImageFile imageFileUpload = imageFileService.upload(m, challenge);
-            imageFileList.add(imageFileUpload);
-            challengeImages.add(imageFileUpload.getFilePath());
+            if (m != null){
+                ImageFile imageFileUpload = imageFileService.upload(m, challenge);
+                imageFileList.add(imageFileUpload);
+                challengeImages.add(imageFileUpload.getFilePath());
+            }
+            
         }
         challenge.setChallengeImage(imageFileList);
 
