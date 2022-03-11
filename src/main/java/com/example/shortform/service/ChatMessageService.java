@@ -92,15 +92,6 @@ public class ChatMessageService {
         User user = userRepository.findById(requestDto.getUserId()).orElseThrow(
                 () -> new NotFoundException("")
         );
-
-        String createdAt = requestDto.getCreatedAt();
-        String year = createdAt.substring(0,4) + ".";
-        String month = createdAt.substring(5,7) + ".";
-        String day = createdAt.substring(8,10) + " ";
-        String time = createdAt.substring(11,19);
-        createdAt = year + month + day + time;
-
-        requestDto.setCreatedAt(createdAt);
 //        ChatRoom chatRoom = chatRoomRepository.findById(Long.valueOf(requestDto.getRoomId())).orElse(null);
 
 //        UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(chatRoom, user);
@@ -117,6 +108,13 @@ public class ChatMessageService {
             redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
         } else {
             ChatMessage chatMessage = saveMessage(requestDto, user.getEmail());
+            String createdAt = chatMessage.getCreatedAt().toString();
+            String year = createdAt.substring(0,4) + ".";
+            String month = createdAt.substring(5,7) + ".";
+            String day = createdAt.substring(8,10) + " ";
+            String time = createdAt.substring(11,19);
+            createdAt = year + month + day + time;
+            requestDto.setCreatedAt(createdAt);
             ChatMessageResponseDto responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
             responseDto.setId(chatMessage.getId());
             redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
