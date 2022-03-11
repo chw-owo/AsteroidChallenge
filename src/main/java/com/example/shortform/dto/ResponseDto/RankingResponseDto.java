@@ -17,7 +17,8 @@ public class RankingResponseDto {
     private String profileImage;
     private int rankingPoint;
     private String level;
-    private String rank;
+    private int rank;
+    private String status;
 
     public RankingResponseDto(User user){
         this.userId = user.getId();

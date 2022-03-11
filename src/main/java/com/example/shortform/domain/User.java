@@ -13,6 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @Entity
 public class User extends Timestamped{
     @Id
@@ -36,8 +37,10 @@ public class User extends Timestamped{
     @JoinColumn(name = "level_id")
     private Level level;
 
+    @Column(name = "yesterday_rank", nullable = false)
+    private int yesterdayRank;
 
-    @Setter
+
     @Column(name = "point", nullable = false)
     private int rankingPoint;
 
@@ -109,6 +112,11 @@ public class User extends Timestamped{
 
     public Object getRole() {
         return this.role;
+    }
+
+    @PrePersist
+    public void prePersist(){
+        this.yesterdayRank = 0;
     }
 
 

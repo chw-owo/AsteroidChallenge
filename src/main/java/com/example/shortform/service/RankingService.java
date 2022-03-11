@@ -29,18 +29,33 @@ public class RankingService {
     private final UserRepository userRepository;
     private final UserChallengeRepository userChallengeRepository;
 
+
     @Scheduled(cron = "0 0 0 * * *")//fixedDelay = 1000 * 60 * 60 * 24)
     public void updateRank(){
         List<User> users = userRepository.findAllByOrderByRankingPointDesc();
         Ranking rank = new Ranking(users);
         rankRepository.save(rank);
 
-        // 12시 마다 데일리 인증 초기화해주기
-        List<UserChallenge> userChallenges = userChallengeRepository.findAll();
-        for (UserChallenge userChallenge : userChallenges) {
-            userChallenge.setDailyAuthenticated(false);
-            userChallengeRepository.save(userChallenge);
+
+        ArrayList<Integer> rankingPointList = new ArrayList<>();
+
+        for(User u : users){
+            if(!rankingPointList.contains(u.getRankingPoint()))
+                rankingPointList.add(u.getRankingPoint());
         }
+        Collections.sort(rankingPointList);
+        for(User u:users){
+            Integer yesterdayRank = rankingPointList.indexOf(u.getRankingPoint());
+            u.setYesterdayRank(yesterdayRank);
+        }
+
+//         // 12시 마다 데일리 인증 초기화해주기
+//         List<UserChallenge> userChallenges = userChallengeRepository.findAll();
+//         for (UserChallenge userChallenge : userChallenges) {
+//             userChallenge.setDailyAuthenticated(false);
+//             userChallengeRepository.save(userChallenge);
+      
+         }
     }
 
     public List<RankingResponseDto> getRanking(PrincipalDetails principalDetails){
@@ -53,25 +68,41 @@ public class RankingService {
         List<User> top3Users = userRepository.findTop3ByOrderByRankingPointDesc();
         for(int i =0; i<3; i++) {
 
-            User u = top3Users.get(i);
-            RankingResponseDto rankingDto = new RankingResponseDto(u);
+            User user = top3Users.get(i);
+            RankingResponseDto rankingDto = new RankingResponseDto(user);
+            List<User> users = userRepository.findAllByOrderByRankingPointDesc();
 
-            int yesterdayRank = yesterdayList.getUsers().indexOf(u);
-            System.out.println(yesterdayRank);
+            int yesterdayRank = user.getYesterdayRank();
+
+            ArrayList<Integer> rankingPointList = new ArrayList<>();
+
+            for(User u : users){
+                if(!rankingPointList.contains(u.getRankingPoint()))
+                    rankingPointList.add(u.getRankingPoint());
+            }
+            Collections.sort(rankingPointList);
+
+            int todayRank = rankingPointList.indexOf(user.getRankingPoint());
+
             String status = "";
 
-            if (yesterdayRank == -1) {
+            System.out.print(yesterdayRank);
+            System.out.println(todayRank);
+            System.out.println("==================================");
+
+            if (!(yesterdayList.getUsers().contains(user))|| user.getYesterdayRank() == 0) {
                 status = "new";
             }
-            else if (yesterdayRank > i) {
+            else if (yesterdayRank > todayRank) {
                 status = "상승";
-            } else if (yesterdayRank == i) {
+            } else if (yesterdayRank == todayRank) {
                 status = "유지";
-            } else if (yesterdayRank < i) {
+            } else if (yesterdayRank < todayRank) {
                 status = "하강";
             }
 
-            rankingDto.setRank(status);
+            rankingDto.setStatus(status);
+            rankingDto.setRank(todayRank);
             rankDtos.add(rankingDto);
         }
 
@@ -80,23 +111,27 @@ public class RankingService {
         User user = userRepository.findByEmail(principalDetails.getUser().getEmail()).orElseThrow(()->new NotFoundException("존재하지 않는 사용자입니다."));
         RankingResponseDto rankingDto = new RankingResponseDto(user);
 
+
         List<User> users = userRepository.findAllByOrderByRankingPointDesc();
-        int todayRank = 1;
+        int yesterdayRank = user.getYesterdayRank();
+        ArrayList<Integer> rankingPointList = new ArrayList<>();
 
-        for(User u:users){
-            if(user.getRankingPoint() == u.getRankingPoint()){
-                break;
-            }
-            todayRank++;
+        for(User u : users){
+            if(!rankingPointList.contains(u.getRankingPoint()))
+                rankingPointList.add(u.getRankingPoint());
         }
+        Collections.sort(rankingPointList);
 
-        int yesterdayRank = yesterdayList.getUsers().indexOf(user);
+        int todayRank = rankingPointList.indexOf(user.getRankingPoint());
+
+
         String status = "";
 
-        System.out.print(todayRank);
-        System.out.println(yesterdayRank);
 
-        if (yesterdayRank == -1) {
+        System.out.print(yesterdayRank);
+        System.out.println(todayRank);
+        System.out.println("==================================");
+        if (!(yesterdayList.getUsers().contains(user))|| user.getYesterdayRank() == 0) {
             status = "new";
         } else if (yesterdayRank > todayRank) {
             status = "상승";
@@ -106,7 +141,8 @@ public class RankingService {
             status = "하강";
         }
 
-        rankingDto.setRank(status);
+        rankingDto.setStatus(status);
+        rankingDto.setRank(todayRank);
         rankDtos.add(rankingDto);
 
         return rankDtos;
