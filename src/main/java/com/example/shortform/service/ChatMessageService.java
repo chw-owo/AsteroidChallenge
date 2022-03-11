@@ -6,6 +6,7 @@ import com.example.shortform.domain.User;
 import com.example.shortform.domain.UserChatRoom;
 import com.example.shortform.dto.request.ChatMessageRequestDto;
 import com.example.shortform.dto.resonse.ChatMessageResponseDto;
+import com.example.shortform.dto.resonse.CommentResponseDto;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.ChatMessageRepository;
 import com.example.shortform.repository.ChatRoomRepository;
@@ -92,6 +93,14 @@ public class ChatMessageService {
                 () -> new NotFoundException("")
         );
 
+        String createdAt = requestDto.getCreatedAt();
+        String year = createdAt.substring(0,4) + ".";
+        String month = createdAt.substring(5,7) + ".";
+        String day = createdAt.substring(8,10) + " ";
+        String time = createdAt.substring(11,19);
+        createdAt = year + month + day + time;
+
+        requestDto.setCreatedAt(createdAt);
 //        ChatRoom chatRoom = chatRoomRepository.findById(Long.valueOf(requestDto.getRoomId())).orElse(null);
 
 //        UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(chatRoom, user);
