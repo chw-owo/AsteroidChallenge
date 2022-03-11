@@ -40,28 +40,28 @@ public class StompHandler implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         String jwtToken = accessor.getFirstNativeHeader("authorization");
 //        jwtAuthenticationProvider.validateToken(jwtToken);
-        log.info("Web Socket 들어올 때 token 검증 = {}", message.getHeaders());
-        log.info("Web Socket 들어올 때 token 검증 = {}", jwtToken);
+        //log.info("Web Socket 들어올 때 token 검증 = {}", message.getHeaders());
+        //log.info("Web Socket 들어올 때 token 검증 = {}", jwtToken);
 
         if (StompCommand.CONNECT == accessor.getCommand()) {
-            log.info("connect 진입");
-            log.info("Connect 시 email= {}", jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("authorization")));
+           // log.info("connect 진입");
+            //log.info("Connect 시 email= {}", jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("authorization")));
             if (jwtToken == null) {
                 throw new UnauthorizedException("로그인 후 이용가능합니다.");
             }
 
         } else if (StompCommand.SUBSCRIBE == accessor.getCommand()) {
-            log.info("Subscribe token 검증 = {}", jwtToken);
+            //log.info("Subscribe token 검증 = {}", jwtToken);
             String destination = Optional.ofNullable((String) message.getHeaders().get("simpDestination")).orElse("InvalidRoomId");
             String roomId = chatMessageService.getRoomId(destination);
-            log.info("sub destination roomId = {} {}", destination, roomId);
+            //log.info("sub destination roomId = {} {}", destination, roomId);
 
             if (roomId != null) {
-                log.info("sub if문 진입");
+               // log.info("sub if문 진입");
                 String sessionId = (String) message.getHeaders().get("simpSessionId");
-                log.info("sub sessionId = {}", sessionId);
+                //log.info("sub sessionId = {}", sessionId);
                 String email = jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("authorization"));
-                log.info("sub email = {}", email);
+                //log.info("sub email = {}", email);
                 User user = userRepository.findByEmail(email).orElseThrow(
                         () -> new NotFoundException("")
                 );
@@ -81,21 +81,21 @@ public class StompHandler implements ChannelInterceptor {
                         .build();
 
                 chatMessageService.sendChatMessage(requestDto);
-                log.info("SUBSCRIBED {}, {}", user.getNickname(), roomId);
+                //log.info("SUBSCRIBED {}, {}", user.getNickname(), roomId);
             }
         } else if (StompCommand.DISCONNECT == accessor.getCommand()) {
-            log.info("disconnect 진입 token = {}", jwtToken);
+            //log.info("disconnect 진입 token = {}", jwtToken);
             String sessionId = (String) message.getHeaders().get("simpSessionId");
             String roomId = redisRepository.getUserEnterRoomId(sessionId);
 
-            log.info("sessionId = {}, roomId = {}", sessionId, roomId);
+            //log.info("sessionId = {}, roomId = {}", sessionId, roomId);
 
             String token = Optional.ofNullable(accessor.getFirstNativeHeader("authorization")).orElse("unknownUser");
-            log.info("token = {}", token);
+            //log.info("token = {}", token);
 
             if (accessor.getFirstNativeHeader("authorization") != null) {
                 String email = jwtAuthenticationProvider.getUser(token);
-                log.info("email = {}", email);
+                //log.info("email = {}", email);
                 User user = userRepository.findByEmail(email).orElseThrow(
                         () -> new NotFoundException("로그인 하지 않은 유저입니다.")
                 );
@@ -112,7 +112,7 @@ public class StompHandler implements ChannelInterceptor {
                 redisRepository.removeUserEnterInfo(sessionId);
             }
 
-            log.info("DISCONNECT {}, {}", sessionId, roomId);
+            //log.info("DISCONNECT {}, {}", sessionId, roomId);
         }
 
         return message;
