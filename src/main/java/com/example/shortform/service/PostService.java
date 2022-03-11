@@ -32,6 +32,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final ImageFileService imageFileService;
     private final UserRepository userRepository;
+    private final LevelService levelService;
     private final DateCheckRepository dateCheckRepository;
     private final UserChallengeRepository userChallengeRepository;
 
@@ -43,7 +44,8 @@ public class PostService {
                        ImageFileService imageFileService,
                        UserRepository userRepository,
                        DateCheckRepository dateCheckRepository,
-                       UserChallengeRepository userChallengeRepository) {
+                       UserChallengeRepository userChallengeRepository,
+                       LevelService levelService) {
         this.postRepository = postRepository;
         this.challengeRepository = challengeRepository;
         this.commentRepository = commentRepository;
@@ -51,6 +53,7 @@ public class PostService {
         this.userRepository = userRepository;
         this.dateCheckRepository = dateCheckRepository;
         this.userChallengeRepository = userChallengeRepository;
+        this.levelService = levelService;
     }
 
     @Transactional
@@ -98,6 +101,9 @@ public class PostService {
 
         user.setRankingPoint(user.getRankingPoint()+1);
 
+        // 레벨업, 다운 로직
+        levelService.checkLevelPoint(user);
+
         return ResponseEntity.ok(post.toResponse());
     }
 
@@ -115,6 +121,8 @@ public class PostService {
         User user = userRepository.findByEmail(principalDetails.getUsername()).orElseThrow(()-> new NotFoundException("존재하지 않는 사용자입니다"));
         user.setRankingPoint(user.getRankingPoint()-1);
 
+        // 레벨업, 다운 로직
+        levelService.checkLevelPoint(user);
 
         postRepository.deleteById(postId);
 

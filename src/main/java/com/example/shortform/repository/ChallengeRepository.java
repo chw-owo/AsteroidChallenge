@@ -8,10 +8,9 @@ import java.util.*;
 
 public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
 
-    List<Challenge> findAllByOrderByCreatedAt();
-
+    List<Challenge> findAllByOrderByCreatedAtDesc();
 
     List<Challenge> findAllByTitleContaining(String search);
 
-    List<Challenge> findAllByCategoryId(Long categoryId);
+    List<Challenge> findAllByCategoryIdOrderByCreatedAtDesc(Long categoryId);
 }

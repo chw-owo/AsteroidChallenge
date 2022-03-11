@@ -147,7 +147,7 @@ public class ChallengeService {
     }
 
     public List<ChallengesResponseDto> getChallenges() throws ParseException, InternalServerException {
-        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAt();
+        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
 
 
@@ -198,7 +198,7 @@ public class ChallengeService {
 
 
     public List<ChallengesResponseDto> getCategoryChallenge(Long categoryId) throws ParseException, InternalServerException {
-        List<Challenge> challenges = challengeRepository.findAllByCategoryId(categoryId);
+        List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(categoryId);
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
 
         for(Challenge challenge: challenges){
@@ -223,7 +223,7 @@ public class ChallengeService {
     }
 
     public List<ChallengesResponseDto> getKeywordChallenge(String keyword) throws ParseException, InternalServerException {
-        List<Challenge> challenges = challengeRepository.findAll();
+        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
 
         for(Challenge c: challenges) {
@@ -271,6 +271,14 @@ public class ChallengeService {
         if (userChallengeCheck != null) {
             throw new DuplicateException("이미 참가한 챌린지입니다.");
         }
+
+        // 중간에 참가하는 로직 구현
+        UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(challenge.getUser().getId(), challengeId);
+        // 챌린지 기간
+        int challengeDate = userChallenge.getChallengeDate();
+        // 현재 날짜와 챌린지 참가 가능한 날짜 비교
+        if (!userChallenge.getParticipateDate(challengeDate, challenge))
+            throw new InvalidException("참가 가능 날짜가 지났습니다.");
 
         userChallengeRepository.save(new UserChallenge(challenge, user));
         List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);

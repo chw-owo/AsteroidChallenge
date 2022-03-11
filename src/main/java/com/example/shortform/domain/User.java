@@ -127,4 +127,7 @@ public class User extends Timestamped{
     }
 
 
+    public void changeLevel(Level level) {
+        this.level = level;
+    }
 }
