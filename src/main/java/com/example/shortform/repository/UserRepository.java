@@ -23,4 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findUserInfo(@Param("user_id") Long userId);
 
     List<User> findAllByOrderByRankingPointDesc();
+
+
+    List<User> findAllByOrderByYesterdayRankingPointDesc();
 }

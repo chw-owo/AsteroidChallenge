@@ -40,9 +40,15 @@ public class User extends Timestamped{
     @Column(name = "yesterday_rank", nullable = false)
     private int yesterdayRank;
 
+    @Column(name = "rank_status")
+    private String rankStatus;
+
 
     @Column(name = "point", nullable = false)
     private int rankingPoint;
+
+    @Column(name = "yesterday_point")
+    private int yesterdayRankingPoint;
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
@@ -116,7 +122,8 @@ public class User extends Timestamped{
 
     @PrePersist
     public void prePersist(){
-        this.yesterdayRank = 0;
+        this.yesterdayRank = -1;
+        this.rankStatus = "new";
     }
 
 
