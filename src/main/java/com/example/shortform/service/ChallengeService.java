@@ -96,7 +96,6 @@ public class ChallengeService {
                 imageFileList.add(imageFileUpload);
                 challengeImages.add(imageFileUpload.getFilePath());
             }
-            
         }
         challenge.setChallengeImage(imageFileList);
 

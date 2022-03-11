@@ -24,8 +24,10 @@ public class RankingResponseDto {
         this.userId = user.getId();
         this.nickname = user.getNickname();
         this.profileImage = user.getProfileImage();
-        this.rankingPoint = user.getRankingPoint();
+        this.rankingPoint = user.getYesterdayRankingPoint();
         this.level = user.getLevel().getName();
+        this.rank = user.getYesterdayRank();
+        this.status = user.getRankStatus();
 
     }
 }
