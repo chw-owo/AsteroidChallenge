@@ -108,7 +108,13 @@ public class ChatRoomService {
         List<ChatMessageResponseDto> responseDtoList = new ArrayList<>();
 
         for (ChatMessage chatMessage : messageList) {
-            ChatMessageResponseDto responseDto = chatMessage.toResponse(chatMessage.getCreatedAt().toString(), chatMessage.getUser().toChatMemberResponse());
+            String createdAt = chatMessage.getCreatedAt().toString();
+            String year = createdAt.substring(0,4) + ".";
+            String month = createdAt.substring(5,7) + ".";
+            String day = createdAt.substring(8,10) + " ";
+            String time = createdAt.substring(11,19);
+            createdAt = year + month + day + time;
+            ChatMessageResponseDto responseDto = chatMessage.toResponse(createdAt, chatMessage.getUser().toChatMemberResponse());
             responseDtoList.add(responseDto);
         }
 
