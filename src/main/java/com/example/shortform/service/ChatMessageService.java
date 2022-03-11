@@ -108,7 +108,7 @@ public class ChatMessageService {
             redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
         } else {
             ChatMessage chatMessage = saveMessage(requestDto, user.getEmail());
-            String createdAt = requestDto.getCreatedAt();
+            String createdAt = chatMessage.getCreatedAt().toString();
             String year = createdAt.substring(0,4) + ".";
             String month = createdAt.substring(5,7) + ".";
             String day = createdAt.substring(8,10) + " ";
