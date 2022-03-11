@@ -49,7 +49,8 @@ public class RankingService {
             u.setYesterdayRank(yesterdayRank);
         }
 
-//         // 12시 마다 데일리 인증 초기화해주기
+
+         // 12시 마다 데일리 인증 초기화해주기
          List<UserChallenge> userChallenges = userChallengeRepository.findAll();
          for (UserChallenge userChallenge : userChallenges) {
              userChallenge.setDailyAuthenticated(false);
