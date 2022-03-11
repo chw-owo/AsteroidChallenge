@@ -116,7 +116,7 @@ public class User extends Timestamped{
 
     @PrePersist
     public void prePersist(){
-        this.yesterdayRank = 1;
+        this.yesterdayRank = 0;
     }
 
 
