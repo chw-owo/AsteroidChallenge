@@ -12,4 +12,6 @@ public interface UserChallengeRepository extends JpaRepository<UserChallenge, Lo
     UserChallenge findByUserIdAndChallengeId(Long id, Long challengeId);
 
     void deleteByUserIdAndChallengeId(Long id, Long challengeId);
+
+    List<UserChallenge> findAllByUser(User user);
 }

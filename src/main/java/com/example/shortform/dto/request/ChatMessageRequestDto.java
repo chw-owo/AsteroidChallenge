@@ -3,6 +3,8 @@ package com.example.shortform.dto.request;
 import com.example.shortform.domain.ChatMessage;
 import com.example.shortform.domain.ChatRoom;
 import com.example.shortform.domain.User;
+import com.example.shortform.dto.resonse.ChatMessageResponseDto;
+import com.example.shortform.dto.resonse.ChatRoomMemberDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,6 +26,17 @@ public class ChatMessageRequestDto {
                 .content(message)
                 .user(user)
                 .chatRoom(chatRoom)
+                .roomId(roomId)
+                .build();
+    }
+
+    public ChatMessageResponseDto toMessageResponse(ChatRoomMemberDto user) {
+        return ChatMessageResponseDto.builder()
+                .type(type)
+                .user(user)
+                .sender(user.getNickname())
+                .message(message)
+                .createdAt(createdAt)
                 .roomId(roomId)
                 .build();
     }

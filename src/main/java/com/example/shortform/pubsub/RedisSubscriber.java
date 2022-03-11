@@ -35,7 +35,6 @@ public class RedisSubscriber {
             // 채팅방을 구독한 클라이언트에게 메시지 발송
 //            messagingTemplate.convertAndSend("/sub/chat/rooms/" + chatMessage.getRoomId(), chatMessage);
             messagingTemplate.convertAndSend("/sub/chat/rooms/" + chatMessageResponseDto.getRoomId(), chatMessageResponseDto);
-            log.info("subscriber 완료");
         } catch (Exception e) {
             log.error("Exception {}", e);
         }

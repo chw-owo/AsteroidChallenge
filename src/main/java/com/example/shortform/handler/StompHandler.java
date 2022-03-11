@@ -23,7 +23,7 @@ import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Slf4j
-@Transactional
+//@Transactional
 @Component
 @RequiredArgsConstructor
 public class StompHandler implements ChannelInterceptor {
@@ -39,7 +39,7 @@ public class StompHandler implements ChannelInterceptor {
 
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         String jwtToken = accessor.getFirstNativeHeader("authorization");
-        jwtAuthenticationProvider.validateToken(jwtToken);
+//        jwtAuthenticationProvider.validateToken(jwtToken);
         log.info("Web Socket 들어올 때 token 검증 = {}", message.getHeaders());
         log.info("Web Socket 들어올 때 token 검증 = {}", jwtToken);
 
@@ -59,7 +59,7 @@ public class StompHandler implements ChannelInterceptor {
             if (roomId != null) {
                 log.info("sub if문 진입");
                 String sessionId = (String) message.getHeaders().get("simpSessionId");
-                log.info("sub sessionId = {}", destination);
+                log.info("sub sessionId = {}", sessionId);
                 String email = jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("authorization"));
                 log.info("sub email = {}", email);
                 User user = userRepository.findByEmail(email).orElseThrow(
@@ -84,23 +84,34 @@ public class StompHandler implements ChannelInterceptor {
                 log.info("SUBSCRIBED {}, {}", user.getNickname(), roomId);
             }
         } else if (StompCommand.DISCONNECT == accessor.getCommand()) {
+            log.info("disconnect 진입 token = {}", jwtToken);
             String sessionId = (String) message.getHeaders().get("simpSessionId");
             String roomId = redisRepository.getUserEnterRoomId(sessionId);
 
-            String email = jwtAuthenticationProvider.getUser(jwtToken);
-            User user = userRepository.findByEmail(email).orElseThrow(
-                    () -> new NotFoundException("로그인 하지 않은 유저입니다.")
-            );
+            log.info("sessionId = {}, roomId = {}", sessionId, roomId);
 
-            ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
-                    .type(ChatMessage.MessageType.QUIT)
-                    .roomId(roomId)
-                    .userId(user.getId())
-                    .build();
+            String token = Optional.ofNullable(accessor.getFirstNativeHeader("authorization")).orElse("unknownUser");
+            log.info("token = {}", token);
 
-            chatMessageService.sendChatMessage(requestDto);
+            if (accessor.getFirstNativeHeader("authorization") != null) {
+                String email = jwtAuthenticationProvider.getUser(token);
+                log.info("email = {}", email);
+                User user = userRepository.findByEmail(email).orElseThrow(
+                        () -> new NotFoundException("로그인 하지 않은 유저입니다.")
+                );
+                ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
+                        .type(ChatMessage.MessageType.QUIT)
+                        .roomId(roomId)
+                        .userId(user.getId())
+                        .build();
+                chatMessageService.sendChatMessage(requestDto);
 
-            redisRepository.removeUserEnterInfo(sessionId);
+            }
+
+            if (roomId != null) {
+                redisRepository.removeUserEnterInfo(sessionId);
+            }
+
             log.info("DISCONNECT {}, {}", sessionId, roomId);
         }
 

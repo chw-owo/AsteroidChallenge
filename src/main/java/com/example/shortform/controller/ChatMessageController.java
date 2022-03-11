@@ -30,16 +30,7 @@ public class ChatMessageController {
                 () -> new NotFoundException("인증되지 않은 유저입니다.")
         );
 
-        if (ChatMessage.MessageType.ENTER.equals(requestDto.getType())) {
-            requestDto.setMessage(user.getNickname() + "님이 방에 입장했습니다.");
-        } else if (ChatMessage.MessageType.QUIT.equals(requestDto.getType())) {
-            requestDto.setMessage(user.getNickname() + "님이 방에서 나갔습니다.");
-        }
-
-        ChatMessage chatMessage = chatMessageService.saveDB(requestDto, email);
-
-        ChatRoomMemberDto member = user.toChatMemberResponse();
-
         chatMessageService.sendChatMessage(requestDto);
+
     }
 }

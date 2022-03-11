@@ -10,7 +10,7 @@ import javax.annotation.Resource;
 @Repository
 public class RedisRepository {
     @Resource(name = "redisTemplate")
-    private HashOperations<String,String, String> hashEnterInfo;
+    private HashOperations<String, String, String> hashEnterInfo;
 
     public static final String ENTER_INFO = "ENTER_INFO";
 

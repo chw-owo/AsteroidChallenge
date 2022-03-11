@@ -5,10 +5,7 @@ import com.example.shortform.domain.*;
 import com.example.shortform.dto.request.ChatRoomRequestDto;
 import com.example.shortform.dto.resonse.*;
 import com.example.shortform.exception.NotFoundException;
-import com.example.shortform.repository.ChallengeRepository;
-import com.example.shortform.repository.ChatMessageRepository;
-import com.example.shortform.repository.ChatRoomRepository;
-import com.example.shortform.repository.UserChatRoomRepository;
+import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;
@@ -26,6 +23,7 @@ public class ChatRoomService {
     private final UserChatRoomRepository userChatRoomRepository;
     private final ChallengeRepository challengeRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final UserChallengeRepository userChallengeRepository;
 
     @Transactional
     public Long createChatRoom(ChatRoomRequestDto requestDto, PrincipalDetails principalDetails) {
@@ -43,36 +41,38 @@ public class ChatRoomService {
     @Transactional
     public List<ChatRoomListResponseDto> getAllMyRooms(PrincipalDetails principalDetails) {
         User user = principalDetails.getUser();
-        List<UserChatRoom> userChatRooms = userChatRoomRepository.findAllByUser(user);
         List<ChatRoomListResponseDto> chatRoomResponseDtoList = new ArrayList<>();
+        List<UserChallenge> userChallenges = userChallengeRepository.findAllByUser(user);
 
-        for (UserChatRoom userChatRoom : userChatRooms) {
+        for (UserChallenge userChallenge : userChallenges) {
             List<String> profileImageList = new ArrayList<>();
             List<ChatRoomMemberDto> memberList = new ArrayList<>();
-            ChatRoom chatRoom = userChatRoom.getChatRoom();
-            List<UserChatRoom> userList = userChatRoomRepository.findAllByChatRoom(chatRoom);
-            for (UserChatRoom room : userList) {
-                User member = room.getUser();
+            Challenge challenge = userChallenge.getChallenge();
+            List<UserChallenge> userList = userChallengeRepository.findAllByChallenge(challenge);
+            for (UserChallenge userC : userList) {
+                User member = userC.getUser();
                 memberList.add(member.toChatMemberResponse());
                 profileImageList.add(member.getProfileImage());
             }
-            List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoom(chatRoom);
+            ChatRoom chatRoom = challenge.getChatRoom();
+            List<UserChatRoom> userChatRooms = userChatRoomRepository.findAllByChatRoom(chatRoom);
+            List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoom(challenge.getChatRoom());
             ChatRoomListResponseDto chatRoomResponseDto;
             if (chatMessageList.size() == 0) {
-                chatRoomResponseDto = chatRoom.toResponseList(
-                        chatRoom.getCreatedAt(),
+                chatRoomResponseDto = challenge.getChatRoom().toResponseList(
+                        challenge.getChatRoom().getCreatedAt(),
                         profileImageList,
-                        memberList.size(),
+                        userChatRooms.size(),
                         memberList,
                         null
                 );
             } else {
-                chatRoomResponseDto = chatRoom.toResponseList(
-                        chatRoom.getCreatedAt(),
+                chatRoomResponseDto = challenge.getChatRoom().toResponseList(
+                        challenge.getChatRoom().getCreatedAt(),
                         profileImageList,
-                        memberList.size(),
+                        userChatRooms.size(),
                         memberList,
-                        chatMessageList.get(1).getContent()
+                        chatMessageList.get(0).getContent()
                 );
             }
             chatRoomResponseDtoList.add(chatRoomResponseDto);
