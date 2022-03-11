@@ -89,7 +89,6 @@ public class JwtAuthenticationProvider implements InitializingBean{
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            log.info("validate 들어옴");
             /*if (redisUtil.hasKeyBlackList(token)) {
                 throw new UnauthorizedException("이미 탈퇴한 회원입니다");
             }*/

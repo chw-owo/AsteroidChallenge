@@ -41,34 +41,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.httpBasic().disable()
                 .cors().configurationSource(corsConfigurationSource());
 
-//        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .formLogin().disable()
-//
-//                .authorizeRequests()
-//                .antMatchers("/auth/**").permitAll()
-//                .antMatchers("*").permitAll()
-//
-//                .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-//                .anyRequest()
-//                //.authenticated()
-//                .permitAll()
-//                .and()
-//                .addFilterBefore(new JwtAuthenticationFilter(jwtAuthenticationProvider),
-//                        UsernamePasswordAuthenticationFilter.class);
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용 안함.
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .formLogin().disable() // 기본 로그인 방식 안쓸거임.
+                .formLogin().disable()
+
                 .authorizeRequests()
-                .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers("/auth/**").permitAll()
+                .antMatchers("/challenge/**").permitAll()
+                .antMatchers("/category/**", "/users/**", "/chat/**").permitAll()
+                .antMatchers("/ranking/**", "/posts/**", "/mypage/**").permitAll()
+                .antMatchers("/pub/**", "/sub/**").permitAll()
+                .antMatchers("/h2-console/**").permitAll()
+                .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers("/chatting/**").permitAll()
-                .antMatchers("*").permitAll()
                 .antMatchers("/chat/message").permitAll()
                 //.antMatchers(HttpMethod.OPTIONS, "/test/**").permitAll()
                 .anyRequest()
-                .permitAll()
-                .and().cors().configurationSource(corsConfigurationSource())    // 추가
+                .authenticated()
+                //.permitAll()
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtAuthenticationProvider),
                         UsernamePasswordAuthenticationFilter.class);
@@ -80,7 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.addAllowedOrigin("http://localhost:3000");
-        configuration.addAllowedOriginPattern("*");
+        configuration.addAllowedOrigin("http://hanghae-asteroid.s3-website.ap-northeast-2.amazonaws.com/");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.addExposedHeader("*");

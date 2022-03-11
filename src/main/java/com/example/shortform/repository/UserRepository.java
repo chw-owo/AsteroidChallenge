@@ -21,4 +21,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "inner join fetch u.level " +
             "where u.id = :user_id")
     Optional<User> findUserInfo(@Param("user_id") Long userId);
+
+    List<User> findAllByOrderByRankingPointDesc();
+
+
+    List<User> findAllByOrderByYesterdayRankingPointDesc();
 }

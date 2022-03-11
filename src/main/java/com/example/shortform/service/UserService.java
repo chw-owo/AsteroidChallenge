@@ -1,15 +1,15 @@
 package com.example.shortform.service;
 
+import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
 import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.domain.Level;
 import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
+import com.example.shortform.domain.UserChallenge;
 import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
-
 import com.example.shortform.dto.resonse.UserInfo;
-
 import com.example.shortform.dto.resonse.UserProfileInfo;
 import com.example.shortform.exception.DuplicateException;
 import com.example.shortform.exception.InvalidException;
@@ -18,6 +18,7 @@ import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.mail.EmailMessage;
 import com.example.shortform.mail.EmailService;
 import com.example.shortform.repository.LevelRepository;
+import com.example.shortform.repository.UserChallengeRepository;
 import com.example.shortform.repository.UserRepository;
 import com.example.shortform.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -41,6 +44,8 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserChallengeRepository userChallengeRepository;
+    private final ChallengeService challengeService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
@@ -66,18 +71,20 @@ public class UserService {
             throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
 
 
+        Level level = new Level();
         //test
         //========================================================
         if(!levelRepository.findById(1L).isPresent()){
-            Level level_tmp = new Level("temp level");
-            levelRepository.save(level_tmp);
+            level = new Level("temp level");
+            levelRepository.save(level);
+        }else{
+            level = levelRepository.findById(1L).orElseThrow(
+                    () -> new NotFoundException("존재하지 않는 LEVEL 입니다.")
+            );
         }
+
         //========================================================
 
-
-        Level level = levelRepository.findById(1L).orElseThrow(
-                () -> new NotFoundException("존재하지 않는 LEVEL 입니다.")
-        );
 
         // 비밀번호 암호화
         String encPassword = passwordEncoder.encode(rawPassword);
@@ -254,7 +261,23 @@ public class UserService {
 
     // 로그인한 유저 정보 가져오기
     public UserInfo findUserInfo(User user) {
-        return UserInfo.of(user);
+
+        List<UserChallenge> challengeInfo = userChallengeRepository.findAllByUser(user);
+
+        int dailyCount = 0;
+        for (UserChallenge userChallenge : challengeInfo) {
+            String status = null;
+            try {
+                 status = challengeService.challengeStatus(userChallenge.getChallenge());
+            } catch (ParseException e) {
+                throw new InvalidException("잘못된 날짜 형식 입니다.");
+            }
+
+            if (!userChallenge.isDailyAuthenticated() && "진행중".equals(status))
+                dailyCount++;
+        }
+
+        return UserInfo.of(user, dailyCount);
     }
 
     @Transactional(readOnly = true)
@@ -265,7 +288,12 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<CMResponseDto> updateProfile(Long userId, ProfileRequestDto requestDto, MultipartFile multipartFile) throws IOException {
+    public ResponseEntity<CMResponseDto> updateProfile(Long userId, ProfileRequestDto requestDto, MultipartFile multipartFile,
+                                                       PrincipalDetails principalDetails) throws IOException {
+
+        if (!principalDetails.getUser().getId().equals(userId))
+            throw new InvalidException("다른 사용자의 정보는 수정할 수 없습니다.");
+
         // 해당하는 유저 entity 찾기
         User findUser = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException("존재하지 않는 유저입니다.")
@@ -273,24 +301,26 @@ public class UserService {
         // 이미지 S3 업로드
         String imgUrl;
 
-        if (multipartFile.getSize() != 0) {
+        // 이미지 변경해주기
+        if (multipartFile != null) {
             imgUrl = s3Uploader.upload(multipartFile, UUID.randomUUID() + multipartFile.getOriginalFilename());
             findUser.setProfileImage(imgUrl);
         }
-        
-
-        // TODO valid 추가 해줘야 한다.
 
         // 비밀번호 변경
-        if(!isDuplicatePassword(requestDto.getPassword(), requestDto.getPasswordCheck()))
-            throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        if (!"".equals(requestDto.getPassword().trim()) ||
+                !"".equals(requestDto.getPasswordCheck().trim())) {
 
-        if (passwordEncoder.matches(requestDto.getPassword(), findUser.getPassword()))
-            throw new DuplicateException("기존 비밀번호와 동일합니다.");
+            if(!isDuplicatePassword(requestDto.getPassword(), requestDto.getPasswordCheck()))
+                throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
 
-        String encPassword = passwordEncoder.encode(requestDto.getPassword());
+            if (passwordEncoder.matches(requestDto.getPassword(), findUser.getPassword()))
+                throw new DuplicateException("기존 비밀번호와 동일합니다.");
 
-        findUser.setPassword(encPassword);
+            String encPassword = passwordEncoder.encode(requestDto.getPassword());
+
+            findUser.setPassword(encPassword);
+        }
 
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
