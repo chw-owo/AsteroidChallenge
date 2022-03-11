@@ -6,6 +6,7 @@ import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.domain.Level;
 import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
+import com.example.shortform.domain.UserChallenge;
 import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.dto.resonse.UserInfo;
@@ -17,6 +18,7 @@ import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.mail.EmailMessage;
 import com.example.shortform.mail.EmailService;
 import com.example.shortform.repository.LevelRepository;
+import com.example.shortform.repository.UserChallengeRepository;
 import com.example.shortform.repository.UserRepository;
 import com.example.shortform.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -40,6 +44,8 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserChallengeRepository userChallengeRepository;
+    private final ChallengeService challengeService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
@@ -255,7 +261,23 @@ public class UserService {
 
     // 로그인한 유저 정보 가져오기
     public UserInfo findUserInfo(User user) {
-        return UserInfo.of(user);
+
+        List<UserChallenge> challengeInfo = userChallengeRepository.findAllByUser(user);
+
+        int dailyCount = 0;
+        for (UserChallenge userChallenge : challengeInfo) {
+            String status = null;
+            try {
+                 status = challengeService.challengeStatus(userChallenge.getChallenge());
+            } catch (ParseException e) {
+                throw new InvalidException("잘못된 날짜 형식 입니다.");
+            }
+
+            if (!userChallenge.isDailyAuthenticated() && "진행중".equals(status))
+                dailyCount++;
+        }
+
+        return UserInfo.of(user, dailyCount);
     }
 
     @Transactional(readOnly = true)

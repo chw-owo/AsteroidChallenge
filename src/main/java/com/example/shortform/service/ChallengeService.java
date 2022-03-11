@@ -212,11 +212,11 @@ public class ChallengeService {
             }
             String status = challengeStatus(challenge);
 
-            if(categoryId.equals(challenge.getCategory())){
+            //if(categoryId.equals(challenge.getCategory())){
                 ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
                 responseDto.setStatus(status);
                 ChallengesResponseDtos.add(responseDto);
-            }
+            //}
         }
 
         return ChallengesResponseDtos;
