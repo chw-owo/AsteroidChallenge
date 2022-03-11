@@ -6,6 +6,8 @@ import lombok.*;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Builder
@@ -60,5 +62,40 @@ public class UserChallenge extends Timestamped{
         } catch (ParseException e) {
             throw new InvalidException("날짜 형식이 잘못되었습니다.");
         }
+    }
+
+    public boolean getParticipateDate(int challengeDate, Challenge challenge) {
+        // 챌린지 시작 후 참가가능 일수
+        int possibleParticipateDate = (int) Math.ceil(challengeDate * 0.2); // 10일이면 2일
+
+        // 참여가능 날짜
+        String date1 = challenge.getStartDate().split(" ")[0];
+
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
+            Date date = format.parse(date1);
+
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            cal.add(Calendar.DATE, possibleParticipateDate - 1); // 시작일 포함해야돼서 -1 해준다.
+
+            // 80%까지 참여할 수 있는 날짜
+            String participateDate = format.format(cal.getTime());
+
+            // 현재날짜 구하기
+            LocalDate now = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            String nowDate = now.format(formatter);
+
+            // 참여가능날짜 지났는지 비교
+            Date before = format.parse(participateDate); // 2.27
+            Date after = format.parse(nowDate); // 3.11
+
+            return after.before(before);
+
+        } catch (ParseException e) {
+            throw new InvalidException("날짜 형식이 잘못되었습니다.");
+        }
+
     }
 }

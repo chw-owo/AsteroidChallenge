@@ -272,6 +272,14 @@ public class ChallengeService {
             throw new DuplicateException("이미 참가한 챌린지입니다.");
         }
 
+        // 중간에 참가하는 로직 구현
+        UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(challenge.getUser().getId(), challengeId);
+        // 챌린지 기간
+        int challengeDate = userChallenge.getChallengeDate();
+        // 현재 날짜와 챌린지 참가 가능한 날짜 비교
+        if (!userChallenge.getParticipateDate(challengeDate, challenge))
+            throw new InvalidException("참가 가능 날짜가 지났습니다.");
+
         userChallengeRepository.save(new UserChallenge(challenge, user));
         List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
         challenge.setCurrentMember(userChallenges.size());
