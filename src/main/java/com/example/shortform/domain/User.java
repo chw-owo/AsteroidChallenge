@@ -36,8 +36,6 @@ public class User extends Timestamped{
     @JoinColumn(name = "level_id")
     private Level level;
 
-
-    @Setter
     @Column(name = "point", nullable = false)
     private int rankingPoint;
 
@@ -112,4 +110,7 @@ public class User extends Timestamped{
     }
 
 
+    public void changeLevel(Level level) {
+        this.level = level;
+    }
 }
