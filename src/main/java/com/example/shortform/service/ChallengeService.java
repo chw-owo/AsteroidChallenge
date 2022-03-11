@@ -10,6 +10,7 @@ import com.example.shortform.dto.request.ChallengeModifyRequestDto;
 import com.example.shortform.dto.request.PasswordDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.dto.resonse.MemberResponseDto;
+import com.example.shortform.dto.resonse.UserChallengeInfo;
 import com.example.shortform.exception.*;
 import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -211,11 +212,11 @@ public class ChallengeService {
             }
             String status = challengeStatus(challenge);
 
-            if(categoryId.equals(challenge.getCategory())){
+            //if(categoryId.equals(challenge.getCategory())){
                 ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
                 responseDto.setStatus(status);
                 ChallengesResponseDtos.add(responseDto);
-            }
+            //}
         }
 
         return ChallengesResponseDtos;
@@ -398,5 +399,63 @@ public class ChallengeService {
         challengeRepository.delete(challenge);
 
         return ResponseEntity.ok(new CMResponseDto("true"));
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public ResponseEntity<List<UserChallengeInfo>> getUserChallenge(Long userId) throws ParseException {
+        User findUser = userRepository.findUserInfo(userId).orElseThrow(
+                () -> new NotFoundException("존재하지 않는 유저입니다.")
+        );
+
+        List<UserChallenge> UserChallengeInfoList = userChallengeRepository.findAllUserChallengeInfo(findUser.getId());
+        List<UserChallengeInfo> userChallengeInfoList = new ArrayList<>();
+
+        for (UserChallenge userChallenge : UserChallengeInfoList) {
+
+            // challenge
+            Challenge challenge = userChallenge.getChallenge();
+            // status
+            String status = challengeStatus(challenge);
+
+            String dailyAuth = null;
+            // 진행중 챌린지 : 포스트 인증하면 내가 해냄 리턴해주기
+            if (userChallenge.isDailyAuthenticated())
+                dailyAuth = "true";
+            else
+                dailyAuth = "false";
+
+            // 완료된 챌린지에서 성공, 실패 리턴해주기
+            if ("완료".equals(status)) {
+                // 성공일수(챌린지 진행일 * 0.8) > 인증횟수
+                if ((int)Math.ceil(userChallenge.getChallengeDate() * 0.8) > userChallenge.getAuthCount())
+                    status = "실패";
+                // 인증횟수가 같거나 더 많으면 성공
+                else
+                    status = "성공";
+            }
+
+            // tag
+            List<String> tagChallengeStrings = new ArrayList<>();
+            List<TagChallenge> tagChallenges = challenge.getTagChallenges();
+            for(TagChallenge tagChallenge : tagChallenges){
+                String tagChallengeString = tagChallenge.getTag().getName();
+                tagChallengeStrings.add(tagChallengeString);
+            }
+
+            // image
+            List<String> challengeImages = new ArrayList<>();
+            List<ImageFile> ImageFiles =  challenge.getChallengeImage();
+            for(ImageFile image:ImageFiles){
+                challengeImages.add(image.getFilePath());
+            }
+
+            UserChallengeInfo userChallengeInfo = UserChallengeInfo.of(challenge, status, tagChallengeStrings,
+                    challengeImages, dailyAuth);
+
+            userChallengeInfoList.add(userChallengeInfo);
+        }
+
+        return ResponseEntity.ok(userChallengeInfoList);
+
     }
 }

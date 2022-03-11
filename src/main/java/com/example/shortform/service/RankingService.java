@@ -3,10 +3,12 @@ package com.example.shortform.service;
 import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.domain.Ranking;
 import com.example.shortform.domain.User;
+import com.example.shortform.domain.UserChallenge;
 import com.example.shortform.dto.RequestDto.RankingRequestDto;
 import com.example.shortform.dto.ResponseDto.RankingResponseDto;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.RankingRepository;
+import com.example.shortform.repository.UserChallengeRepository;
 import com.example.shortform.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,12 +27,15 @@ public class RankingService {
 
     private final RankingRepository rankRepository;
     private final UserRepository userRepository;
+    private final UserChallengeRepository userChallengeRepository;
 
-    @Scheduled(fixedDelay = 20000)//cron = "0 0 0 * * *")
+
+    @Scheduled(cron = "0 0 0 * * *")//fixedDelay = 1000 * 60 * 60 * 24)
     public void updateRank(){
         List<User> users = userRepository.findAllByOrderByRankingPointDesc();
         Ranking rank = new Ranking(users);
         rankRepository.save(rank);
+
 
         ArrayList<Integer> rankingPointList = new ArrayList<>();
 
@@ -44,6 +49,13 @@ public class RankingService {
             u.setYesterdayRank(yesterdayRank);
         }
 
+//         // 12시 마다 데일리 인증 초기화해주기
+//         List<UserChallenge> userChallenges = userChallengeRepository.findAll();
+//         for (UserChallenge userChallenge : userChallenges) {
+//             userChallenge.setDailyAuthenticated(false);
+//             userChallengeRepository.save(userChallenge);
+      
+         }
     }
 
     public List<RankingResponseDto> getRanking(PrincipalDetails principalDetails){
