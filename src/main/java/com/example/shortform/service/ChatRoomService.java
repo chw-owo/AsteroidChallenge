@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.transaction.Transactional;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class ChatRoomService {
     private final ChallengeRepository challengeRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserChallengeRepository userChallengeRepository;
+    private final ChallengeService challengeService;
 
     @Transactional
     public Long createChatRoom(ChatRoomRequestDto requestDto, PrincipalDetails principalDetails) {
@@ -39,7 +41,7 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public List<ChatRoomListResponseDto> getAllMyRooms(PrincipalDetails principalDetails) {
+    public List<ChatRoomListResponseDto> getAllMyRooms(PrincipalDetails principalDetails) throws ParseException {
         User user = principalDetails.getUser();
         List<ChatRoomListResponseDto> chatRoomResponseDtoList = new ArrayList<>();
         List<UserChallenge> userChallenges = userChallengeRepository.findAllByUser(user);
@@ -48,7 +50,8 @@ public class ChatRoomService {
             List<String> profileImageList = new ArrayList<>();
             List<ChatRoomMemberDto> memberList = new ArrayList<>();
             Challenge challenge = userChallenge.getChallenge();
-            if (challenge.getStatus().equals(ChallengeStatus.ING)) {
+            String status = challengeService.challengeStatus(challenge);
+            if (status.equals("진행중")) {
                 List<UserChallenge> userList = userChallengeRepository.findAllByChallenge(challenge);
                 for (UserChallenge userC : userList) {
                     User member = userC.getUser();
