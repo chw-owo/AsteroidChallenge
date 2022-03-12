@@ -37,10 +37,7 @@ public class UserApiController {
     @PostMapping("/auth/signup")
     public ResponseEntity<CMResponseDto> signup(@RequestBody @Valid SignupRequestDto signupRequestDto) {
 
-        ResponseEntity<CMResponseDto> response;
-        response = userService.signup(signupRequestDto);
-        rankingService.updateRank();
-        return response;
+        return userService.signup(signupRequestDto);
     }
 
     // 이메일 중복체크
