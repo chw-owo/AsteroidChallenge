@@ -11,6 +11,7 @@ import com.example.shortform.dto.resonse.UserProfileInfo;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.service.ChallengeService;
 import com.example.shortform.service.KakaoService;
+import com.example.shortform.service.RankingService;
 import com.example.shortform.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +29,18 @@ import java.util.List;
 public class UserApiController {
 
     private final UserService userService;
+    private final RankingService rankingService;
     private final KakaoService kakaoService;
     private final ChallengeService challengeService;
 
     // 회원가입
     @PostMapping("/auth/signup")
     public ResponseEntity<CMResponseDto> signup(@RequestBody @Valid SignupRequestDto signupRequestDto) {
-        return userService.signup(signupRequestDto);
+
+        ResponseEntity<CMResponseDto> response;
+        response = userService.signup(signupRequestDto);
+        rankingService.updateRank();
+        return response;
     }
 
     // 이메일 중복체크

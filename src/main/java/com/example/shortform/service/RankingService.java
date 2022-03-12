@@ -32,6 +32,7 @@ public class RankingService {
 
     //@Scheduled(fixedDelay = 10000)//(cron = "0 0 0 * * *")//
     @Scheduled(cron = "0 0 0 * * *")
+
     public void updateRank() {
         List<User> users = userRepository.findAllByOrderByRankingPointDesc();
 //        Ranking rank = new Ranking(users);
@@ -54,8 +55,8 @@ public class RankingService {
             int todayRank = rankingPointList.indexOf(user.getRankingPoint()) + 1;
             String status = "";
 
-            if (yesterdayRank == -1) {
-                status = "new";
+            if (yesterdayRank == -1) { //새로 등장
+                status = "유지";
             } else if (yesterdayRank > todayRank) {
                 status = "상승";
             } else if (yesterdayRank == todayRank) {
@@ -64,8 +65,6 @@ public class RankingService {
                 status = "하강";
             }
 
-//            todayRank = 3;
-//            status = "test";
 
             user.setRankStatus(status);
             user.setYesterdayRank(todayRank);
