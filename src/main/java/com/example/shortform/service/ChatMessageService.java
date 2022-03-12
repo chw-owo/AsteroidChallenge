@@ -100,7 +100,7 @@ public class ChatMessageService {
             saveChatMember(requestDto, user);
             requestDto.setMessage(user.getNickname() + "님이 방에 입장했습니다.");
 
-            SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("YYYY.MM.dd HH:mm:ss");
             Calendar cal = Calendar.getInstance();
             Date date = cal.getTime();
             sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -113,7 +113,7 @@ public class ChatMessageService {
             saveChatMember(requestDto, user);
             requestDto.setMessage(user.getNickname() + "님이 방에서 나갔습니다.");
 
-            SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("YYYY.MM.dd HH:mm:ss");
             Calendar cal = Calendar.getInstance();
             Date date = cal.getTime();
             sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
