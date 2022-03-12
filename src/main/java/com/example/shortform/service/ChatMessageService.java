@@ -50,7 +50,7 @@ public class ChatMessageService {
                 () -> new NotFoundException("유저정보가 존재하지 않습니다.")
         );
 
-        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm");
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
         Calendar cal = Calendar.getInstance();
         Date date = cal.getTime();
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -99,11 +99,27 @@ public class ChatMessageService {
         if (ChatMessage.MessageType.ENTER.equals(requestDto.getType())) {
             saveChatMember(requestDto, user);
             requestDto.setMessage(user.getNickname() + "님이 방에 입장했습니다.");
+
+            SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+            Calendar cal = Calendar.getInstance();
+            Date date = cal.getTime();
+            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+            String dateResult = sdf.format(date);
+            requestDto.setCreatedAt(dateResult);
+
             ChatMessageResponseDto responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
             redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
         } else if (ChatMessage.MessageType.QUIT.equals(requestDto.getType())) {
             saveChatMember(requestDto, user);
             requestDto.setMessage(user.getNickname() + "님이 방에서 나갔습니다.");
+
+            SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+            Calendar cal = Calendar.getInstance();
+            Date date = cal.getTime();
+            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+            String dateResult = sdf.format(date);
+            requestDto.setCreatedAt(dateResult);
+
             ChatMessageResponseDto responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
             redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
         } else {
