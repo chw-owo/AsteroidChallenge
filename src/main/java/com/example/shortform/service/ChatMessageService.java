@@ -99,25 +99,27 @@ public class ChatMessageService {
         if (ChatMessage.MessageType.ENTER.equals(requestDto.getType())) {
             saveChatMember(requestDto, user);
             requestDto.setMessage(user.getNickname() + "님이 방에 입장했습니다.");
-            String createdAt = requestDto.getCreatedAt();
-            String year = createdAt.substring(0,4) + ".";
-            String month = createdAt.substring(5,7) + ".";
-            String day = createdAt.substring(8,10) + " ";
-            String time = createdAt.substring(11,19);
-            createdAt = year + month + day + time;
-            requestDto.setCreatedAt(createdAt);
+
+            SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+            Calendar cal = Calendar.getInstance();
+            Date date = cal.getTime();
+            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+            String dateResult = sdf.format(date);
+            requestDto.setCreatedAt(dateResult);
+
             ChatMessageResponseDto responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
             redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
         } else if (ChatMessage.MessageType.QUIT.equals(requestDto.getType())) {
             saveChatMember(requestDto, user);
             requestDto.setMessage(user.getNickname() + "님이 방에서 나갔습니다.");
-            String createdAt = requestDto.getCreatedAt();
-            String year = createdAt.substring(0,4) + ".";
-            String month = createdAt.substring(5,7) + ".";
-            String day = createdAt.substring(8,10) + " ";
-            String time = createdAt.substring(11,19);
-            createdAt = year + month + day + time;
-            requestDto.setCreatedAt(createdAt);
+
+            SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+            Calendar cal = Calendar.getInstance();
+            Date date = cal.getTime();
+            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+            String dateResult = sdf.format(date);
+            requestDto.setCreatedAt(dateResult);
+
             ChatMessageResponseDto responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
             redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
         } else {
