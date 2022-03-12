@@ -48,34 +48,37 @@ public class ChatRoomService {
             List<String> profileImageList = new ArrayList<>();
             List<ChatRoomMemberDto> memberList = new ArrayList<>();
             Challenge challenge = userChallenge.getChallenge();
-            List<UserChallenge> userList = userChallengeRepository.findAllByChallenge(challenge);
-            for (UserChallenge userC : userList) {
-                User member = userC.getUser();
-                memberList.add(member.toChatMemberResponse());
-                profileImageList.add(member.getProfileImage());
+            if (challenge.getStatus().equals(ChallengeStatus.ING)) {
+                List<UserChallenge> userList = userChallengeRepository.findAllByChallenge(challenge);
+                for (UserChallenge userC : userList) {
+                    User member = userC.getUser();
+                    memberList.add(member.toChatMemberResponse());
+                    profileImageList.add(member.getProfileImage());
+                }
+                ChatRoom chatRoom = challenge.getChatRoom();
+                List<UserChatRoom> userChatRooms = userChatRoomRepository.findAllByChatRoom(chatRoom);
+                List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoom(chatRoom);
+                ChatRoomListResponseDto chatRoomResponseDto;
+                if (chatMessageList.size() == 0) {
+                    chatRoomResponseDto = challenge.getChatRoom().toResponseList(
+                            chatRoom.getCreatedAt(),
+                            profileImageList,
+                            userChatRooms.size(),
+                            memberList,
+                            null
+                    );
+                } else {
+                    chatRoomResponseDto = challenge.getChatRoom().toResponseList(
+                            challenge.getCreatedAt(),
+                            profileImageList,
+                            userChatRooms.size(),
+                            memberList,
+                            chatMessageList.get(0).getContent()
+                    );
+                }
+                chatRoomResponseDtoList.add(chatRoomResponseDto);
             }
-            ChatRoom chatRoom = challenge.getChatRoom();
-            List<UserChatRoom> userChatRooms = userChatRoomRepository.findAllByChatRoom(chatRoom);
-            List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoom(challenge.getChatRoom());
-            ChatRoomListResponseDto chatRoomResponseDto;
-            if (chatMessageList.size() == 0) {
-                chatRoomResponseDto = challenge.getChatRoom().toResponseList(
-                        challenge.getChatRoom().getCreatedAt(),
-                        profileImageList,
-                        userChatRooms.size(),
-                        memberList,
-                        null
-                );
-            } else {
-                chatRoomResponseDto = challenge.getChatRoom().toResponseList(
-                        challenge.getChatRoom().getCreatedAt(),
-                        profileImageList,
-                        userChatRooms.size(),
-                        memberList,
-                        chatMessageList.get(0).getContent()
-                );
-            }
-            chatRoomResponseDtoList.add(chatRoomResponseDto);
+
         }
         return chatRoomResponseDtoList;
     }
