@@ -31,7 +31,7 @@ public class RankingService {
 
 
     @Scheduled(cron = "0 0 0 * * *")//(fixedDelay = 1000000)
-    public void updateRank() {
+    public void updateRanks() {
         List<User> users = userRepository.findAllByOrderByRankingPointDesc();
 //        Ranking rank = new Ranking(users);
 //        rankRepository.save(rank);
@@ -81,6 +81,45 @@ public class RankingService {
             userChallengeRepository.save(userChallenge);
 
         }
+
+    }
+
+    public void updateRank(User user) {
+        List<User> users = userRepository.findAllByOrderByRankingPointDesc();
+//        Ranking rank = new Ranking(users);
+//        rankRepository.save(rank);
+
+        //Get Point List removed Dupl===========================================================
+
+        ArrayList<Integer> rankingPointList = new ArrayList<>();
+        for (User u : users) {
+            if (!rankingPointList.contains(u.getRankingPoint()))
+                rankingPointList.add(u.getRankingPoint());
+        }
+        Collections.sort(rankingPointList, Comparator.reverseOrder());
+
+        //Get Rank================================================================
+
+        int yesterdayRank = user.getYesterdayRank();
+        int todayRank = rankingPointList.indexOf(user.getRankingPoint()) + 1;
+        String status = "";
+
+        if (yesterdayRank == -1) { //새로 등장
+            status = "유지";
+        } else if (yesterdayRank > todayRank) {
+            status = "상승";
+        } else if (yesterdayRank == todayRank) {
+            status = "유지";
+        } else if (yesterdayRank < todayRank) {
+            status = "하강";
+        }
+
+
+        user.setRankStatus(status);
+        user.setYesterdayRank(todayRank);
+        user.setYesterdayRankingPoint(user.getRankingPoint());
+        userRepository.save(user);
+
 
     }
 

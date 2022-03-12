@@ -53,6 +53,8 @@ public class UserService {
     private final S3Uploader s3Uploader;
     private final HttpServletRequest request;
 
+    private final RankingService rankingService;
+
     @Transactional
     public ResponseEntity<CMResponseDto> signup(SignupRequestDto signupRequestDto) {
 
@@ -104,6 +106,7 @@ public class UserService {
 
         // 저장
         User savedUser = userRepository.save(user);
+        rankingService.updateRank(savedUser);
 
         savedUser.generateEmailCheckToken();
         sendSignupConfirmEmail(savedUser);
