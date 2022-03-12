@@ -45,6 +45,7 @@ public class ChallengeService {
     private final UserRepository userRepository;
     private final ImageFileRepository imageFileRepository;
 
+    private final UserChatRoomRepository userChatRoomRepository;
 
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -351,6 +352,13 @@ public class ChallengeService {
             userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(),challengeId);
             user.setRankingPoint(user.getRankingPoint() - 50);
             challenge.setCurrentMember(challenge.getCurrentMember() - 1);
+
+            UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(challenge.getChatRoom(), user);
+
+            if (userChatRoom != null) {
+                userChatRoomRepository.deleteByChatRoomIdAndUserId(challenge.getChatRoom().getId(), user.getId());
+            }
+
         } else {
             throw new ForbiddenException("참가하지 않은 챌린지입니다.");
         }
