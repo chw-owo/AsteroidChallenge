@@ -43,7 +43,7 @@ public class PostController {
         }
     }
 
-    @PatchMapping("/posts/{postId}")
+    @PutMapping("/posts/{postId}")
     public ResponseEntity<?> modifyPost(@PathVariable Long postId,
                                         @RequestPart("post") PostRequestDto requestDto,
                                         @RequestPart(value = "postImage",required = false) MultipartFile multipartFile,

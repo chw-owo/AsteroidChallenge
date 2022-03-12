@@ -2,6 +2,7 @@ package com.example.shortform.controller;
 
 import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.dto.request.CommentRequestDto;
+import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.service.CommentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,7 +23,7 @@ public class CommentController {
         if (principalDetails != null) {
             return commentService.writeComment(postId, requestDto, principalDetails);
         } else {
-            throw new NullPointerException("로그인 후 이용가능합니다.");
+            throw new UnauthorizedException("로그인 후 이용가능합니다.");
         }
     }
 
@@ -31,7 +32,7 @@ public class CommentController {
         if (principalDetails != null) {
             commentService.deleteComment(commentId, principalDetails);
         } else {
-            throw new NullPointerException("로그인 후 이용가능합니다.");
+            throw new UnauthorizedException("로그인 후 이용가능합니다.");
         }
     }
 }

@@ -32,6 +32,7 @@ public class RankingService {
 
     @Scheduled(cron = "0 0 0 * * *")//(fixedDelay = 1000000)
     public void updateRanks() {
+
         List<User> users = userRepository.findAllByOrderByRankingPointDesc();
 //        Ranking rank = new Ranking(users);
 //        rankRepository.save(rank);

@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Objects;
 
@@ -48,11 +46,11 @@ public class GlobalExceptionHandler {
                 HttpStatus.valueOf(e.getErrorCode().getStatus()));
     }
 
-    /*@ExceptionHandler(InternalServerException.class)
+    @ExceptionHandler(InternalServerException.class)
     public ResponseEntity<ErrorResponse> handleInternalServerException(InternalServerException e) {
         return new ResponseEntity<>(new ErrorResponse(e.getErrorCode(), e.getMessage()),
                 HttpStatus.valueOf(e.getErrorCode().getStatus()));
-    }*/
+    }
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(UsernameNotFoundException e) {
