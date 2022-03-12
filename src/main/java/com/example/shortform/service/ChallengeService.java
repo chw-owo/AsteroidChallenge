@@ -87,12 +87,15 @@ public class ChallengeService {
 
         // 이미지 업로드
 
+
+
         List<ImageFile> imageFileList = new ArrayList<>();
         List<String> challengeImages = new ArrayList<>();
+        if (multipartFiles != null){
+            for (MultipartFile m : multipartFiles) {
 
-        for (MultipartFile m : multipartFiles) {
-            if (m != null){
                 ImageFile imageFileUpload = imageFileService.upload(m, challenge);
+                ;
                 imageFileList.add(imageFileUpload);
                 challengeImages.add(imageFileUpload.getFilePath());
             }
