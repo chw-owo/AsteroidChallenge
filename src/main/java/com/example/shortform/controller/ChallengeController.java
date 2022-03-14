@@ -1,7 +1,6 @@
 package com.example.shortform.controller;
 
 import com.example.shortform.config.auth.PrincipalDetails;
-import com.example.shortform.domain.Category;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
 import com.example.shortform.dto.RequestDto.ReportRequestDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
@@ -12,10 +11,6 @@ import com.example.shortform.dto.request.PasswordDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.exception.InternalServerException;
 import com.example.shortform.exception.NotFoundException;
-import com.example.shortform.dto.ResponseDto.ChallengeIdResponseDto;
-import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
-import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
-import com.example.shortform.dto.ResponseDto.TagResponseDto;
 import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.service.ChallengeService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +23,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -37,18 +31,14 @@ public class ChallengeController {
     private final ChallengeService challengeService;
 
     @PostMapping(value = "/challenge")
-
-    public Map<String, Object> postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
-                                             @AuthenticationPrincipal PrincipalDetails principal,
-                                             @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException, ParseException {
-        if (principal != null) {
-            HashMap<String, Object> result = new HashMap<>();
-            result.put("result", "true");
-            result.put("challengeId", challengeService.postChallenge(requestDto, principal, multipartFiles));
-            return result;
-        } else
-            throw new UnauthorizedException("로그인 후 이용가능합니다.");
-
+    public Long postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
+                              @AuthenticationPrincipal PrincipalDetails principalDetails,
+                              @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException, ParseException {
+        if (principalDetails != null) {
+            return challengeService.postChallenge(requestDto, principalDetails, multipartFiles);
+        } else{
+        throw new NotFoundException("로그인한 유저정보가 없습니다.");
+        }
     }
 
 
@@ -58,7 +48,7 @@ public class ChallengeController {
     }
 
     @GetMapping("/challenge/{challengeId}")
-    public ChallengeResponseDto getChallenge(@PathVariable Long challengeId) throws Exception, InternalServerException {
+    public ChallengeResponseDto getChallenge(@PathVariable Long challengeId,@RequestBody ReportResponseDto responseDto) throws Exception, InternalServerException {
         return challengeService.getChallenge(challengeId);
     }
 
@@ -123,9 +113,9 @@ public class ChallengeController {
     }
 
     @PostMapping("/challenge/{challengeId}/report")
-    public List<ReportResponseDto> getReport(@PathVariable Long challengeId, @RequestBody ReportRequestDto requsetDto) throws ParseException {
+    public List<ReportResponseDto> getReport(@PathVariable Long challengeId, @RequestBody ReportRequestDto requestDto) throws ParseException {
 
-        return challengeService.getReport(challengeId, requsetDto);
+        return challengeService.getReport(challengeId, requestDto);
 
 
     }
