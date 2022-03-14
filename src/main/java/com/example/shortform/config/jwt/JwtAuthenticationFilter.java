@@ -32,9 +32,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(jwt) && jwtAuthenticationProvider.validateToken(jwt)) {
             Authentication authentication = jwtAuthenticationProvider.getAuthentication(jwt);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.info("saved login info {}", authentication.getName());
-        } else
-            log.info("invalid login token {}", requestURI);
+            //log.info("saved login info {}", authentication.getName());
+        }
+
 
         filterChain.doFilter(request, response);
     }
