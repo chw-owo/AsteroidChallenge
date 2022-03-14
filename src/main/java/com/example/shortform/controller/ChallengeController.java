@@ -3,6 +3,7 @@ package com.example.shortform.controller;
 import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.domain.Category;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
+import com.example.shortform.dto.RequestDto.ReportRequestDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
 import com.example.shortform.dto.ResponseDto.ReportResponseDto;
@@ -34,19 +35,17 @@ public class ChallengeController {
 
     private final ChallengeService challengeService;
 
-    //for test
-
     @PostMapping(value = "/challenge")
     public ResponseEntity<CMResponseDto> postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
-                                                       @AuthenticationPrincipal PrincipalDetails principal,
-                                                       @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException {
-        return challengeService.postChallenge(requestDto, principal, multipartFiles);
+                                                       @AuthenticationPrincipal PrincipalDetails principalDetails,
+                                                       @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException, ParseException {
+        if (principalDetails != null) {
+            return challengeService.postChallenge(requestDto, principalDetails, multipartFiles);
+        } else{
+        throw new NotFoundException("로그인한 유저정보가 없습니다.");
+        }
     }
-//     @PostMapping("/challenge")
-//     public ResponseEntity<?> createChallenge(@RequestPart(value = "imageFile", required = false) List<MultipartFile> multipartFileList,
-//                                              @RequestPart("challenge")ChallengeRequestDto requestDto) throws IOException {
-//         return challengeService.createChallenge(multipartFileList, requestDto);
-//     }
+
 
     @GetMapping("/challenge")
     public List<ChallengesResponseDto> getChallenges() throws ParseException, InternalServerException {
@@ -118,16 +117,11 @@ public class ChallengeController {
         }
     }
 
-    @GetMapping("/challenge/{challengeId}/report")
-    public ReportResponseDto successDate(@PathVariable Long challengeId) throws ParseException {// @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        //if (principalDetails != null) {
-        return challengeService.successDate(challengeId);
-//            HashMap<String, Object> result = new HashMap<>();
-//            result.put("result", "true");
-//            return result;
-//        } else {
-//            throw new NullPointerException("로그인 후 이용가능합니다.");
-//        }
+    @PostMapping("/challenge/{challengeId}/report")
+    public List<ReportResponseDto> getReport(@PathVariable Long challengeId, @RequestBody ReportRequestDto requsetDto) throws ParseException {
+
+        return challengeService.getReport(challengeId, requsetDto);
+
 
     }
 

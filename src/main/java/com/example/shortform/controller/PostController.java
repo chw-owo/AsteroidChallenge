@@ -32,6 +32,8 @@ public class PostController {
         } else{
             throw new NotFoundException("로그인한 유저정보가 없습니다.");
         }
+
+
     }
 
     @DeleteMapping("/posts/{postId}")
