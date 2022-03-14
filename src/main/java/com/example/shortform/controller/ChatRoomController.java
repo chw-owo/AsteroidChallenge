@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class ChatRoomController {
     }
 
     @GetMapping("/chat/rooms")
-    public List<ChatRoomListResponseDto> getAllMyRooms(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public List<ChatRoomListResponseDto> getAllMyRooms(@AuthenticationPrincipal PrincipalDetails principalDetails) throws ParseException {
         return chatRoomService.getAllMyRooms(principalDetails);
     }
 
