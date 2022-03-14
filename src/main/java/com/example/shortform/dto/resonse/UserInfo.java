@@ -11,6 +11,7 @@ public class UserInfo {
     private String email;
     private String nickname;
     private String profileUrl;
+    private String levelName;
 
     private int dailyCount;
 
@@ -20,6 +21,7 @@ public class UserInfo {
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .profileUrl(user.getProfileImage())
+                .levelName(user.getLevel().getName())
                 .dailyCount(dailyCount)
                 .build();
     }
