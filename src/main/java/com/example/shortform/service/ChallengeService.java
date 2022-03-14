@@ -14,10 +14,8 @@ import com.example.shortform.dto.resonse.MemberResponseDto;
 import com.example.shortform.dto.resonse.UserChallengeInfo;
 import com.example.shortform.exception.*;
 import com.example.shortform.repository.*;
-import jdk.jfr.Percentage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,7 +28,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -193,9 +190,9 @@ public class ChallengeService {
             }else{
                 percentage = 0;
             }
-            System.out.print(division);
+            //System.out.print(division);
             System.out.print("/");
-            System.out.println(divisor);
+            //System.out.println(divisor);
             ReportResponseDto responseDto = ReportResponseDto.builder().date(date.toString()).percentage(percentage).build();
             responseDtos.add(responseDto);
 

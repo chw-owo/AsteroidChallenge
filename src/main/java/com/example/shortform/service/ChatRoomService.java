@@ -103,7 +103,7 @@ public class ChatRoomService {
             String year = createdAt.substring(0,4) + ".";
             String month = createdAt.substring(5,7) + ".";
             String day = createdAt.substring(8,10) + " ";
-            String time = createdAt.substring(11,19);
+            String time = createdAt.substring(11,16);
             createdAt = year + month + day + time;
             ChatMessageResponseDto responseDto = chatMessage.toResponse(createdAt);
             responseDtoList.add(responseDto);

@@ -14,4 +14,5 @@ public class ChatRoomMemberDto {
     private String email;
     private String nickname;
     private String profileUrl;
+    private String levelName;
 }
