@@ -44,12 +44,25 @@ public class ChatMessageService {
         }
     }
 
-    @Transactional
-    public ChatMessage saveMessage(ChatMessageRequestDto requestDto, String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new NotFoundException("유저정보가 존재하지 않습니다.")
+    public void sendChatMessage(ChatMessageRequestDto requestDto) {
+        User user = userRepository.findById(requestDto.getUserId()).orElseThrow(
+                () -> new NotFoundException("유저가 존재하지 않습니다.")
         );
 
+        if (ChatMessage.MessageType.ENTER.equals(requestDto.getType())) {
+            requestDto.setMessage(user.getNickname() + "님이 방에 입장했습니다.");
+        } else if (ChatMessage.MessageType.QUIT.equals(requestDto.getType())) {
+            requestDto.setMessage(user.getNickname() + "님이 방에서 퇴장했습니다.");
+        }
+
+        ChatMessageResponseDto responseDto = save(requestDto, user);
+
+        redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
+    }
+
+
+    @Transactional
+    public ChatMessageResponseDto save(ChatMessageRequestDto requestDto, User user) {
         SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
         Calendar cal = Calendar.getInstance();
         Date date = cal.getTime();
@@ -58,9 +71,9 @@ public class ChatMessageService {
         requestDto.setCreatedAt(dateResult);
 
         ChatRoom chatRoom = chatRoomRepository.findById(Long.valueOf(requestDto.getRoomId())).orElseThrow(
-                () -> new NotFoundException("")
+                () -> new NotFoundException("채팅방이 존재하지 않습니다.")
         );
-        ChatMessage chatMessage = requestDto.toEntity(user, chatRoom);
+
         UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(chatRoom, user);
         if (userChatRoom == null) {
             userChatRoom = UserChatRoom.builder()
@@ -70,92 +83,109 @@ public class ChatMessageService {
             userChatRoomRepository.save(userChatRoom);
         }
 
-        return chatMessageRepository.save(chatMessage);
-    }
-
-    public void saveChatMember(ChatMessageRequestDto requestDto, User user) {
-
-        ChatRoom chatRoom = chatRoomRepository.findById(Long.valueOf(requestDto.getRoomId())).orElseThrow(
-                () -> new NotFoundException("")
-        );
-        UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(chatRoom, user);
-        if (userChatRoom == null) {
-            userChatRoom = UserChatRoom.builder()
-                    .user(user)
-                    .chatRoom(chatRoom)
-                    .build();
-            userChatRoomRepository.save(userChatRoom);
-        }
-    }
-
-    public void sendChatMessage(ChatMessageRequestDto requestDto) {
-        User user = userRepository.findById(requestDto.getUserId()).orElseThrow(
-                () -> new NotFoundException("")
-        );
-//        ChatRoom chatRoom = chatRoomRepository.findById(Long.valueOf(requestDto.getRoomId())).orElse(null);
-
-//        UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(chatRoom, user);
-
-        if (ChatMessage.MessageType.ENTER.equals(requestDto.getType())) {
-            saveChatMember(requestDto, user);
-            requestDto.setMessage(user.getNickname() + "님이 방에 입장했습니다.");
-
-            SimpleDateFormat sdf = new SimpleDateFormat("YYYY.MM.dd HH:mm:ss");
-            Calendar cal = Calendar.getInstance();
-            Date date = cal.getTime();
-            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-            String dateResult = sdf.format(date);
-            requestDto.setCreatedAt(dateResult);
-
-            ChatMessageResponseDto responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
-            redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
-        } else if (ChatMessage.MessageType.QUIT.equals(requestDto.getType())) {
-            saveChatMember(requestDto, user);
-            requestDto.setMessage(user.getNickname() + "님이 방에서 나갔습니다.");
-
-            SimpleDateFormat sdf = new SimpleDateFormat("YYYY.MM.dd HH:mm:ss");
-            Calendar cal = Calendar.getInstance();
-            Date date = cal.getTime();
-            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-            String dateResult = sdf.format(date);
-            requestDto.setCreatedAt(dateResult);
-
-            ChatMessageResponseDto responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
-            redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
+        ChatMessageResponseDto responseDto;
+        if (ChatMessage.MessageType.TALK.equals(requestDto.getType())) {
+            ChatMessage chatMessage = chatMessageRepository.save(requestDto.toEntity(user, chatRoom));
+            responseDto = chatMessage.toResponse(chatMessage.getCreatedAt().toString());
         } else {
-            ChatMessage chatMessage = saveMessage(requestDto, user.getEmail());
-            String createdAt = chatMessage.getCreatedAt().toString();
-            String year = createdAt.substring(0,4) + ".";
-            String month = createdAt.substring(5,7) + ".";
-            String day = createdAt.substring(8,10) + " ";
-            String time = createdAt.substring(11,19);
-            createdAt = year + month + day + time;
-            requestDto.setCreatedAt(createdAt);
-            ChatMessageResponseDto responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
-            responseDto.setId(chatMessage.getId());
-            redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
+            responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
         }
 
-//        ChatMessageResponseDto responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
+        return responseDto;
 
-//        redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
     }
+}
 
 //    @Transactional
-//    public void sendAccessMessage(ChatMessageRequestDto requestDto) {
+//    public ChatMessage saveMessage(ChatMessageRequestDto requestDto, String email) {
+//        User user = userRepository.findByEmail(email).orElseThrow(
+//                () -> new NotFoundException("유저정보가 존재하지 않습니다.")
+//        );
+//
+//        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+//        Calendar cal = Calendar.getInstance();
+//        Date date = cal.getTime();
+//        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+//        String dateResult = sdf.format(date);
+//        requestDto.setCreatedAt(dateResult);
+//
+//        ChatRoom chatRoom = chatRoomRepository.findById(Long.valueOf(requestDto.getRoomId())).orElseThrow(
+//                () -> new NotFoundException("")
+//        );
+//        ChatMessage chatMessage = requestDto.toEntity(user, chatRoom);
+//        UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(chatRoom, user);
+//        if (userChatRoom == null) {
+//            userChatRoom = UserChatRoom.builder()
+//                    .user(user)
+//                    .chatRoom(chatRoom)
+//                    .build();
+//            userChatRoomRepository.save(userChatRoom);
+//        }
+//
+//        return chatMessageRepository.save(chatMessage);
+//    }
+
+//    public void saveChatMember(ChatMessageRequestDto requestDto, User user) {
+//
+//        ChatRoom chatRoom = chatRoomRepository.findById(Long.valueOf(requestDto.getRoomId())).orElseThrow(
+//                () -> new NotFoundException("")
+//        );
+//        UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(chatRoom, user);
+//        if (userChatRoom == null) {
+//            userChatRoom = UserChatRoom.builder()
+//                    .user(user)
+//                    .chatRoom(chatRoom)
+//                    .build();
+//            userChatRoomRepository.save(userChatRoom);
+//        }
+//    }
+
+//    public void sendChatMessages(ChatMessageRequestDto requestDto) {
 //        User user = userRepository.findById(requestDto.getUserId()).orElseThrow(
 //                () -> new NotFoundException("")
 //        );
+////        ChatRoom chatRoom = chatRoomRepository.findById(Long.valueOf(requestDto.getRoomId())).orElse(null);
 //
-//        ChatMessageResponseDto responseDto = ChatMessageResponseDto.builder()
-//                .type(requestDto.getType())
-//                .message(requestDto.getMessage())
-//                .sender(user.getNickname())
-//                .createdAt(requestDto.getCreatedAt())
-//                .roomId(requestDto.getRoomId())
-//                .user(user.toChatMemberResponse())
-//                .build();
+////        UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(chatRoom, user);
 //
-//        redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
+//        if (ChatMessage.MessageType.ENTER.equals(requestDto.getType())) {
+//            saveChatMember(requestDto, user);
+//            requestDto.setMessage(user.getNickname() + "님이 방에 입장했습니다.");
+//
+//            SimpleDateFormat sdf = new SimpleDateFormat("YYYY.MM.dd HH:mm:ss");
+//            Calendar cal = Calendar.getInstance();
+//            Date date = cal.getTime();
+//            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+//            String dateResult = sdf.format(date);
+//            requestDto.setCreatedAt(dateResult);
+//
+//            ChatMessageResponseDto responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
+//            redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
+//        } else if (ChatMessage.MessageType.QUIT.equals(requestDto.getType())) {
+//            saveChatMember(requestDto, user);
+//            requestDto.setMessage(user.getNickname() + "님이 방에서 나갔습니다.");
+//
+//            SimpleDateFormat sdf = new SimpleDateFormat("YYYY.MM.dd HH:mm:ss");
+//            Calendar cal = Calendar.getInstance();
+//            Date date = cal.getTime();
+//            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+//            String dateResult = sdf.format(date);
+//            requestDto.setCreatedAt(dateResult);
+//
+//            ChatMessageResponseDto responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
+//            redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
+//        } else {
+//            ChatMessage chatMessage = saveMessage(requestDto, user.getEmail());
+//            String createdAt = chatMessage.getCreatedAt().toString();
+//            String year = createdAt.substring(0,4) + ".";
+//            String month = createdAt.substring(5,7) + ".";
+//            String day = createdAt.substring(8,10) + " ";
+//            String time = createdAt.substring(11,19);
+//            createdAt = year + month + day + time;
+//            requestDto.setCreatedAt(createdAt);
+//            ChatMessageResponseDto responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
+//            responseDto.setId(chatMessage.getId());
+//            redisTemplate.convertAndSend(channelTopic.getTopic(), responseDto);
+//        }
+
 //    }
-}

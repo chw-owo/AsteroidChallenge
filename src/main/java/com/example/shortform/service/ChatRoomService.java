@@ -28,7 +28,7 @@ public class ChatRoomService {
     private final ChallengeService challengeService;
 
     @Transactional
-    public Long createChatRoom(ChatRoomRequestDto requestDto, PrincipalDetails principalDetails) {
+    public void createChatRoom(ChatRoomRequestDto requestDto, PrincipalDetails principalDetails) {
         User user = principalDetails.getUser();
         Challenge challenge = challengeRepository.findById(requestDto.getChallengeId()).orElseThrow(
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
@@ -37,7 +37,6 @@ public class ChatRoomService {
         chatRoomRepository.save(chatRoom);
         UserChatRoom userChatRoom = requestDto.toEntity(chatRoom, user);
         userChatRoomRepository.save(userChatRoom);
-        return chatRoom.getId();
     }
 
     @Transactional
@@ -87,20 +86,6 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public ChatRoomResponseDto getRoom(Long roomId, PrincipalDetails principalDetails) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new NotFoundException("채팅방이 존재하지 않습니다.")
-        );
-
-        User user = principalDetails.getUser();
-        MemberResponseDto member = user.toMemberResponse();
-
-        ChatRoomResponseDto chatRoomResponseDto = chatRoom.toRespnose(member);
-
-        return chatRoomResponseDto;
-    }
-
-    @Transactional
     public ChatMessageListDto getAllMessages(Long roomId, PrincipalDetails principalDetails) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new NotFoundException("채팅방이 존재하지 않습니다.")
@@ -114,13 +99,13 @@ public class ChatRoomService {
         List<ChatMessageResponseDto> responseDtoList = new ArrayList<>();
 
         for (ChatMessage chatMessage : messageList) {
-            String createdAt = chatMessage.getCreatedAt().toString();
-            String year = createdAt.substring(0,4) + ".";
-            String month = createdAt.substring(5,7) + ".";
-            String day = createdAt.substring(8,10) + " ";
-            String time = createdAt.substring(11,19);
-            createdAt = year + month + day + time;
-            ChatMessageResponseDto responseDto = chatMessage.toResponse(createdAt, chatMessage.getUser().toChatMemberResponse());
+//            String createdAt = chatMessage.getCreatedAt().toString();
+//            String year = createdAt.substring(0,4) + ".";
+//            String month = createdAt.substring(5,7) + ".";
+//            String day = createdAt.substring(8,10) + " ";
+//            String time = createdAt.substring(11,19);
+//            createdAt = year + month + day + time;
+            ChatMessageResponseDto responseDto = chatMessage.toResponse(chatMessage.getCreatedAt().toString());
             responseDtoList.add(responseDto);
         }
 

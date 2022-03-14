@@ -43,8 +43,7 @@ public class ChatMessage extends Timestamped{
     @Column(name = "room_id", nullable = false)
     private String roomId;
 
-    public ChatMessageResponseDto toResponse(String createdAt,
-                                             ChatRoomMemberDto memberDto) {
+    public ChatMessageResponseDto toResponse(String createdAt) {
         return ChatMessageResponseDto.builder()
                 .message(content)
                 .roomId(roomId)
@@ -52,7 +51,7 @@ public class ChatMessage extends Timestamped{
                 .type(type)
                 .sender(user.getNickname())
                 .id(id)
-                .user(memberDto)
+                .user(user.toChatMemberResponse())
                 .build();
     }
 
