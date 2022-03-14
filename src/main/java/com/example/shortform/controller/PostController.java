@@ -5,6 +5,9 @@ import com.example.shortform.dto.request.PostRequestDto;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -56,7 +59,7 @@ public class PostController {
     }
 
     @GetMapping("/challenge/{challengeId}/posts")
-    public ResponseEntity<?> getListPost(@PathVariable Long challengeId) {
-        return postService.getListPost(challengeId);
+    public ResponseEntity<?> getListPost(@PathVariable Long challengeId, @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return postService.getListPost(challengeId, pageable);
     }
 }

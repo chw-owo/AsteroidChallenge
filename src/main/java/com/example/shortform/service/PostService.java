@@ -11,20 +11,19 @@ import com.example.shortform.exception.InvalidException;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 import java.time.LocalDate;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -162,16 +161,17 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity<?> getListPost(Long challengeId) {
+    public ResponseEntity<?> getListPost(Long challengeId, Pageable pageable) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
 
-        List<Post> postList = postRepository.findAllByChallengeIdOrderByCreatedAtDesc(challengeId);
+//        List<Post> postList = postRepository.findAllByChallengeIdOrderByCreatedAtDesc(challengeId);
+        Page<Post> postPage = postRepository.findAllByChallengeId(challengeId, pageable);
         List<PostResponseDto> responseDtoList = new ArrayList<>();
 
 
-        for (Post post : postList) {
+        for (Post post : postPage) {
             List<CommentResponseDto> commentDetailList = new ArrayList<>();
             List<Comment> commentList = commentRepository.findAllByPostIdOrderByCreatedAtDesc(post.getId());
             for (Comment comment : commentList) {
