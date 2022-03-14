@@ -161,20 +161,21 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity<?> getListPost(Long challengeId, Pageable pageable) {
+    public ResponseEntity<?> getListPost(Long challengeId, Pageable postPageable, Pageable commentPageable) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
 
 //        List<Post> postList = postRepository.findAllByChallengeIdOrderByCreatedAtDesc(challengeId);
-        Page<Post> postPage = postRepository.findAllByChallengeId(challengeId, pageable);
+        Page<Post> postPage = postRepository.findAllByChallengeId(challengeId, postPageable);
         List<PostResponseDto> responseDtoList = new ArrayList<>();
 
 
         for (Post post : postPage) {
             List<CommentResponseDto> commentDetailList = new ArrayList<>();
-            List<Comment> commentList = commentRepository.findAllByPostIdOrderByCreatedAtDesc(post.getId());
-            for (Comment comment : commentList) {
+//            List<Comment> commentList = commentRepository.findAllByPostIdOrderByCreatedAtDesc(post.getId());
+            Page<Comment> commentPage = commentRepository.findAllByPostId(post.getId(), commentPageable);
+            for (Comment comment : commentPage) {
                 CommentResponseDto commentDetailResponseDto = comment.toResponse();
                 String commentCreatedAt = comment.getCreatedAt().toString();
                 String year = commentCreatedAt.substring(0,4) + ".";
