@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -36,14 +37,18 @@ public class ChallengeController {
     private final ChallengeService challengeService;
 
     @PostMapping(value = "/challenge")
-    public ResponseEntity<CMResponseDto> postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
-                                                       @AuthenticationPrincipal PrincipalDetails principalDetails,
-                                                       @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException, ParseException {
-        if (principalDetails != null) {
-            return challengeService.postChallenge(requestDto, principalDetails, multipartFiles);
-        } else{
-        throw new NotFoundException("로그인한 유저정보가 없습니다.");
-        }
+
+    public Map<String, Object> postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
+                                             @AuthenticationPrincipal PrincipalDetails principal,
+                                             @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException {
+        if (principal != null) {
+            HashMap<String, Object> result = new HashMap<>();
+            result.put("result", "true");
+            result.put("challengeId", challengeService.postChallenge(requestDto, principal, multipartFiles));
+            return result;
+        } else
+            throw new UnauthorizedException("로그인 후 이용가능합니다.");
+
     }
 
 

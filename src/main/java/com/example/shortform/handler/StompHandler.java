@@ -68,12 +68,6 @@ public class StompHandler implements ChannelInterceptor {
 
                 redisRepository.setUserEnterInfo(sessionId, roomId);
 
-//                ChatMessage chatMessage = ChatMessage.builder()
-//                        .roomId(roomId)
-//                        .user(user)
-//                        .type(ChatMessage.MessageType.ENTER)
-//                        .build();
-
                 ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
                         .type(ChatMessage.MessageType.ENTER)
                         .roomId(roomId)

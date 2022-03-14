@@ -31,7 +31,7 @@ public class UserProfileInfo {
                 .profileUrl(user.getProfileImage())
                 .levelName(user.getLevel().getName())
                 .levelIcon(user.getLevel().getLevelIcon())
-                .experiencePoint(user.getLevel().getExperiencePoint())
+                .experiencePoint(user.getLevel().getNextPoint())
                 .build();
     }
 }

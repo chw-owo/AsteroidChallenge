@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.transaction.Transactional;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,9 +25,10 @@ public class ChatRoomService {
     private final ChallengeRepository challengeRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserChallengeRepository userChallengeRepository;
+    private final ChallengeService challengeService;
 
     @Transactional
-    public Long createChatRoom(ChatRoomRequestDto requestDto, PrincipalDetails principalDetails) {
+    public void createChatRoom(ChatRoomRequestDto requestDto, PrincipalDetails principalDetails) {
         User user = principalDetails.getUser();
         Challenge challenge = challengeRepository.findById(requestDto.getChallengeId()).orElseThrow(
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
@@ -35,11 +37,10 @@ public class ChatRoomService {
         chatRoomRepository.save(chatRoom);
         UserChatRoom userChatRoom = requestDto.toEntity(chatRoom, user);
         userChatRoomRepository.save(userChatRoom);
-        return chatRoom.getId();
     }
 
     @Transactional
-    public List<ChatRoomListResponseDto> getAllMyRooms(PrincipalDetails principalDetails) {
+    public List<ChatRoomListResponseDto> getAllMyRooms(PrincipalDetails principalDetails) throws ParseException {
         User user = principalDetails.getUser();
         List<ChatRoomListResponseDto> chatRoomResponseDtoList = new ArrayList<>();
         List<UserChallenge> userChallenges = userChallengeRepository.findAllByUser(user);
@@ -48,7 +49,8 @@ public class ChatRoomService {
             List<String> profileImageList = new ArrayList<>();
             List<ChatRoomMemberDto> memberList = new ArrayList<>();
             Challenge challenge = userChallenge.getChallenge();
-            if (challenge.getStatus().equals(ChallengeStatus.ING)) {
+            String status = challengeService.challengeStatus(challenge);
+            if (status.equals("진행중")) {
                 List<UserChallenge> userList = userChallengeRepository.findAllByChallenge(challenge);
                 for (UserChallenge userC : userList) {
                     User member = userC.getUser();
@@ -73,7 +75,7 @@ public class ChatRoomService {
                             profileImageList,
                             userChatRooms.size(),
                             memberList,
-                            chatMessageList.get(0).getContent()
+                            chatMessageList.get(chatMessageList.size() - 1).getContent()
                     );
                 }
                 chatRoomResponseDtoList.add(chatRoomResponseDto);
@@ -81,20 +83,6 @@ public class ChatRoomService {
 
         }
         return chatRoomResponseDtoList;
-    }
-
-    @Transactional
-    public ChatRoomResponseDto getRoom(Long roomId, PrincipalDetails principalDetails) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new NotFoundException("채팅방이 존재하지 않습니다.")
-        );
-
-        User user = principalDetails.getUser();
-        MemberResponseDto member = user.toMemberResponse();
-
-        ChatRoomResponseDto chatRoomResponseDto = chatRoom.toRespnose(member);
-
-        return chatRoomResponseDto;
     }
 
     @Transactional
@@ -117,7 +105,7 @@ public class ChatRoomService {
             String day = createdAt.substring(8,10) + " ";
             String time = createdAt.substring(11,19);
             createdAt = year + month + day + time;
-            ChatMessageResponseDto responseDto = chatMessage.toResponse(createdAt, chatMessage.getUser().toChatMemberResponse());
+            ChatMessageResponseDto responseDto = chatMessage.toResponse(createdAt);
             responseDtoList.add(responseDto);
         }
 
