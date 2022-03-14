@@ -14,6 +14,8 @@ import com.example.shortform.dto.resonse.UserChallengeInfo;
 import com.example.shortform.exception.*;
 import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,10 +26,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -145,12 +145,13 @@ public class ChallengeService {
         }
     }
 
-    public List<ChallengesResponseDto> getChallenges() throws ParseException, InternalServerException {
-        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
+    public List<ChallengesResponseDto> getChallenges(Pageable pageable) throws ParseException, InternalServerException {
+//        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
+        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
 
 
-        for(Challenge challenge: challenges){
+        for(Challenge challenge: challengePage){
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles =  challenge.getChallengeImage();
 //            if(ImageFiles.isEmpty()){

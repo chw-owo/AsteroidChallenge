@@ -18,6 +18,9 @@ import com.example.shortform.dto.ResponseDto.TagResponseDto;
 import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.service.ChallengeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -56,8 +59,8 @@ public class ChallengeController {
 //     }
 
     @GetMapping("/challenge")
-    public List<ChallengesResponseDto> getChallenges() throws ParseException, InternalServerException {
-        return challengeService.getChallenges();
+    public List<ChallengesResponseDto> getChallenges(@PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
+        return challengeService.getChallenges(pageable);
     }
 
     @GetMapping("/challenge/{challengeId}")
