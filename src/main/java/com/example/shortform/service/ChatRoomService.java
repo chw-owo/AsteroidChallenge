@@ -75,7 +75,7 @@ public class ChatRoomService {
                             profileImageList,
                             userChatRooms.size(),
                             memberList,
-                            chatMessageList.get(0).getContent()
+                            chatMessageList.get(chatMessageList.size() - 1).getContent()
                     );
                 }
                 chatRoomResponseDtoList.add(chatRoomResponseDto);
