@@ -148,15 +148,17 @@ public class ChallengeService {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()->new NotFoundException("존재하지 않는 챌린지입니다."));
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
-        Date startDate = format.parse(requestDto.getStartDate());
         LocalDate now = LocalDate.now();
 
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(startDate);
+        Date startDate = format.parse(requestDto.getStartDate());
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(startDate);   // calendar 구조체에 오늘 날짜를 저장함
+        startCalendar.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
 
         for(int i =0; i<7; i++){
-            cal.add(Calendar.DATE, 1);
-            LocalDate localDate = LocalDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault()).toLocalDate();
+            startCalendar.add(Calendar.DATE, 1);
+            LocalDate localDate = LocalDateTime.ofInstant(startCalendar.toInstant(), ZoneId.systemDefault()).toLocalDate();
+            localDate = localDate.minusDays(1);
             dateList.add(localDate);
         }
 
