@@ -40,7 +40,7 @@ public class ChallengeController {
 
     public Map<String, Object> postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
                                              @AuthenticationPrincipal PrincipalDetails principal,
-                                             @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException {
+                                             @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException, ParseException {
         if (principal != null) {
             HashMap<String, Object> result = new HashMap<>();
             result.put("result", "true");
