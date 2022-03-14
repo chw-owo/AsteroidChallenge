@@ -6,6 +6,7 @@ import com.example.shortform.dto.resonse.ChatMessageListDto;
 import com.example.shortform.dto.resonse.ChatMessageResponseDto;
 import com.example.shortform.dto.resonse.ChatRoomListResponseDto;
 import com.example.shortform.dto.resonse.ChatRoomResponseDto;
+import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
