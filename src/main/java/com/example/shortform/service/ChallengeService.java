@@ -57,7 +57,7 @@ public class ChallengeService {
 
     public Long postChallenge(ChallengeRequestDto requestDto,
                                               PrincipalDetails principal,
-                                            List<MultipartFile> multipartFiles) throws IOException, InternalServerException {
+                                            List<MultipartFile> multipartFiles) throws IOException, InternalServerException, ParseException {
 
         // 카테고리 받아오기
 
