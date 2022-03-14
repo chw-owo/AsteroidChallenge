@@ -29,6 +29,9 @@ public class Level extends Timestamped{
     @Column(name = "experience_point", nullable = false)
     private int experiencePoint;
 
+    @Column(name = "next_point", nullable = false)
+    private int nextPoint;
+
     @OneToMany(mappedBy = "level", orphanRemoval = true)
     private List<User> users = new ArrayList<>();
 

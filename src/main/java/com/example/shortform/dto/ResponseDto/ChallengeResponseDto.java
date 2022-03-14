@@ -21,6 +21,7 @@ public class ChallengeResponseDto {
 
     private Long challengeId;
     private Long userId;
+    private String roomId;
 
     private String title;
     private String content;
@@ -46,6 +47,7 @@ public class ChallengeResponseDto {
         this.startDate=challenge.getStartDate();
         this.endDate=challenge.getEndDate();
         this.isPrivate=challenge.getIsPrivate();
+        this.roomId = challenge.getChatRoom().getId().toString();
 
         this.userId = challenge.getUser().getId();
 
