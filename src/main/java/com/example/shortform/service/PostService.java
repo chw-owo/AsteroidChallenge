@@ -5,6 +5,7 @@ import com.example.shortform.domain.*;
 import com.example.shortform.dto.request.PostRequestDto;
 import com.example.shortform.dto.resonse.CommentResponseDto;
 import com.example.shortform.dto.resonse.PostResponseDto;
+import com.example.shortform.dto.resonse.PostWriteResponseDto;
 import com.example.shortform.exception.ForbiddenException;
 import com.example.shortform.exception.InvalidException;
 import com.example.shortform.exception.NotFoundException;
@@ -99,13 +100,18 @@ public class PostService {
         post.setImageFile(imageFile);
         User user = userRepository.findByEmail(principalDetails.getUsername()).orElseThrow(()-> new NotFoundException("존재하지 않는 사용자입니다"));
 
-
         user.setRankingPoint(user.getRankingPoint()+1);
 
         // 레벨업, 다운 로직
         levelService.checkLevelPoint(user);
 
-        return ResponseEntity.ok(post.toResponse());
+        PostWriteResponseDto responseDto = PostWriteResponseDto.builder()
+                .postId(post.getId())
+                .experiencePoint(user.getLevel().getNextPoint())
+                .rankingPoint(user.getRankingPoint())
+                .build();
+
+        return ResponseEntity.ok(responseDto);
     }
 
 
