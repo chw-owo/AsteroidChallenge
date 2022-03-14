@@ -63,7 +63,7 @@ public class ChatMessageService {
 
     @Transactional
     public ChatMessageResponseDto save(ChatMessageRequestDto requestDto, User user) {
-        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
         Calendar cal = Calendar.getInstance();
         Date date = cal.getTime();
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
