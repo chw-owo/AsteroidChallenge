@@ -50,7 +50,7 @@ public class ChallengeService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public ResponseEntity<CMResponseDto> postChallenge(ChallengeRequestDto requestDto,
+    public Long postChallenge(ChallengeRequestDto requestDto,
                                               PrincipalDetails principal,
                                             List<MultipartFile> multipartFiles) throws IOException, InternalServerException {
 
@@ -87,16 +87,11 @@ public class ChallengeService {
         }
 
         // 이미지 업로드
-
-
-
         List<ImageFile> imageFileList = new ArrayList<>();
         List<String> challengeImages = new ArrayList<>();
         if (multipartFiles != null){
             for (MultipartFile m : multipartFiles) {
-
                 ImageFile imageFileUpload = imageFileService.upload(m, challenge);
-                ;
                 imageFileList.add(imageFileUpload);
                 challengeImages.add(imageFileUpload.getFilePath());
             }
@@ -109,7 +104,7 @@ public class ChallengeService {
         userChallengeRepository.save(userChallenge);
         challenge.setUser(user);
 
-        return ResponseEntity.ok(new CMResponseDto("true"));
+        return challenge.getId();
     }
 
 
