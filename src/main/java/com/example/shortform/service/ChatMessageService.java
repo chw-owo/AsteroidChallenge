@@ -91,6 +91,14 @@ public class ChatMessageService {
             responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
         }
 
+        String createdAt = responseDto.getCreatedAt();
+        String year = createdAt.substring(0,4) + ".";
+        String month = createdAt.substring(5,7) + ".";
+        String day = createdAt.substring(8,10) + " ";
+        String time = createdAt.substring(11,19);
+        createdAt = year + month + day + time;
+        responseDto.setCreatedAt(createdAt);
+
         return responseDto;
 
     }
