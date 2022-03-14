@@ -98,8 +98,6 @@ public class PostService {
         }
         //for Report, 퍼센테이지 업데이트====================================================
 
-        //userChallenge.setAuthCount(userChallenge.getAuthCount() + 1);
-
         AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
         authChallenge.setAuthMember(authChallenge.getAuthMember()+1);
         authChallengeRepository.save(authChallenge);
@@ -145,11 +143,19 @@ public class PostService {
         levelService.checkLevelPoint(user);
 
         postRepository.deleteById(postId);
-
         // // 해당 게시글에 인증삭제하면 당일 인증여부 체크
         UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(), post.getChallenge().getId());
         userChallenge.setDailyAuthenticated(false);
         userChallenge.setAuthCount(userChallenge.getAuthCount() - 1);
+
+        //for Report, 퍼센테이지 업데이트====================================================
+
+        AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(userChallenge.getChallenge(), post.getCreatedAt().toLocalDate());
+        authChallenge.setAuthMember(authChallenge.getAuthMember()-1);
+        authChallengeRepository.save(authChallenge);
+
+        //============================================================================
+
 
     }
 
