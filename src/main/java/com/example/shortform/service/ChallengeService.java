@@ -14,8 +14,10 @@ import com.example.shortform.dto.resonse.MemberResponseDto;
 import com.example.shortform.dto.resonse.UserChallengeInfo;
 import com.example.shortform.exception.*;
 import com.example.shortform.repository.*;
+import jdk.jfr.Percentage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,8 +29,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.chrono.ChronoLocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -57,21 +59,21 @@ public class ChallengeService {
                                               PrincipalDetails principal,
                                             List<MultipartFile> multipartFiles) throws IOException, InternalServerException, ParseException {
 
-                // 카테고리 받아오기
+        // 카테고리 받아오기
 
-                Category category = categoryRepository.findByName(requestDto.getCategory());
+        Category category = categoryRepository.findByName(requestDto.getCategory());
 
-                // 태그 저장하기
-                List<TagChallenge> tagChallenges = new ArrayList<>();
-                Challenge challenge = new Challenge(requestDto, category);
-                List<String> tagStrings = requestDto.getTagName();
+        // 태그 저장하기
+        List<TagChallenge> tagChallenges = new ArrayList<>();
+        Challenge challenge = new Challenge(requestDto, category);
+        List<String> tagStrings = requestDto.getTagName();
 
-                for (String tagString : tagStrings) {
-                    Tag tag = new Tag(tagString);
-                    tagRepository.save(tag);
+        for (String tagString : tagStrings) {
+            Tag tag = new Tag(tagString);
+            tagRepository.save(tag);
 
-                    TagChallenge tagChallenge = new TagChallenge(challenge, tag);
-                    if (!tagChallenges.contains(tagChallenge)) { // 한 게시물 내부의 중복태그 방지
+            TagChallenge tagChallenge = new TagChallenge(challenge, tag);
+            if (!tagChallenges.contains(tagChallenge)) { // 한 게시물 내부의 중복태그 방지
                 tagChallenges.add(tagChallenge);
                 tagChallengeRepository.save(tagChallenge);
             } else {
@@ -126,7 +128,7 @@ public class ChallengeService {
         LocalDate endLocalDate = LocalDateTime.ofInstant(endCalendar.toInstant(), endCalendar.getTimeZone().toZoneId()).toLocalDate();
 
 
-        for (LocalDate date = startLocalDate.minusDays(1); date.isBefore(endLocalDate); date = date.plusDays(1))
+        for (LocalDate date = startLocalDate; date.isBefore(endLocalDate); date = date.plusDays(1))
         {
             AuthChallenge authChallenge = AuthChallenge.builder()
                     .challenge(challenge)
@@ -149,6 +151,8 @@ public class ChallengeService {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()->new NotFoundException("존재하지 않는 챌린지입니다."));
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
+        LocalDate now = LocalDate.now();
+
         Date startDate = format.parse(requestDto.getStartDate());
         Calendar startCalendar = Calendar.getInstance();
         startCalendar.setTime(startDate);   // calendar 구조체에 오늘 날짜를 저장함
@@ -181,8 +185,6 @@ public class ChallengeService {
             int divisor = authChallenge.getAuthMember();
             double percentage_d = 0.0;
             int percentage;
-
-            LocalDate now = LocalDate.now();
 
             if(authChallenge.equals(null)){
                 percentage = 0;
