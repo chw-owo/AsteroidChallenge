@@ -15,6 +15,7 @@ public class PostResponseDto {
     private Long postId;
     private String nickname;
     private String profileImage;
+    private String levelName;
     private String postImage;
     private String content;
     private String createdAt;
