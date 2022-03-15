@@ -120,6 +120,7 @@ public class User extends Timestamped{
                 .userId(id)
                 .nickname(nickname)
                 .profileImage(profileImage)
+                .levelName(level.getName())
                 .build();
     }
 
@@ -129,6 +130,7 @@ public class User extends Timestamped{
                 .email(email)
                 .userId(id)
                 .nickname(nickname)
+                .levelName(level.getName())
                 .build();
     }
 

@@ -14,6 +14,7 @@ public class CommentResponseDto {
     private String nickname;
     private String content;
     private String profileImage;
+    private String levelName;
     private String createdAt;
 
 }

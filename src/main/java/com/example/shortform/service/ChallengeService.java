@@ -3,6 +3,7 @@ package com.example.shortform.service;
 import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.domain.*;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
+import com.example.shortform.dto.RequestDto.ReportRequestDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
 import com.example.shortform.dto.ResponseDto.ReportResponseDto;
@@ -25,6 +26,10 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -39,20 +44,22 @@ public class ChallengeService {
     private final CategoryRepository categoryRepository;
     private final TagChallengeRepository tagChallengeRepository;
     private final ImageFileService imageFileService;
-  
-  
+
+
     private final UserChallengeRepository userChallengeRepository;
     private final UserRepository userRepository;
     private final ImageFileRepository imageFileRepository;
 
     private final UserChatRoomRepository userChatRoomRepository;
 
+    private final AuthChallengeRepository authChallengeRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
+
     public Long postChallenge(ChallengeRequestDto requestDto,
                                               PrincipalDetails principal,
-                                            List<MultipartFile> multipartFiles) throws IOException, InternalServerException {
+                                            List<MultipartFile> multipartFiles) throws IOException, InternalServerException, ParseException {
 
         // 카테고리 받아오기
 
@@ -104,25 +111,100 @@ public class ChallengeService {
         userChallengeRepository.save(userChallenge);
         challenge.setUser(user);
 
+
+        // 위클리 레포트
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
+
+        Date startDate = format.parse(requestDto.getStartDate());
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(startDate);   // calendar 구조체에 오늘 날짜를 저장함
+        startCalendar.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
+        LocalDate startLocalDate = LocalDateTime.ofInstant(startCalendar.toInstant(), startCalendar.getTimeZone().toZoneId()).toLocalDate();
+
+
+        Date endDate = format.parse(requestDto.getEndDate());
+        Calendar endCalendar = Calendar.getInstance();
+        startCalendar.setTime(endDate);
+        endCalendar.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY);
+        LocalDate endLocalDate = LocalDateTime.ofInstant(endCalendar.toInstant(), endCalendar.getTimeZone().toZoneId()).toLocalDate();
+
+
+        for (LocalDate date = startLocalDate; date.isBefore(endLocalDate); date = date.plusDays(1))
+        {
+            AuthChallenge authChallenge = AuthChallenge.builder()
+                    .challenge(challenge)
+                    .date(date)
+                    .currentMember(1)
+                    .build();
+            authChallengeRepository.save(authChallenge);
+        }
+
+
         return challenge.getId();
+
     }
 
 
-    public ReportResponseDto successDate(Long challengeId) throws ParseException {
+    public List<ReportResponseDto> getReport(Long challengeId, ReportRequestDto requestDto) throws ParseException {
 
-        ReportResponseDto responseDto = new ReportResponseDto();
-        List<String> successDate = new ArrayList<>();
-
+        List<ReportResponseDto> responseDtos = new ArrayList<>();
+        List<LocalDate> dateList = new ArrayList<>();
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()->new NotFoundException("존재하지 않는 챌린지입니다."));
-        List<Post> posts = challenge.getPosts();
 
-        for(Post p:posts){
-            Date postDate =java.sql.Timestamp.valueOf(p.getCreatedAt());
-            successDate.add(postDate.toString());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
+        LocalDate now = LocalDate.now();
+
+        Date startDate = format.parse(requestDto.getStartDate());
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.setTime(startDate);   // calendar 구조체에 오늘 날짜를 저장함
+        startCalendar.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
+
+        for(int i =0; i<7; i++){
+            startCalendar.add(Calendar.DATE, 1);
+            LocalDate localDate = LocalDateTime.ofInstant(startCalendar.toInstant(), ZoneId.systemDefault()).toLocalDate();
+            localDate = localDate.minusDays(1);
+            dateList.add(localDate);
         }
-        responseDto.setSuccessDates(successDate);
 
-        return responseDto;
+        for (LocalDate date:dateList){
+
+            Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, date));
+            AuthChallenge authChallenge = new AuthChallenge();
+
+            if(!authChallengeCheck.isPresent()){
+                authChallenge = AuthChallenge.builder()
+                        .challenge(challenge)
+                        .date(date)
+                        .currentMember(1)
+                        .build();
+                authChallengeRepository.save(authChallenge);
+            }else{
+                authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, date);
+            }
+
+            int division = authChallenge.getCurrentMember();
+            int divisor = authChallenge.getAuthMember();
+            double percentage_d = 0.0;
+            int percentage;
+
+            if(authChallenge.equals(null)){
+                percentage = 0;
+            }
+            else if(!date.isAfter(now)) {
+                percentage_d = ( (double) divisor / (double) division ) * 100.0;
+                percentage = (int) percentage_d;
+            }else{
+                percentage = 0;
+            }
+            //System.out.print(division);
+            System.out.print("/");
+            //System.out.println(divisor);
+            ReportResponseDto responseDto = ReportResponseDto.builder().date(date.toString()).percentage(percentage).build();
+            responseDtos.add(responseDto);
+
+        }
+        return responseDtos;
     }
 
     public String challengeStatus(Challenge challenge) throws ParseException {
@@ -185,9 +267,9 @@ public class ChallengeService {
         List<UserChallenge> userChallengeList = userChallengeRepository.findAllByChallenge(challenge);
         List<MemberResponseDto> memberList = new ArrayList<>();
 
-         for (UserChallenge userChallenge : userChallengeList) {
-             memberList.add(userChallenge.getUser().toMemberResponse());
-         }
+        for (UserChallenge userChallenge : userChallengeList) {
+            memberList.add(userChallenge.getUser().toMemberResponse());
+        }
         String status = challengeStatus(challenge);
 
         ChallengeResponseDto challengeResponseDtos = new ChallengeResponseDto(challenge, challengeImage);
@@ -214,9 +296,9 @@ public class ChallengeService {
             String status = challengeStatus(challenge);
 
             //if(categoryId.equals(challenge.getCategory())){
-                ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
-                responseDto.setStatus(status);
-                ChallengesResponseDtos.add(responseDto);
+            ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
+            responseDto.setStatus(status);
+            ChallengesResponseDtos.add(responseDto);
             //}
         }
 
@@ -302,8 +384,13 @@ public class ChallengeService {
         List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
         challenge.setCurrentMember(userChallenges.size());
 
+        LocalDate now = LocalDate.now();
+        AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge,now);
+        authChallenge.setCurrentMember(authChallenge.getCurrentMember()+1);
+        authChallengeRepository.save(authChallenge);
+
     }
-    
+
 
     @Transactional
     public ResponseEntity<?> modifyChallenge(Long challengeId, ChallengeModifyRequestDto requestDto, List<MultipartFile> multipartFileList, PrincipalDetails principalDetails) throws IOException {
@@ -380,7 +467,7 @@ public class ChallengeService {
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
 
-    
+
 
     @Transactional
     public void privateParticipateChallenge(Long challengeId, PasswordDto passwordDto, PrincipalDetails principalDetails) {
@@ -462,7 +549,7 @@ public class ChallengeService {
                 // 성공일수(챌린지 진행일 * 0.8) > 인증횟수
                 if ((int)Math.ceil(userChallenge.getChallengeDate() * 0.8) > userChallenge.getAuthCount())
                     status = "실패";
-                // 인증횟수가 같거나 더 많으면 성공
+                    // 인증횟수가 같거나 더 많으면 성공
                 else
                     status = "성공";
             }

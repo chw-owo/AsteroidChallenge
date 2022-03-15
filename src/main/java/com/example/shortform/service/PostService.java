@@ -36,6 +36,7 @@ public class PostService {
     private final LevelService levelService;
     private final DateCheckRepository dateCheckRepository;
     private final UserChallengeRepository userChallengeRepository;
+    private final AuthChallengeRepository authChallengeRepository;
 
 
     @Autowired
@@ -46,7 +47,9 @@ public class PostService {
                        UserRepository userRepository,
                        DateCheckRepository dateCheckRepository,
                        UserChallengeRepository userChallengeRepository,
-                       LevelService levelService) {
+                       LevelService levelService,
+                       AuthChallengeRepository authChallengeRepository
+) {
         this.postRepository = postRepository;
         this.challengeRepository = challengeRepository;
         this.commentRepository = commentRepository;
@@ -54,6 +57,8 @@ public class PostService {
         this.userRepository = userRepository;
         this.dateCheckRepository = dateCheckRepository;
         this.userChallengeRepository = userChallengeRepository;
+
+        this.authChallengeRepository = authChallengeRepository;
         this.levelService = levelService;
     }
 
@@ -68,6 +73,10 @@ public class PostService {
         );
 
         // TODO 멤버 아닌경우 인증게시글 못올리도록 수정
+        UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(), challengeId);
+        if(!challenge.getMemberList().contains(userChallenge)){
+            throw new ForbiddenException("챌린지에 가입한 사람만 작성할 수 있습니다.");
+        }
 
         //인증 게시글은 하루에 하나만==================================================
         LocalDate now = LocalDate.now();
@@ -76,7 +85,6 @@ public class PostService {
             List<Post> Posts = postRepository.findAllByUser(principalDetails.getUser());
 
             // 해당 게시글에 인증하면 당일 인증여부 체크
-            UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(), challengeId);
             userChallenge.setDailyAuthenticated(true);
             userChallenge.setAuthCount(userChallenge.getAuthCount() + 1);
 
@@ -87,10 +95,13 @@ public class PostService {
                 }
             }
         }
+        //for Report, 퍼센테이지 업데이트====================================================
+
+        AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
+        authChallenge.setAuthMember(authChallenge.getAuthMember()+1);
+        authChallengeRepository.save(authChallenge);
+
         //============================================================================
-
-
-
 
         Post post = postRepository.save(requestDto.toEntity(challenge, principalDetails.getUser()));
 
@@ -131,11 +142,19 @@ public class PostService {
         levelService.checkLevelPoint(user);
 
         postRepository.deleteById(postId);
-
         // // 해당 게시글에 인증삭제하면 당일 인증여부 체크
         UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(), post.getChallenge().getId());
         userChallenge.setDailyAuthenticated(false);
         userChallenge.setAuthCount(userChallenge.getAuthCount() - 1);
+
+        //for Report, 퍼센테이지 업데이트====================================================
+
+        AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(userChallenge.getChallenge(), post.getCreatedAt().toLocalDate());
+        authChallenge.setAuthMember(authChallenge.getAuthMember()-1);
+        authChallengeRepository.save(authChallenge);
+
+        //============================================================================
+
 
     }
 
