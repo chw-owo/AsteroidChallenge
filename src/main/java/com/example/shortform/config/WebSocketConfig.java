@@ -22,19 +22,24 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
+        //prefix /sub로 메세지 구분
         registry.enableSimpleBroker("/sub");
+        //prefix /pub로 메세지 발송을 요청
+        // /pub 요청 시 massagemapping으로 이동
         registry.setApplicationDestinationPrefixes("/pub");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/chatting")
+        registry.addEndpoint("/chatting") // websocket 연결 주소
                 .setAllowedOrigins("http://localhost:3000", "http://hanghae-asteroid.s3-website.ap-northeast-2.amazonaws.com/")
-                .withSockJS();
+                .withSockJS(); // 닞은 버전의 브라우저에서도 websocket이 동작하게 하는 역할
     }
 
+    // interceptor 설정
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
+        // stomphandler가 미리 token 및 message type 확인 할수 있도록 interceptor 설정
         registration.interceptors(stompHandler);
     }
 }
