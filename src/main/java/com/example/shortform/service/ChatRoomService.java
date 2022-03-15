@@ -4,6 +4,7 @@ import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.domain.*;
 import com.example.shortform.dto.request.ChatRoomRequestDto;
 import com.example.shortform.dto.resonse.*;
+import com.example.shortform.exception.InvalidException;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,9 @@ public class ChatRoomService {
         Challenge challenge = challengeRepository.findById(requestDto.getChallengeId()).orElseThrow(
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
+        if (challenge.getChatRoom() != null) {
+            throw new InvalidException("이미 채팅방이 존재합니다.");
+        }
         ChatRoom chatRoom = requestDto.toEntity(user.getProfileImage());
         chatRoomRepository.save(chatRoom);
         challenge.setChatRoom(chatRoom);
