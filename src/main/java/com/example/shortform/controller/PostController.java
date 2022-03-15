@@ -63,8 +63,8 @@ public class PostController {
 
     @GetMapping("/challenge/{challengeId}/posts")
     public ResponseEntity<?> getListPost(@PathVariable Long challengeId,
-                                         @Qualifier("post") @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable postPageable,
-                                         @Qualifier("comment") @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable commentPageable) {
+                                         @Qualifier("post") @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable postPageable,
+                                         @Qualifier("comment") @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable commentPageable) {
         return postService.getListPost(challengeId, postPageable, commentPageable);
     }
 }
