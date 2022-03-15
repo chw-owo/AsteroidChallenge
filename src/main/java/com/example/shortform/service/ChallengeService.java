@@ -15,6 +15,8 @@ import com.example.shortform.dto.resonse.UserChallengeInfo;
 import com.example.shortform.exception.*;
 import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 @Service
@@ -222,12 +227,13 @@ public class ChallengeService {
         }
     }
 
-    public List<ChallengesResponseDto> getChallenges() throws ParseException, InternalServerException {
-        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
+    public List<ChallengesResponseDto> getChallenges(Pageable pageable) throws ParseException, InternalServerException {
+//        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
+        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
 
 
-        for(Challenge challenge: challenges){
+        for(Challenge challenge: challengePage){
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles =  challenge.getChallengeImage();
 //            if(ImageFiles.isEmpty()){
@@ -273,11 +279,12 @@ public class ChallengeService {
     }
 
 
-    public List<ChallengesResponseDto> getCategoryChallenge(Long categoryId) throws ParseException, InternalServerException {
-        List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(categoryId);
+    public List<ChallengesResponseDto> getCategoryChallenge(Long categoryId, Pageable pageable) throws ParseException, InternalServerException {
+//        List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(categoryId);
+        Page<Challenge> challengePage = challengeRepository.findAllByCategoryId(categoryId, pageable);
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
 
-        for(Challenge challenge: challenges){
+        for(Challenge challenge: challengePage){
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles =  challenge.getChallengeImage();
 //            if(ImageFiles.isEmpty()){
@@ -298,34 +305,55 @@ public class ChallengeService {
         return ChallengesResponseDtos;
     }
 
-    public List<ChallengesResponseDto> getKeywordChallenge(String keyword) throws ParseException, InternalServerException {
-        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
+    public List<ChallengesResponseDto> getKeywordChallenge(String keyword, Pageable pageable) throws ParseException, InternalServerException {
+//        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
+        String searchKeyword = keyword.trim();
+        if (searchKeyword.equals("")) {
+            return new ArrayList<>();
+        }
+        Page<Challenge> challengePage = challengeRepository.searchList(searchKeyword, pageable);
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
 
-        for(Challenge c: challenges) {
+        for (Challenge challenge : challengePage) {
             List<String> challengeImages = new ArrayList<>();
-            List<ImageFile> ImageFiles = c.getChallengeImage();
+            List<ImageFile> ImageFiles = challenge.getChallengeImage();
 //            if(ImageFiles.isEmpty()){
 //                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
 //            }
             for (ImageFile image : ImageFiles) {
                 challengeImages.add(image.getFilePath());
             }
-            String status = challengeStatus(c);
-            if(c.getTitle().contains(keyword)){
-                ChallengesResponseDto responseDto = new ChallengesResponseDto(c, challengeImages);
-                responseDto.setStatus(status);
-                ChallengesResponseDtos.add(responseDto);
-            }
-            for(TagChallenge t : c.getTagChallenges()){
-                if(t.getTag().getName().contains(keyword)){
-                    ChallengesResponseDto responseDto = new ChallengesResponseDto(c, challengeImages);
-                    responseDto.setStatus(status);
-                    ChallengesResponseDtos.add(responseDto);
-                }
+            String status = challengeStatus(challenge);
+            ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
+            responseDto.setStatus(status);
+            ChallengesResponseDtos.add(responseDto);
 
-            }
         }
+
+//        for(Challenge c: challenges) {
+//            List<String> challengeImages = new ArrayList<>();
+//            List<ImageFile> ImageFiles = c.getChallengeImage();
+////            if(ImageFiles.isEmpty()){
+////                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
+////            }
+//            for (ImageFile image : ImageFiles) {
+//                challengeImages.add(image.getFilePath());
+//            }
+//            String status = challengeStatus(c);
+//            if(c.getTitle().contains(keyword)){
+//                ChallengesResponseDto responseDto = new ChallengesResponseDto(c, challengeImages);
+//                responseDto.setStatus(status);
+//                ChallengesResponseDtos.add(responseDto);
+//            }
+//            for(TagChallenge t : c.getTagChallenges()){
+//                if(t.getTag().getName().contains(keyword)){
+//                    ChallengesResponseDto responseDto = new ChallengesResponseDto(c, challengeImages);
+//                    responseDto.setStatus(status);
+//                    ChallengesResponseDtos.add(responseDto);
+//                }
+//
+//            }
+//        }
 
         return ChallengesResponseDtos;
     }

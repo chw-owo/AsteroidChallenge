@@ -7,10 +7,10 @@ import com.example.shortform.dto.resonse.*;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import javax.transaction.Transactional;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -86,19 +86,20 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public ChatMessageListDto getAllMessages(Long roomId, PrincipalDetails principalDetails) {
+    public ChatMessageListDto getAllMessages(Long roomId, PrincipalDetails principalDetails, Pageable pageable) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new NotFoundException("채팅방이 존재하지 않습니다.")
         );
 
         User user = principalDetails.getUser();
 
-        List<ChatMessage> messageList = chatMessageRepository.findAllByChatRoom(chatRoom);
+        Page<ChatMessage> messagePage = chatMessageRepository.findAllByChatRoom(chatRoom, pageable);
+//        List<ChatMessage> messageList = chatMessageRepository.findAllByChatRoom(chatRoom);
         List<UserChatRoom> memberList = userChatRoomRepository.findAllByChatRoom(chatRoom);
 
         List<ChatMessageResponseDto> responseDtoList = new ArrayList<>();
 
-        for (ChatMessage chatMessage : messageList) {
+        for (ChatMessage chatMessage : messagePage) {
             String createdAt = chatMessage.getCreatedAt().toString();
             String year = createdAt.substring(0,4) + ".";
             String month = createdAt.substring(5,7) + ".";
