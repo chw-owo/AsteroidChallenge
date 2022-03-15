@@ -33,8 +33,9 @@ public class ChatRoomService {
         Challenge challenge = challengeRepository.findById(requestDto.getChallengeId()).orElseThrow(
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
-        ChatRoom chatRoom = requestDto.toEntity(user.getProfileImage(), challenge);
+        ChatRoom chatRoom = requestDto.toEntity(user.getProfileImage());
         chatRoomRepository.save(chatRoom);
+        challenge.setChatRoom(chatRoom);
         UserChatRoom userChatRoom = requestDto.toEntity(chatRoom, user);
         userChatRoomRepository.save(userChatRoom);
     }
