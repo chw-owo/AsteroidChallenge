@@ -58,6 +58,7 @@ public class Post extends Timestamped{
                 .postId(id)
                 .content(content)
                 .profileImage(user.getProfileImage())
+                .levelName(user.getLevel().getName())
                 .nickname(user.getNickname())
                 .comments(commentList)
                 .build();
