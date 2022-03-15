@@ -87,9 +87,6 @@ public class Challenge extends Timestamped{
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<UserChallenge> memberList = new ArrayList<>();
 
-    @OneToOne(mappedBy = "challenge", orphanRemoval = true)
-    private ChatRoom chatRoom;
-
 
     public Challenge(ChallengeRequestDto requestDto, Category category){
         this.title=requestDto.getTitle();
@@ -108,6 +105,9 @@ public class Challenge extends Timestamped{
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToOne(orphanRemoval = true)
+    @JoinColumn(name = "chat_room_id")
+    private ChatRoom chatRoom;
 
 //    public ChallengeResponseDto toResponse(List<TagNameResponseDto> tagNameList,
 //                                           List<MemberResponseDto> memberList,
