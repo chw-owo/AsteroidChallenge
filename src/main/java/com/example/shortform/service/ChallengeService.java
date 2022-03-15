@@ -193,7 +193,7 @@ public class ChallengeService {
                 percentage = 0;
             }
             //System.out.print(division);
-            System.out.print("/");
+            //System.out.print("/");
             //System.out.println(divisor);
             ReportResponseDto responseDto = ReportResponseDto.builder().date(date.toString()).percentage(percentage).build();
             responseDtos.add(responseDto);
