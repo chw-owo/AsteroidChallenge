@@ -16,10 +16,9 @@ import lombok.NoArgsConstructor;
 public class ChatRoomRequestDto {
     private Long challengeId;
 
-    public ChatRoom toEntity(String profileImage, Challenge challenge) {
+    public ChatRoom toEntity(String profileImage) {
         return ChatRoom.builder()
                 .roomImage(profileImage)
-                .challenge(challenge)
                 .build();
     }
 
