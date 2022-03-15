@@ -48,7 +48,7 @@ public class ChatRoomController {
     @GetMapping("/chat/rooms/{roomId}/messages")
     public ChatMessageListDto getAllMessages(@PathVariable Long roomId,
                                              @AuthenticationPrincipal PrincipalDetails principalDetails,
-                                             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+                                             @PageableDefault(size = 500, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         if (principalDetails != null)
             return chatRoomService.getAllMessages(roomId, principalDetails, pageable);
         else

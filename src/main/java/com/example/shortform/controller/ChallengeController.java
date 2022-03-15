@@ -56,7 +56,7 @@ public class ChallengeController {
 
 
     @GetMapping("/challenge")
-    public List<ChallengesResponseDto> getChallenges(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
+    public List<ChallengesResponseDto> getChallenges(@PageableDefault(size = 100, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
         return challengeService.getChallenges(pageable);
     }
 
@@ -72,12 +72,12 @@ public class ChallengeController {
 
     @GetMapping("/challenge/category/{categoryId}")
     public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Long categoryId,
-                                                            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
+                                                            @PageableDefault(size = 100, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
         return challengeService.getCategoryChallenge(categoryId, pageable);
     }
 
     @GetMapping("/challenge/search")
-    public List<ChallengesResponseDto> getKeywordChallenge(@RequestParam("keyword") String keyword, @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
+    public List<ChallengesResponseDto> getKeywordChallenge(@RequestParam("keyword") String keyword, @PageableDefault(size = 100, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
         return challengeService.getKeywordChallenge(keyword, pageable);
     }
 
