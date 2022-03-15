@@ -307,7 +307,11 @@ public class ChallengeService {
 
     public List<ChallengesResponseDto> getKeywordChallenge(String keyword, Pageable pageable) throws ParseException, InternalServerException {
 //        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
-        Page<Challenge> challengePage = challengeRepository.searchList(keyword, pageable);
+        String searchKeyword = keyword.trim();
+        if (searchKeyword.equals("")) {
+            return new ArrayList<>();
+        }
+        Page<Challenge> challengePage = challengeRepository.searchList(searchKeyword, pageable);
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
 
         for (Challenge challenge : challengePage) {
