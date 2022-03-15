@@ -65,24 +65,20 @@ public class ChatRoomService {
                 ChatRoom chatRoom = challenge.getChatRoom();
                 List<UserChatRoom> userChatRooms = userChatRoomRepository.findAllByChatRoom(chatRoom);
                 List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoom(chatRoom);
-                ChatRoomListResponseDto chatRoomResponseDto;
-                if (chatMessageList.size() == 0) {
-                    chatRoomResponseDto = challenge.getChatRoom().toResponseList(
+
+                String recentMessage;
+                if (chatMessageList.size() == 0)
+                    recentMessage = null;
+                else
+                    recentMessage = chatMessageList.get(chatMessageList.size() - 1).getContent();
+
+                ChatRoomListResponseDto chatRoomResponseDto = challenge.getChatRoom().toResponseList(
                             chatRoom.getCreatedAt(),
                             profileImageList,
                             userChatRooms.size(),
                             memberList,
-                            null
+                            recentMessage
                     );
-                } else {
-                    chatRoomResponseDto = challenge.getChatRoom().toResponseList(
-                            challenge.getCreatedAt(),
-                            profileImageList,
-                            userChatRooms.size(),
-                            memberList,
-                            chatMessageList.get(chatMessageList.size() - 1).getContent()
-                    );
-                }
                 chatRoomResponseDtoList.add(chatRoomResponseDto);
             }
 
