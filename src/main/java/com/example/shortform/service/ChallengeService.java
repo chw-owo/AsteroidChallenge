@@ -197,11 +197,12 @@ public class ChallengeService {
     }
 
 
-    public List<ChallengesResponseDto> getCategoryChallenge(Long categoryId) throws ParseException, InternalServerException {
-        List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(categoryId);
+    public List<ChallengesResponseDto> getCategoryChallenge(Long categoryId, Pageable pageable) throws ParseException, InternalServerException {
+//        List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(categoryId);
+        Page<Challenge> challengePage = challengeRepository.findAllByCategoryId(categoryId, pageable);
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
 
-        for(Challenge challenge: challenges){
+        for(Challenge challenge: challengePage){
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles =  challenge.getChallengeImage();
 //            if(ImageFiles.isEmpty()){

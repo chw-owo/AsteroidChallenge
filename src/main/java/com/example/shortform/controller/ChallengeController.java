@@ -74,8 +74,9 @@ public class ChallengeController {
 //     }
 
     @GetMapping("/challenge/category/{categoryId}")
-    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Long categoryId) throws ParseException, InternalServerException {
-        return challengeService.getCategoryChallenge(categoryId);
+    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Long categoryId,
+                                                            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
+        return challengeService.getCategoryChallenge(categoryId, pageable);
     }
 
     @GetMapping("/challenge/search")

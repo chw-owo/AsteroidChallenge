@@ -19,4 +19,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
 
     @Query("select distinct c from Challenge c left join c.tagChallenges t where c.title like %:keyword% or c.category.name like %:keyword% or t.tag.name like %:keyword%")
     Page<Challenge> searchList(String keyword, Pageable pageable);
+
+    Page<Challenge> findAllByCategoryId(Long categoryId, Pageable pageable);
 }
