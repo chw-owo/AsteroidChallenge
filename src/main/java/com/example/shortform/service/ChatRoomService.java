@@ -142,6 +142,7 @@ public class ChatRoomService {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new NotFoundException("채팅방이 존재하지 않습니다.")
         );
-        chatRoomRepository.deleteById(roomId);
+        chatRoom.getChallenge().setChatRoom(null);
+//        chatRoomRepository.deleteById(roomId);
     }
 }
