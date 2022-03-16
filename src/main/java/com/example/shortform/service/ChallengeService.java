@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -451,12 +452,25 @@ public class ChallengeService {
         );
 
         UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(),challengeId);
-        User user = principalDetails.getUser();
+        User user = userRepository.findById(principalDetails.getUser().getId()).orElseThrow(
+                () -> new NotFoundException("로그인 한 유저가 아닙니다.")
+        );
 
         if (userChallenge != null){
             userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(),challengeId);
-            user.setRankingPoint(user.getRankingPoint() - 50);
             challenge.setCurrentMember(challenge.getCurrentMember() - 1);
+
+            LocalDate now = LocalDate.now();
+            String start = challenge.getStartDate().substring(0,10);
+            String end = challenge.getEndDate().substring(0,10);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            LocalDate startDate = LocalDate.parse(start, formatter);
+            LocalDate endDate = LocalDate.parse(end, formatter);
+
+            if (now.isAfter(startDate) && now.isBefore(endDate)) {
+                user.setRankingPoint(user.getRankingPoint() - 50);
+            }
 
             UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(challenge.getChatRoom(), user);
 
