@@ -111,7 +111,7 @@ public class ChallengeService {
         challenge.setUser(user);
         UserChallenge userChallenge = new UserChallenge(challenge, user);
         userChallengeRepository.save(userChallenge);
-        challenge.setUser(user);
+//        challenge.setUser(user);
 
 
         // 위클리 레포트
@@ -274,10 +274,10 @@ public class ChallengeService {
         }
         String status = challengeStatus(challenge);
 
-        ChallengeResponseDto challengeResponseDtos = new ChallengeResponseDto(challenge, challengeImage);
-        challengeResponseDtos.setMembers(memberList);
-        challengeResponseDtos.setStatus(status);
-        return challengeResponseDtos;
+        ChallengeResponseDto challengeResponseDto = new ChallengeResponseDto(challenge, challengeImage);
+        challengeResponseDto.setMembers(memberList);
+        challengeResponseDto.setStatus(status);
+        return challengeResponseDto;
     }
 
 
@@ -451,7 +451,6 @@ public class ChallengeService {
                 List<TagChallenge> tagChallengeList = new ArrayList<>();
                 for (String tagString : tagNames) {
                     Tag tag = new Tag(tagString);
-                    tagRepository.save(tag);
 
                     TagChallenge newTagChallenge = TagChallenge.builder()
                             .challenge(challenge)
@@ -459,6 +458,7 @@ public class ChallengeService {
                             .build();
                     if (!tagChallengeList.contains(newTagChallenge)) {
                         if (!tagChallengeRepository.existsByChallengeAndTagName(challenge, tagString)) {
+                            tagRepository.save(tag);
                             tagChallengeList.add(newTagChallenge);
                             tagChallengeRepository.save(newTagChallenge);
                         }
@@ -493,6 +493,7 @@ public class ChallengeService {
         );
 
         if (userChallenge != null){
+            // 챌린지에서 퇴장 및 참여 인원 수 차감
             userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(),challengeId);
             challenge.setCurrentMember(challenge.getCurrentMember() - 1);
 
@@ -504,12 +505,14 @@ public class ChallengeService {
             LocalDate startDate = LocalDate.parse(start, formatter);
             LocalDate endDate = LocalDate.parse(end, formatter);
 
+            // 챌린지 시작 후 & 챌린지 종료 전 중단 시 페널티 적용
             if (now.isAfter(startDate) && now.isBefore(endDate)) {
                 user.setRankingPoint(user.getRankingPoint() - 50);
             }
 
             UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(challenge.getChatRoom(), user);
 
+            // 챌린지의 채팅방에 참여 중일 경우 퇴장시킴
             if (userChatRoom != null) {
                 userChatRoomRepository.deleteByChatRoomIdAndUserId(challenge.getChatRoom().getId(), user.getId());
             }
