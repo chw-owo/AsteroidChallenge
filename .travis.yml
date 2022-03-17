@@ -36,11 +36,13 @@ deploy:
     wait-until-deployed: true
 
   - provider: codedeploy
+    on:
+      branch: main
     access_key_id: $AWS_ACCESS_KEY # Travis repo settings 에 설정된 값
     secret_access_key: $AWS_SECRET_KEY
 
     bucket: asteroid-build # s3 버킷
-    key: asteroid-webservice
+    key: asteroid-webservice.zip
 
     bundle_type: zip
     application: asteroid-webservice # 웹 콘솔에서 등록한 codedeploy 애플리케이션
