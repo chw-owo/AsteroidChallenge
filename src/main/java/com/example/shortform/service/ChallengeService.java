@@ -56,6 +56,7 @@ public class ChallengeService {
 
     private final AuthChallengeRepository authChallengeRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final LevelService levelService;
 
     @Transactional
 
@@ -472,6 +473,9 @@ public class ChallengeService {
             if (now.isAfter(startDate) && now.isBefore(endDate)) {
                 user.setRankingPoint(user.getRankingPoint() - 50);
             }
+
+            // 레벨업, 다운 로직
+            levelService.checkLevelPoint(user);
 
             UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(challenge.getChatRoom(), user);
 

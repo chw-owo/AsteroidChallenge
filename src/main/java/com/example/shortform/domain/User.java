@@ -111,7 +111,7 @@ public class User extends Timestamped{
     }
 
     public void setRankingPoint(int point) {
-        this.rankingPoint = point;
+        this.rankingPoint = Math.max(point, 0);
     }
 
 
