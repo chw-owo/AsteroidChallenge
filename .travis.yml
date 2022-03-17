@@ -42,7 +42,7 @@ deploy:
     secret_access_key: $AWS_SECRET_KEY
 
     bucket: asteroid-build # s3 버킷
-    key: asteroid-webservice.zip
+    key: asteroid-webservice
 
     bundle_type: zip
     application: asteroid-webservice # 웹 콘솔에서 등록한 codedeploy 애플리케이션
