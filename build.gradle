@@ -14,6 +14,12 @@ configurations {
     }
 }
 
+bootJar{
+    archivesBaseName = 'asteroid-webservice'
+    archiveFileName = 'asteroid-webservice.jar'
+    archiveVersion = "0.0.0"
+}
+
 repositories {
     mavenCentral()
 }
