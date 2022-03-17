@@ -10,6 +10,7 @@ import com.example.shortform.dto.ResponseDto.ReportResponseDto;
 import com.example.shortform.dto.request.ChallengeModifyRequestDto;
 import com.example.shortform.dto.request.PasswordDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
+import com.example.shortform.dto.resonse.ChallengeIdResponseDto;
 import com.example.shortform.dto.resonse.MemberResponseDto;
 import com.example.shortform.dto.resonse.UserChallengeInfo;
 import com.example.shortform.exception.*;
@@ -29,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -397,7 +399,7 @@ public class ChallengeService {
 
 
     @Transactional
-    public ResponseEntity<?> modifyChallenge(Long challengeId, ChallengeModifyRequestDto requestDto, List<MultipartFile> multipartFileList, PrincipalDetails principalDetails) throws IOException {
+    public ResponseEntity<ChallengeIdResponseDto> modifyChallenge(Long challengeId, ChallengeModifyRequestDto requestDto, List<MultipartFile> multipartFileList, PrincipalDetails principalDetails) throws IOException {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("찾는 챌린지가 존재하지 않습니다.")
         );
@@ -451,12 +453,25 @@ public class ChallengeService {
         );
 
         UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(),challengeId);
-        User user = principalDetails.getUser();
+        User user = userRepository.findById(principalDetails.getUser().getId()).orElseThrow(
+                () -> new NotFoundException("로그인 한 유저가 아닙니다.")
+        );
 
         if (userChallenge != null){
             userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(),challengeId);
-            user.setRankingPoint(user.getRankingPoint() - 50);
             challenge.setCurrentMember(challenge.getCurrentMember() - 1);
+
+            LocalDate now = LocalDate.now();
+            String start = challenge.getStartDate().substring(0,10);
+            String end = challenge.getEndDate().substring(0,10);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            LocalDate startDate = LocalDate.parse(start, formatter);
+            LocalDate endDate = LocalDate.parse(end, formatter);
+
+            if (now.isAfter(startDate) && now.isBefore(endDate)) {
+                user.setRankingPoint(user.getRankingPoint() - 50);
+            }
 
             UserChatRoom userChatRoom = userChatRoomRepository.findByChatRoomAndUser(challenge.getChatRoom(), user);
 
