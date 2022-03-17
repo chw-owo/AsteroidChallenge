@@ -56,7 +56,7 @@ deploy:
     wait-until-deployed: true
 
 # CI 실행 완료 시 메일로 알람
-notifications:
-  email:
-    recipients:
-      - qudalsrnt3x@gmail.com
+#notifications:
+#  email:
+#    recipients:
+#      - qudalsrnt3x@gmail.com
