@@ -433,12 +433,47 @@ public class ChallengeService {
             List<TagChallenge> tagChallenges = tagChallengeRepository.findAllByChallenge(challenge);
             List<String> tagNames = requestDto.getTagName();
 
-            int i = 0;
+            if (requestDto.getTagName() != null) {
+                for (TagChallenge tagChallenge : tagChallenges) {
+                    boolean imEmpty = true;
+                    for (String tagName : tagNames) {
+                        if (tagChallenge.getTag().getName().equals(tagName)) {
+                            imEmpty = false;
+                            break;
+                        }
+                    }
+                    if(imEmpty) {
+                        tagRepository.deleteById(tagChallenge.getTag().getId());
+                    }
 
-            for (TagChallenge tagChallenge : tagChallenges) {
-                tagChallenge.getTag().setName(tagNames.get(i));
-                i++;
+                }
+
+                List<TagChallenge> tagChallengeList = new ArrayList<>();
+                for (String tagString : tagNames) {
+                    Tag tag = new Tag(tagString);
+                    tagRepository.save(tag);
+
+                    TagChallenge newTagChallenge = TagChallenge.builder()
+                            .challenge(challenge)
+                            .tag(tag)
+                            .build();
+                    if (!tagChallengeList.contains(newTagChallenge)) {
+                        if (!tagChallengeRepository.existsByChallengeAndTagName(challenge, tagString)) {
+                            tagChallengeList.add(newTagChallenge);
+                            tagChallengeRepository.save(newTagChallenge);
+                        }
+                    } else {
+                        throw new DuplicateException("중복된 태그는 사용할 수 없습니다.");
+                    }
+                }
             }
+
+//            int i = 0;
+//
+//            for (TagChallenge tagChallenge : tagChallenges) {
+//                tagChallenge.getTag().setName(tagNames.get(i));
+//                i++;
+//            }
 
             return ResponseEntity.ok(challenge.toResponse());
         } else {

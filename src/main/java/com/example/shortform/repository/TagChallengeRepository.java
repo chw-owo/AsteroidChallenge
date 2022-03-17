@@ -12,4 +12,5 @@ import java.util.List;
 public interface TagChallengeRepository extends JpaRepository<TagChallenge, Long> {
     List<TagChallenge> findAllByChallenge(Challenge challenge);
 
+    boolean existsByChallengeAndTagName(Challenge challenge, String tagString);
 }
