@@ -10,6 +10,7 @@ import com.example.shortform.dto.ResponseDto.ReportResponseDto;
 import com.example.shortform.dto.request.ChallengeModifyRequestDto;
 import com.example.shortform.dto.request.PasswordDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
+import com.example.shortform.dto.resonse.ChallengeIdResponseDto;
 import com.example.shortform.dto.resonse.MemberResponseDto;
 import com.example.shortform.dto.resonse.UserChallengeInfo;
 import com.example.shortform.exception.*;
@@ -398,7 +399,7 @@ public class ChallengeService {
 
 
     @Transactional
-    public ResponseEntity<?> modifyChallenge(Long challengeId, ChallengeModifyRequestDto requestDto, List<MultipartFile> multipartFileList, PrincipalDetails principalDetails) throws IOException {
+    public ResponseEntity<ChallengeIdResponseDto> modifyChallenge(Long challengeId, ChallengeModifyRequestDto requestDto, List<MultipartFile> multipartFileList, PrincipalDetails principalDetails) throws IOException {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("찾는 챌린지가 존재하지 않습니다.")
         );
