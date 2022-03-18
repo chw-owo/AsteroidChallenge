@@ -61,7 +61,6 @@ public class ChallengeService {
     private final LevelService levelService;
 
     @Transactional
-
     public Long postChallenge(ChallengeRequestDto requestDto,
                                               PrincipalDetails principal,
                                             List<MultipartFile> multipartFiles) throws IOException, ParseException {
@@ -131,7 +130,7 @@ public class ChallengeService {
         endCalendar.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY);
         LocalDate endLocalDate = LocalDateTime.ofInstant(endCalendar.toInstant(), endCalendar.getTimeZone().toZoneId()).toLocalDate();
 
-        for (LocalDate date = startLocalDate; date.isBefore(endLocalDate); date = date.plusDays(1))
+        for (LocalDate date = startLocalDate; date.isBefore(endLocalDate); date = date.plusDays(2))
         {
             AuthChallenge authChallenge = AuthChallenge.builder()
                     .challenge(challenge)
@@ -357,12 +356,24 @@ public class ChallengeService {
         challenge.setCurrentMember(userChallenges.size());
 
         // update percentage of report - plus currentMember
-        // 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
+        // 현재 진행 중이라면 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
         LocalDate now = LocalDate.now();
-        AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
-        authChallenge.setCurrentMember(authChallenge.getCurrentMember() + 1);
-        authChallengeRepository.save(authChallenge);
+        Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, now));
+        AuthChallenge authChallenge;
 
+        if(!authChallengeCheck.isPresent()){
+            authChallenge = AuthChallenge.builder()
+                    .challenge(challenge)
+                    .date(now)
+                    .currentMember(challenge.getCurrentMember())
+                    .build();
+            authChallengeRepository.save(authChallenge);
+        }else{
+            authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
+        }
+
+        authChallenge.setCurrentMember(authChallenge.getCurrentMember());
+        authChallengeRepository.save(authChallenge);
 
     }
 
@@ -533,8 +544,21 @@ public class ChallengeService {
         // update percentage of report - plus currentMember
         // 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
         LocalDate now = LocalDate.now();
-        AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge,now);
-        authChallenge.setCurrentMember(authChallenge.getCurrentMember()+1);
+        Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, now));
+        AuthChallenge authChallenge;
+
+        if(!authChallengeCheck.isPresent()){
+            authChallenge = AuthChallenge.builder()
+                    .challenge(challenge)
+                    .date(now)
+                    .currentMember(challenge.getCurrentMember())
+                    .build();
+            authChallengeRepository.save(authChallenge);
+        }else{
+            authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
+        }
+
+        authChallenge.setCurrentMember(authChallenge.getCurrentMember());
         authChallengeRepository.save(authChallenge);
     }
 
