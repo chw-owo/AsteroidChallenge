@@ -112,9 +112,11 @@ public class Challenge extends Timestamped{
     private User user;
 
 
+    @Setter
     @OneToOne(orphanRemoval = true)
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
+
 
 
     public void update(ChallengeModifyRequestDto requestDto) {

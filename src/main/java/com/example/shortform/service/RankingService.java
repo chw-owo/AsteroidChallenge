@@ -30,13 +30,12 @@ public class RankingService {
     private final UserChallengeRepository userChallengeRepository;
 
     // 매일 자정마다 유저들의 순위 업데이트
-    @Scheduled(fixedDelay = 100000)//(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 0 * * *")
     public void updateRanks() {
 
         List<User> users = userRepository.findAllByOrderByRankingPointDesc();
 
         //랭킹 점수 순으로 정렬 (중복되는 점수는 제거)
-
         ArrayList<Integer> rankingPointList = new ArrayList<>();
         for (User user : users) {
             if (!rankingPointList.contains(user.getRankingPoint()))
