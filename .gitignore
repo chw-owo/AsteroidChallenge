@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+aws.yml
+application-dev.yml
+application.yml
+application-aws.yml
+application-credentials.yml
+application-local.yml
