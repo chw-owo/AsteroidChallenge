@@ -36,7 +36,7 @@ public class Challenge extends Timestamped{
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "max_member", nullable = false)
@@ -87,9 +87,6 @@ public class Challenge extends Timestamped{
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<UserChallenge> memberList = new ArrayList<>();
 
-    @OneToOne(mappedBy = "challenge", orphanRemoval = true)
-    private ChatRoom chatRoom;
-
 
     public Challenge(ChallengeRequestDto requestDto, Category category, String password){
         this.title=requestDto.getTitle();
@@ -113,6 +110,12 @@ public class Challenge extends Timestamped{
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+
+    @OneToOne(orphanRemoval = true)
+    @JoinColumn(name = "chat_room_id")
+    private ChatRoom chatRoom;
+
 
     public void update(ChallengeModifyRequestDto requestDto) {
         this.title = requestDto.getTitle();

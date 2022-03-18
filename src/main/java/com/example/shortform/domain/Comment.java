@@ -42,6 +42,7 @@ public class Comment extends Timestamped{
                 .commentId(id)
                 .nickname(user.getNickname())
                 .content(content)
+                .levelName(user.getLevel().getName())
                 .profileImage(user.getProfileImage())
                 .build();
     }
