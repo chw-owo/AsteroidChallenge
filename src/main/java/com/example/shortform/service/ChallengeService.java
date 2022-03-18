@@ -278,7 +278,6 @@ public class ChallengeService {
 
 
     public List<ChallengesResponseDto> getCategoryChallenge(Long categoryId, Pageable pageable) throws ParseException, InternalServerException {
-//        List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(categoryId);
         Page<Challenge> challengePage = challengeRepository.findAllByCategoryId(categoryId, pageable);
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
 
@@ -302,7 +301,6 @@ public class ChallengeService {
     }
 
     public List<ChallengesResponseDto> getKeywordChallenge(String keyword, Pageable pageable) throws ParseException, InternalServerException {
-//        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
         String searchKeyword = keyword.trim();
         if (searchKeyword.equals("")) {
             return new ArrayList<>();
@@ -361,16 +359,10 @@ public class ChallengeService {
         // update percentage of report - plus currentMember
         // 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
         LocalDate now = LocalDate.now();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-        Date startDate = dateFormat.parse(challenge.getStartDate());
-        if(now.isAfter(startDate.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate())){
+        AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
+        authChallenge.setCurrentMember(authChallenge.getCurrentMember() + 1);
+        authChallengeRepository.save(authChallenge);
 
-            AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge,now);
-            authChallenge.setCurrentMember(authChallenge.getCurrentMember()+1);
-            authChallengeRepository.save(authChallenge);
-        }
 
     }
 
