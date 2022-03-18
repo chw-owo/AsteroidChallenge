@@ -22,9 +22,14 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -197,23 +202,25 @@ public class PostService {
             for (Comment comment : commentPage) {
                 // 댓글 날짜 형식 변경
                 CommentResponseDto commentDetailResponseDto = comment.toResponse();
-                String commentCreatedAt = comment.getCreatedAt().toString();
-                String year = commentCreatedAt.substring(0,4) + ".";
-                String month = commentCreatedAt.substring(5,7) + ".";
-                String day = commentCreatedAt.substring(8,10) + " ";
-                String time = commentCreatedAt.substring(11,19);
-                commentCreatedAt = year + month + day + time;
+                String commentCreatedAt = comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
+//                String commentCreatedAt = comment.getCreatedAt().toString();
+//                String year = commentCreatedAt.substring(0,4) + ".";
+//                String month = commentCreatedAt.substring(5,7) + ".";
+//                String day = commentCreatedAt.substring(8,10) + " ";
+//                String time = commentCreatedAt.substring(11,19);
+//                commentCreatedAt = year + month + day + time;
                 commentDetailResponseDto.setCreatedAt(commentCreatedAt);
                 commentDetailList.add(commentDetailResponseDto);
             }
             // 인증 게시글 날짜 형식 변경
             PostResponseDto postResponseDto = post.toResponse(commentDetailList);
-            String postCreatedAt = post.getCreatedAt().toString();
-            String year = postCreatedAt.substring(0,4) + ".";
-            String month = postCreatedAt.substring(5,7) + ".";
-            String day = postCreatedAt.substring(8,10) + " ";
-            String time = postCreatedAt.substring(11,19);
-            postCreatedAt = year + month + day + time;
+            String postCreatedAt = post.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
+//            String postCreatedAt = post.getCreatedAt().toString();
+//            String year = postCreatedAt.substring(0,4) + ".";
+//            String month = postCreatedAt.substring(5,7) + ".";
+//            String day = postCreatedAt.substring(8,10) + " ";
+//            String time = postCreatedAt.substring(11,19);
+//            postCreatedAt = year + month + day + time;
             postResponseDto.setCreatedAt(postCreatedAt);
             responseDtoList.add(postResponseDto);
         }

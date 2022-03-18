@@ -479,7 +479,7 @@ public class ChallengeService {
             LocalDate endDate = LocalDate.parse(end, formatter);
 
             // 챌린지 시작 후 & 챌린지 종료 전 중단 시 페널티 적용
-            if (now.isAfter(startDate) && now.isBefore(endDate)) {
+            if (now.isAfter(startDate.minusDays(1)) && now.isBefore(endDate.plusDays(1))) {
                 user.setRankingPoint(user.getRankingPoint() - 50);
             }
 
