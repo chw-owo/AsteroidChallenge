@@ -48,7 +48,6 @@ public class ChallengeResponseDto {
         this.endDate=challenge.getEndDate();
         this.isPrivate=challenge.getIsPrivate();
         this.roomId = challenge.getChatRoom().getId().toString();
-
         this.userId = challenge.getUser().getId();
 
 

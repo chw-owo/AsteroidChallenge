@@ -16,6 +16,7 @@ import com.example.shortform.dto.resonse.UserChallengeInfo;
 import com.example.shortform.exception.*;
 import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.jni.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -200,17 +201,14 @@ public class ChallengeService {
 
             if(authChallenge.equals(null)){
                 percentage = 0;
-            }
-            else if(!date.isAfter(now)) {
+            } else if(!date.isAfter(now)) {
                 percentage_d = ( (double) divisor / (double) division ) * 100.0;
                 percentage = (int) percentage_d;
             }else{
                 percentage = 0;
             }
-
             ReportResponseDto responseDto = ReportResponseDto.builder().date(date.toString()).percentage(percentage).build();
             responseDtos.add(responseDto);
-
         }
         return responseDtos;
     }
@@ -259,9 +257,7 @@ public class ChallengeService {
         List<String> challengeImage = new ArrayList<>();
 
         List<ImageFile> ImageFiles = challenge.getChallengeImage();
-        if(ImageFiles.isEmpty()){
-            throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
-        }
+
         for (ImageFile image : ImageFiles) {
             challengeImage.add(image.getFilePath());
         }
@@ -333,7 +329,7 @@ public class ChallengeService {
     }
 
     @Transactional
-    public void participateChallenge(Long challengeId, PrincipalDetails principalDetails) {
+    public void participateChallenge(Long challengeId, PrincipalDetails principalDetails) throws ParseException {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("찾는 챌린지가 존재하지 않습니다.")
         );
@@ -365,9 +361,16 @@ public class ChallengeService {
         // update percentage of report - plus currentMember
         // 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
         LocalDate now = LocalDate.now();
-        AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge,now);
-        authChallenge.setCurrentMember(authChallenge.getCurrentMember()+1);
-        authChallengeRepository.save(authChallenge);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+        Date startDate = dateFormat.parse(challenge.getStartDate());
+        if(now.isAfter(startDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate())){
+
+            AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge,now);
+            authChallenge.setCurrentMember(authChallenge.getCurrentMember()+1);
+            authChallengeRepository.save(authChallenge);
+        }
 
     }
 
