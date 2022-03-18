@@ -14,7 +14,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Setter
 @Entity
 public class User extends Timestamped{
     @Id
@@ -34,7 +33,7 @@ public class User extends Timestamped{
     @Column(name = "password", nullable = false)
     private String password;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "level_id")
     private Level level;
 
@@ -130,6 +129,12 @@ public class User extends Timestamped{
                 .userId(id)
                 .nickname(nickname)
                 .build();
+    }
+    public void setRanking(String status, int todayRank, int todayRankingPoint){
+        this.rankStatus = status;
+        this.yesterdayRank = todayRank;
+        this.yesterdayRankingPoint=todayRankingPoint;
+
     }
 
     public Object getRole() {

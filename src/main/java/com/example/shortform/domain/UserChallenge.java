@@ -42,12 +42,12 @@ public class UserChallenge extends Timestamped{
     public UserChallenge(Challenge challenge, User user) {
         this.challenge = challenge;
         this.user = user;
-        this.challengeDate = getChallengeDate(challenge);
+        this.challengeDate = calcChallengeDate(challenge);
         this.dailyAuthenticated = false;
         this.authCount = 0;
     }
 
-    private int getChallengeDate(Challenge challenge) {
+    private int calcChallengeDate(Challenge challenge) {
         String date1 = challenge.getEndDate().split(" ")[0];
         String date2 = challenge.getStartDate().split(" ")[0];
 
@@ -98,4 +98,5 @@ public class UserChallenge extends Timestamped{
         }
 
     }
+
 }

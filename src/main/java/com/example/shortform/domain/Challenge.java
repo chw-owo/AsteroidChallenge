@@ -25,7 +25,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Setter
 @Entity
 public class Challenge extends Timestamped{
 
@@ -43,6 +42,7 @@ public class Challenge extends Timestamped{
     @Column(name = "max_member", nullable = false)
     private int maxMember;
 
+    @Setter
     @Column(name = "current_member", nullable = false)
     private int currentMember;
 
@@ -60,7 +60,7 @@ public class Challenge extends Timestamped{
     @Column(name = "password")
     private String password;
 
-    //수정해야됨
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private ChallengeStatus status;
@@ -75,7 +75,7 @@ public class Challenge extends Timestamped{
     @JoinColumn(name = "category_id", nullable =false)
     private Category category;
 
-    @OneToMany(mappedBy = "challenge", orphanRemoval = true)
+    @OneToMany(mappedBy = "challenge", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<TagChallenge> tagChallenges = new ArrayList<>();
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
@@ -91,67 +91,33 @@ public class Challenge extends Timestamped{
     private ChatRoom chatRoom;
 
 
-    public Challenge(ChallengeRequestDto requestDto, Category category){
+    public Challenge(ChallengeRequestDto requestDto, Category category, String password){
         this.title=requestDto.getTitle();
         this.content=requestDto.getContent();
         this.category= category;
-        //this.challengeImage= challengeImage;
         this.maxMember=requestDto.getMaxMember();
         this.startDate=requestDto.getStartDate();
         this.endDate=requestDto.getEndDate();
         this.isPrivate=requestDto.getIsPrivate();
-        this.password=requestDto.getPassword();
+        this.password = password;
         this.currentMember = 1; // 참가인원 방장 포함
     }
 
+    public void ChallengeRelative(List<TagChallenge> tags, List<UserChallenge> users, List<ImageFile> images){
+        this.tagChallenges = tags;
+        this.userChallenges = users;
+        this.challengeImage = images;
+    }
+
+    @Setter
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-
-//    public ChallengeResponseDto toResponse(List<TagNameResponseDto> tagNameList,
-//                                           List<MemberResponseDto> memberList,
-//                                           List<String> imagePathList) {
-//        return ChallengeResponseDto.builder()
-//                .challengeId(id)
-////                .userId(user.getId())
-//                .title(title)
-//                .content(content)
-//                .categoryName(category.getName())
-//                .maxMember(maxMember)
-//                .currentMember(currentMember)
-//                .startDate(startDate)
-//                .endDate(endDate)
-//                .isPrivate(isPrivate)
-//                .tagNameList(tagNameList)
-//                .members(memberList)
-//                .imageUrlList(imagePathList)
-//                .build();
-//    }
-//
-//    public ChallengeResponseDto toSearchResponse(List<TagNameResponseDto> tagNameList,
-//                                           List<MemberResponseDto> memberList
-//                                           ) {
-//        return ChallengeResponseDto.builder()
-//                .challengeId(id)
-////                .userId(user.getId())
-//                .title(title)
-//                .content(content)
-//                .categoryName(category.getName())
-//                .maxMember(maxMember)
-//                .currentMember(currentMember)
-//                .startDate(startDate)
-//                .endDate(endDate)
-//                .isPrivate(isPrivate)
-//                .tagNameList(tagNameList)
-//                .members(memberList)
-//                .build();
-//    }
-
     public void update(ChallengeModifyRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
-        this.category.setName(requestDto.getCategory());
+        this.category.builder().name(requestDto.getCategory()).build();
     }
 
     public ChallengeIdResponseDto toResponse() {
@@ -160,11 +126,6 @@ public class Challenge extends Timestamped{
                 .build();
     }
 
-    public void setImageFiles(List<ImageFile> imageFileList) {
-        this.challengeImage = imageFileList;
-    }
-    public void setCurrentMember(int cnt) {
-        this.currentMember = cnt;
 
-    }
+
 }
