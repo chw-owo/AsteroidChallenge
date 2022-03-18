@@ -27,19 +27,7 @@ public class Category extends Timestamped{
     @OneToMany(mappedBy = "category", orphanRemoval = true)
     private List<Challenge> challenges = new ArrayList<>();
 
-
-    @Builder
-    public Category(CategoryRequestDto requestDto) {
-        this.name = requestDto.getName();
-    }
-
-    @Builder
-    public Category(String name) {
-      this.name = name;
-    }
-
-    public void setName(String name) {
-
-        this.name = name;
+    public Category(String c) {
+        this.name = c;
     }
 }

@@ -73,20 +73,7 @@ public class UserService {
             throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
 
 
-        Level level = new Level();
-        //test
-        //========================================================
-        if(!levelRepository.findById(1L).isPresent()){
-            level = new Level("temp level");
-            levelRepository.save(level);
-        }else{
-            level = levelRepository.findById(1L).orElseThrow(
-                    () -> new NotFoundException("존재하지 않는 LEVEL 입니다.")
-            );
-        }
-
-        //========================================================
-
+        Level level = new Level("level1");
 
         // 비밀번호 암호화
         String encPassword = passwordEncoder.encode(rawPassword);
@@ -105,7 +92,7 @@ public class UserService {
                 .emailVerified(false)
                 .build();
 
-        // 저장
+        // 저장, 랭킹 매기기
         User savedUser = userRepository.save(user);
         rankingService.updateRank(savedUser);
 

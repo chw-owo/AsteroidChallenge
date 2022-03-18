@@ -79,7 +79,7 @@ public class PostService {
             throw new ForbiddenException("챌린지에 가입한 사람만 작성할 수 있습니다.");
         }
 
-        //인증 게시글은 하루에 하나만==================================================
+        //Write a Post per a day
         LocalDate now = LocalDate.now();
 
         if(postRepository.count()>0){
@@ -96,24 +96,21 @@ public class PostService {
                 }
             }
         }
-        //for Report, 퍼센테이지 업데이트====================================================
 
+        // update percentage of report - plus authmember
+        // 리포트 퍼센테이지 업데이트 - 인증 멤버 ++
         AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
         authChallenge.setAuthMember(authChallenge.getAuthMember()+1);
         authChallengeRepository.save(authChallenge);
 
-        //============================================================================
 
         Post post = postRepository.save(requestDto.toEntity(challenge, principalDetails.getUser()));
-
         ImageFile imageFile = imageFileService.upload(multipartFile, post);
-
         post.setImageFile(imageFile);
         User user = userRepository.findByEmail(principalDetails.getUsername()).orElseThrow(()-> new NotFoundException("존재하지 않는 사용자입니다"));
-
         user.setRankingPoint(user.getRankingPoint()+1);
 
-        // 레벨업, 다운 로직
+        // level
         levelService.checkLevelPoint(user);
 
         PostWriteResponseDto responseDto = PostWriteResponseDto.builder()

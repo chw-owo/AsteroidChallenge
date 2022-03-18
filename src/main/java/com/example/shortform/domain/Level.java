@@ -32,7 +32,7 @@ public class Level extends Timestamped{
     @Column(name = "next_point", nullable = false)
     private int nextPoint;
 
-    @OneToMany(mappedBy = "level", orphanRemoval = true)
+    @OneToMany(mappedBy = "level", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<User> users = new ArrayList<>();
 
     public Level(String name){
