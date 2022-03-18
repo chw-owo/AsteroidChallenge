@@ -37,8 +37,7 @@ public class ChatRoom extends Timestamped{
     @OneToMany(mappedBy = "chatRoom", orphanRemoval = true)
     private List<ChatMessage> messages = new ArrayList<>();
 
-    @OneToOne(orphanRemoval = true)
-    @JoinColumn(name = "challenge_id")
+    @OneToOne(mappedBy = "chatRoom")
     private Challenge challenge;
 
     public ChatRoomListResponseDto toResponseList(LocalDateTime createdAt,

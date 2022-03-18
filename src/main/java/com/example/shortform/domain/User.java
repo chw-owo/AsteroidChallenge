@@ -110,7 +110,7 @@ public class User extends Timestamped{
     }
 
     public void setRankingPoint(int point) {
-        this.rankingPoint = point;
+        this.rankingPoint = Math.max(point, 0);
     }
 
 
@@ -119,6 +119,7 @@ public class User extends Timestamped{
                 .userId(id)
                 .nickname(nickname)
                 .profileImage(profileImage)
+                .levelName(level.getName())
                 .build();
     }
 
@@ -128,6 +129,7 @@ public class User extends Timestamped{
                 .email(email)
                 .userId(id)
                 .nickname(nickname)
+                .levelName(level.getName())
                 .build();
     }
     public void setRanking(String status, int todayRank, int todayRankingPoint){

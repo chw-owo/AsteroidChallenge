@@ -10,15 +10,18 @@ import com.example.shortform.dto.ResponseDto.ReportResponseDto;
 import com.example.shortform.dto.request.ChallengeModifyRequestDto;
 import com.example.shortform.dto.request.PasswordDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
+import com.example.shortform.dto.resonse.ChallengeIdResponseDto;
 import com.example.shortform.exception.InternalServerException;
 import com.example.shortform.exception.NotFoundException;
-import com.example.shortform.dto.ResponseDto.ChallengeIdResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
 import com.example.shortform.dto.ResponseDto.TagResponseDto;
 import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.service.ChallengeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -53,8 +56,8 @@ public class ChallengeController {
 
 
     @GetMapping("/challenge")
-    public List<ChallengesResponseDto> getChallenges() throws ParseException, InternalServerException {
-        return challengeService.getChallenges();
+    public List<ChallengesResponseDto> getChallenges(@PageableDefault(size = 6, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
+        return challengeService.getChallenges(pageable);
     }
 
     @GetMapping("/challenge/{challengeId}")
@@ -68,13 +71,14 @@ public class ChallengeController {
 //     }
 
     @GetMapping("/challenge/category/{categoryId}")
-    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Long categoryId) throws ParseException, InternalServerException {
-        return challengeService.getCategoryChallenge(categoryId);
+    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Long categoryId,
+                                                            @PageableDefault(size = 100, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
+        return challengeService.getCategoryChallenge(categoryId, pageable);
     }
 
     @GetMapping("/challenge/search")
-    public List<ChallengesResponseDto> getKeywordChallenge(@RequestParam("keyword") String keyword) throws ParseException, InternalServerException {
-        return challengeService.getKeywordChallenge(keyword);
+    public List<ChallengesResponseDto> getKeywordChallenge(@RequestParam("keyword") String keyword, @PageableDefault(size = 100, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
+        return challengeService.getKeywordChallenge(keyword, pageable);
     }
 
     @PostMapping("/challenge/{challengeId}/user")
@@ -102,10 +106,10 @@ public class ChallengeController {
     }
 
     @PatchMapping("/challenge/{challengeId}")
-    public ResponseEntity<?> modifyChallenge(@PathVariable Long challengeId,
-                                             @RequestPart("challenge") ChallengeModifyRequestDto requestDto,
-                                             @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFileList,
-                                             @AuthenticationPrincipal PrincipalDetails principalDetails) throws IOException {
+    public ResponseEntity<ChallengeIdResponseDto> modifyChallenge(@PathVariable Long challengeId,
+                                                                  @RequestPart("challenge") ChallengeModifyRequestDto requestDto,
+                                                                  @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFileList,
+                                                                  @AuthenticationPrincipal PrincipalDetails principalDetails) throws IOException {
         if (principalDetails != null) {
             return challengeService.modifyChallenge(challengeId, requestDto, multipartFileList, principalDetails);
         } else {
