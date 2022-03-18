@@ -139,6 +139,16 @@ public class ChallengeService {
         return challenge.getId();
     }
 
+    @Scheduled(cron = "0 0 0 * * *")
+    public void saveReport(){
+        List<Challenge> challenges = challengeRepository.findAll();
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        for(Challenge challenge : challenges){
+            AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, yesterday);
+            authChallengeRepository.save(authChallenge);
+            authChallenge.setAuthMember(0);
+        }
+    }
 
     public List<ReportResponseDto> getReport(Long challengeId, ReportRequestDto requestDto) throws ParseException {
 
@@ -164,13 +174,13 @@ public class ChallengeService {
         for (LocalDate date:dateList){
 
             Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, date));
-            AuthChallenge authChallenge = new AuthChallenge();
+            AuthChallenge authChallenge;
 
             if(!authChallengeCheck.isPresent()){
                 authChallenge = AuthChallenge.builder()
                         .challenge(challenge)
                         .date(date)
-                        .currentMember(1)
+                        .currentMember(challenge.getCurrentMember())
                         .build();
                 authChallengeRepository.save(authChallenge);
             }else{
