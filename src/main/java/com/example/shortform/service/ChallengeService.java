@@ -130,7 +130,7 @@ public class ChallengeService {
         endCalendar.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY);
         LocalDate endLocalDate = LocalDateTime.ofInstant(endCalendar.toInstant(), endCalendar.getTimeZone().toZoneId()).toLocalDate();
 
-        for (LocalDate date = startLocalDate; date.isBefore(endLocalDate); date = date.plusDays(2))
+        for (LocalDate date = startLocalDate; date.isBefore(endLocalDate.plusDays(1)); date = date.plusDays(1))
         {
             AuthChallenge authChallenge = AuthChallenge.builder()
                     .challenge(challenge)
