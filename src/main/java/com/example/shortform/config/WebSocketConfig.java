@@ -25,7 +25,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         //prefix /sub로 메세지 구분
-//        registry.enableSimpleBroker("/sub")
+        registry.enableSimpleBroker("/sub");
 //                .setTaskScheduler(taskScheduler())
 //                .setHeartbeatValue(new long[] {3000L, 3000L});
         //prefix /pub로 메세지 발송을 요청
