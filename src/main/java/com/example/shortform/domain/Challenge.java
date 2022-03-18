@@ -46,11 +46,9 @@ public class Challenge extends Timestamped{
     @Column(name = "current_member", nullable = false)
     private int currentMember;
 
-    //수정해야됨
     @Column(name = "start_date", nullable = false)
     private String startDate; //LocalDate
 
-    //수정해야됨
     @Column(name = "end_date", nullable = false)
     private String endDate; //LocalDate
 
