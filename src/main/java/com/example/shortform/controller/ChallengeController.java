@@ -82,7 +82,7 @@ public class ChallengeController {
     }
 
     @PostMapping("/challenge/{challengeId}/user")
-    public HashMap<String, Object> participateChallenge(@PathVariable Long challengeId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public HashMap<String, Object> participateChallenge(@PathVariable Long challengeId, @AuthenticationPrincipal PrincipalDetails principalDetails) throws ParseException {
         if (principalDetails != null) {
             challengeService.participateChallenge(challengeId, principalDetails);
             HashMap<String, Object> result = new HashMap<>();

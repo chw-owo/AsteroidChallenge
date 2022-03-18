@@ -16,9 +16,11 @@ import com.example.shortform.dto.resonse.UserChallengeInfo;
 import com.example.shortform.exception.*;
 import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.jni.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -62,15 +64,22 @@ public class ChallengeService {
 
     public Long postChallenge(ChallengeRequestDto requestDto,
                                               PrincipalDetails principal,
-                                            List<MultipartFile> multipartFiles) throws IOException, InternalServerException, ParseException {
+                                            List<MultipartFile> multipartFiles) throws IOException, ParseException {
 
         // 카테고리 받아오기
-
         Category category = categoryRepository.findByName(requestDto.getCategory());
+        Challenge challenge;
 
-        // 태그 저장하기
+        // 방 비밀번호 암호화
+        if (requestDto.getPassword() != null) {
+            String encPassword = passwordEncoder.encode(requestDto.getPassword());
+            challenge = new Challenge(requestDto, category, encPassword);
+        } else {
+            challenge = new Challenge(requestDto, category, null);
+        }
+
+        // Tag, TagChallenge 저장하기
         List<TagChallenge> tagChallenges = new ArrayList<>();
-        Challenge challenge = new Challenge(requestDto, category);
         List<String> tagStrings = requestDto.getTagName();
 
         for (String tagString : tagStrings) {
@@ -85,38 +94,29 @@ public class ChallengeService {
                 throw new DuplicateException("중복된 태그는 사용할 수 없습니다.");
             }
         }
-        challenge.setTagChallenges(tagChallenges);
 
-        //챌린지 저장
-        challengeRepository.save(challenge);
+        //User, UserChallenge 저장하기
+        ArrayList<UserChallenge> userChallenges = new ArrayList<>();
+        User user = userRepository.findByEmail(principal.getUsername()).orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
+        challenge.setUser(user);
+        UserChallenge userChallenge = new UserChallenge(challenge, user);
+        userChallenges.add(userChallenge);
+        userChallengeRepository.save(userChallenge);
 
-        // 방 비밀번호 암호화
-        if (requestDto.getPassword() != null) {
-            String encPassword = passwordEncoder.encode(requestDto.getPassword());
-            challenge.setPassword(encPassword);
-        }
-
-        // 이미지 업로드
-        List<ImageFile> imageFileList = new ArrayList<>();
+        // Image, ChallengeImages 저장하기
+        List<ImageFile> imageFiles = new ArrayList<>();
         List<String> challengeImages = new ArrayList<>();
         if (multipartFiles != null){
             for (MultipartFile m : multipartFiles) {
                 ImageFile imageFileUpload = imageFileService.upload(m, challenge);
-                imageFileList.add(imageFileUpload);
+                imageFiles.add(imageFileUpload);
                 challengeImages.add(imageFileUpload.getFilePath());
             }
         }
-        challenge.setChallengeImage(imageFileList);
 
-        User user = userRepository.findByEmail(principal.getUsername()).orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
-        challenge.setUser(user);
-        UserChallenge userChallenge = new UserChallenge(challenge, user);
-        userChallengeRepository.save(userChallenge);
-//        challenge.setUser(user);
-
+        challenge.ChallengeRelative(tagChallenges, userChallenges, imageFiles);
 
         // 위클리 레포트
-
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
 
         Date startDate = format.parse(requestDto.getStartDate());
@@ -125,13 +125,11 @@ public class ChallengeService {
         startCalendar.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
         LocalDate startLocalDate = LocalDateTime.ofInstant(startCalendar.toInstant(), startCalendar.getTimeZone().toZoneId()).toLocalDate();
 
-
         Date endDate = format.parse(requestDto.getEndDate());
         Calendar endCalendar = Calendar.getInstance();
         startCalendar.setTime(endDate);
         endCalendar.set(Calendar.DAY_OF_WEEK,Calendar.SATURDAY);
         LocalDate endLocalDate = LocalDateTime.ofInstant(endCalendar.toInstant(), endCalendar.getTimeZone().toZoneId()).toLocalDate();
-
 
         for (LocalDate date = startLocalDate; date.isBefore(endLocalDate); date = date.plusDays(1))
         {
@@ -143,11 +141,21 @@ public class ChallengeService {
             authChallengeRepository.save(authChallenge);
         }
 
+        challengeRepository.save(challenge);
 
         return challenge.getId();
-
     }
 
+    @Scheduled(cron = "0 0 0 * * *")
+    public void saveReport(){
+        List<Challenge> challenges = challengeRepository.findAll();
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        for(Challenge challenge : challenges){
+            AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, yesterday);
+            authChallengeRepository.save(authChallenge);
+            authChallenge.setAuthMember(0);
+        }
+    }
 
     public List<ReportResponseDto> getReport(Long challengeId, ReportRequestDto requestDto) throws ParseException {
 
@@ -173,13 +181,13 @@ public class ChallengeService {
         for (LocalDate date:dateList){
 
             Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, date));
-            AuthChallenge authChallenge = new AuthChallenge();
+            AuthChallenge authChallenge;
 
             if(!authChallengeCheck.isPresent()){
                 authChallenge = AuthChallenge.builder()
                         .challenge(challenge)
                         .date(date)
-                        .currentMember(1)
+                        .currentMember(challenge.getCurrentMember())
                         .build();
                 authChallengeRepository.save(authChallenge);
             }else{
@@ -193,19 +201,14 @@ public class ChallengeService {
 
             if(authChallenge.equals(null)){
                 percentage = 0;
-            }
-            else if(!date.isAfter(now)) {
+            } else if(!date.isAfter(now)) {
                 percentage_d = ( (double) divisor / (double) division ) * 100.0;
                 percentage = (int) percentage_d;
             }else{
                 percentage = 0;
             }
-            //System.out.print(division);
-            //System.out.print("/");
-            //System.out.println(divisor);
             ReportResponseDto responseDto = ReportResponseDto.builder().date(date.toString()).percentage(percentage).build();
             responseDtos.add(responseDto);
-
         }
         return responseDtos;
     }
@@ -219,29 +222,25 @@ public class ChallengeService {
         if(now.getTime() < startDate.getTime()){
             challenge.setStatus(ChallengeStatus.BEFORE);
             return "모집중";
-
         }else if (startDate.getTime() <= now.getTime() && now.getTime() <= endDate.getTime()){
             challenge.setStatus(ChallengeStatus.ING);
             return "진행중";
         }else{
-            //이 부분은 따로 설정
             challenge.setStatus(ChallengeStatus.SUCCESS);
             return "완료";
         }
     }
 
     public List<ChallengesResponseDto> getChallenges(Pageable pageable) throws ParseException, InternalServerException {
-//        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
         Page<Challenge> challengePage = challengeRepository.findAll(pageable);
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
 
 
         for(Challenge challenge: challengePage){
+
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles =  challenge.getChallengeImage();
-//            if(ImageFiles.isEmpty()){
-//                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
-//            }
+
             for(ImageFile image:ImageFiles){
                 challengeImages.add(image.getFilePath());
             }
@@ -249,9 +248,7 @@ public class ChallengeService {
             ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
             responseDto.setStatus(challengeStatus);
             challengesResponseDtos.add(responseDto);
-
         }
-
         return challengesResponseDtos;
     }
 
@@ -260,9 +257,7 @@ public class ChallengeService {
         List<String> challengeImage = new ArrayList<>();
 
         List<ImageFile> ImageFiles = challenge.getChallengeImage();
-//        if(ImageFiles.isEmpty()){
-//            throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
-//        }
+
         for (ImageFile image : ImageFiles) {
             challengeImage.add(image.getFilePath());
         }
@@ -283,33 +278,29 @@ public class ChallengeService {
 
 
     public List<ChallengesResponseDto> getCategoryChallenge(Long categoryId, Pageable pageable) throws ParseException, InternalServerException {
-//        List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(categoryId);
         Page<Challenge> challengePage = challengeRepository.findAllByCategoryId(categoryId, pageable);
         List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
 
         for(Challenge challenge: challengePage){
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles =  challenge.getChallengeImage();
-//            if(ImageFiles.isEmpty()){
-//                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
-//            }
+
             for(ImageFile image:ImageFiles){
                 challengeImages.add(image.getFilePath());
             }
             String status = challengeStatus(challenge);
 
-            //if(categoryId.equals(challenge.getCategory())){
-            ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
-            responseDto.setStatus(status);
-            ChallengesResponseDtos.add(responseDto);
-            //}
+            if(categoryId.equals(challenge.getCategory())){
+                ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
+                responseDto.setStatus(status);
+                ChallengesResponseDtos.add(responseDto);
+            }
         }
 
         return ChallengesResponseDtos;
     }
 
     public List<ChallengesResponseDto> getKeywordChallenge(String keyword, Pageable pageable) throws ParseException, InternalServerException {
-//        List<Challenge> challenges = challengeRepository.findAllByOrderByCreatedAtDesc();
         String searchKeyword = keyword.trim();
         if (searchKeyword.equals("")) {
             return new ArrayList<>();
@@ -319,10 +310,9 @@ public class ChallengeService {
 
         for (Challenge challenge : challengePage) {
             List<String> challengeImages = new ArrayList<>();
+
             List<ImageFile> ImageFiles = challenge.getChallengeImage();
-//            if(ImageFiles.isEmpty()){
-//                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
-//            }
+
             for (ImageFile image : ImageFiles) {
                 challengeImages.add(image.getFilePath());
             }
@@ -333,36 +323,11 @@ public class ChallengeService {
 
         }
 
-//        for(Challenge c: challenges) {
-//            List<String> challengeImages = new ArrayList<>();
-//            List<ImageFile> ImageFiles = c.getChallengeImage();
-////            if(ImageFiles.isEmpty()){
-////                throw new InternalServerException("챌린지 이미지를 찾을 수 없습니다.");
-////            }
-//            for (ImageFile image : ImageFiles) {
-//                challengeImages.add(image.getFilePath());
-//            }
-//            String status = challengeStatus(c);
-//            if(c.getTitle().contains(keyword)){
-//                ChallengesResponseDto responseDto = new ChallengesResponseDto(c, challengeImages);
-//                responseDto.setStatus(status);
-//                ChallengesResponseDtos.add(responseDto);
-//            }
-//            for(TagChallenge t : c.getTagChallenges()){
-//                if(t.getTag().getName().contains(keyword)){
-//                    ChallengesResponseDto responseDto = new ChallengesResponseDto(c, challengeImages);
-//                    responseDto.setStatus(status);
-//                    ChallengesResponseDtos.add(responseDto);
-//                }
-//
-//            }
-//        }
-
         return ChallengesResponseDtos;
     }
 
     @Transactional
-    public void participateChallenge(Long challengeId, PrincipalDetails principalDetails) {
+    public void participateChallenge(Long challengeId, PrincipalDetails principalDetails) throws ParseException {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("찾는 챌린지가 존재하지 않습니다.")
         );
@@ -391,10 +356,13 @@ public class ChallengeService {
         List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
         challenge.setCurrentMember(userChallenges.size());
 
+        // update percentage of report - plus currentMember
+        // 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
         LocalDate now = LocalDate.now();
-        AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge,now);
-        authChallenge.setCurrentMember(authChallenge.getCurrentMember()+1);
+        AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
+        authChallenge.setCurrentMember(authChallenge.getCurrentMember() + 1);
         authChallengeRepository.save(authChallenge);
+
 
     }
 
@@ -469,13 +437,6 @@ public class ChallengeService {
                 }
             }
 
-//            int i = 0;
-//
-//            for (TagChallenge tagChallenge : tagChallenges) {
-//                tagChallenge.getTag().setName(tagNames.get(i));
-//                i++;
-//            }
-
             return ResponseEntity.ok(challenge.toResponse());
         } else {
             throw new ForbiddenException("작성자만 수정할 수 있습니다.");
@@ -525,6 +486,14 @@ public class ChallengeService {
             throw new ForbiddenException("참가하지 않은 챌린지입니다.");
         }
 
+        LocalDate now = LocalDate.now();
+        AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge,now);
+        authChallenge.setCurrentMember(authChallenge.getCurrentMember()-1);
+        if (userChallenge.isDailyAuthenticated()){
+            authChallenge.setAuthMember(authChallenge.getAuthMember()-1);
+        }
+        authChallengeRepository.save(authChallenge);
+
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
 
@@ -560,6 +529,13 @@ public class ChallengeService {
         } else {
             throw new InvalidException("비밀번호가 틀렸습니다");
         }
+
+        // update percentage of report - plus currentMember
+        // 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
+        LocalDate now = LocalDate.now();
+        AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge,now);
+        authChallenge.setCurrentMember(authChallenge.getCurrentMember()+1);
+        authChallengeRepository.save(authChallenge);
     }
 
     public ResponseEntity<CMResponseDto> deleteChallenge(Long challengeId, PrincipalDetails principalDetails) throws ParseException {

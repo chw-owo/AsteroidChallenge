@@ -20,11 +20,4 @@ public class Ranking extends Timestamped{
     @OneToMany(targetEntity = User.class)
     @JoinColumn(name="users")
     private List<User> users;
-
-
-
-    public Ranking(List<User> users) {
-        this.users = users;
-    }
-
 }
