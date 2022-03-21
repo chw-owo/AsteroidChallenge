@@ -28,5 +28,8 @@ public class LevelService {
             if (userPoint >= level.getExperiencePoint())
                 user.changeLevel(level);
         }
+
+        if (userPoint <= 50)
+            user.changeLevel(levelRepository.findById(1L).get());
     }
 }

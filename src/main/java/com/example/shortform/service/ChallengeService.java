@@ -289,11 +289,9 @@ public class ChallengeService {
             }
             String status = challengeStatus(challenge);
 
-            if(categoryId.equals(challenge.getCategory())){
-                ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
-                responseDto.setStatus(status);
-                ChallengesResponseDtos.add(responseDto);
-            }
+            ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
+            responseDto.setStatus(status);
+            ChallengesResponseDtos.add(responseDto);
         }
 
         return ChallengesResponseDtos;
@@ -372,7 +370,7 @@ public class ChallengeService {
             authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
         }
 
-        authChallenge.setCurrentMember(authChallenge.getCurrentMember());
+        authChallenge.setCurrentMember(authChallenge.getCurrentMember() + 1);
         authChallengeRepository.save(authChallenge);
 
     }
@@ -480,7 +478,7 @@ public class ChallengeService {
 
             // 챌린지 시작 후 & 챌린지 종료 전 중단 시 페널티 적용
             if (now.isAfter(startDate.minusDays(1)) && now.isBefore(endDate.plusDays(1))) {
-                user.setRankingPoint(user.getRankingPoint() - 50);
+                user.setRankingPoint(user.getRankingPoint() - 5);
             }
 
             // 레벨업, 다운 로직
