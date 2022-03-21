@@ -99,7 +99,7 @@ public class UserService {
 
         // 메일 보내기
         savedUser.generateEmailCheckToken();
-        sendSignupConfirmEmail(savedUser); // TODO 개선 필요
+        sendSignupConfirmEmail(savedUser);
 
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
