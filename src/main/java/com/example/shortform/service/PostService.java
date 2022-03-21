@@ -110,12 +110,12 @@ public class PostService {
         user.setRankingPoint(user.getRankingPoint()+1);
 
         // level
-        levelService.checkLevelPoint(user);
+        boolean isLevelUp = levelService.checkLevelPoint(user);
 
         PostWriteResponseDto responseDto = PostWriteResponseDto.builder()
                 .postId(post.getId())
-                .experiencePoint(user.getLevel().getNextPoint())
-                .rankingPoint(user.getRankingPoint())
+                .isLevelUp(isLevelUp)
+                .levelName(user.getLevel().getName())
                 .build();
 
         return ResponseEntity.ok(responseDto);

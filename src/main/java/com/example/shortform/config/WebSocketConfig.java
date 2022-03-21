@@ -42,7 +42,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/chatting") // websocket 연결 주소
-                .setAllowedOrigins("http://localhost:3000", "http://hanghae-asteroid.s3-website.ap-northeast-2.amazonaws.com/")
+                .setAllowedOrigins("http://localhost:3000", "http://hanghae-asteroid.s3-website.ap-northeast-2.amazonaws.com/", "http://sohangsung.co.kr")
                 .withSockJS(); // 닞은 버전의 브라우저에서도 websocket이 동작하게 하는 역할
     }
 
