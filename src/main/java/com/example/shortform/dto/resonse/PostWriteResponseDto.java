@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class PostWriteResponseDto {
 
     private Long postId;
-    private int experiencePoint;
-    private int rankingPoint;
+    private boolean isLevelUp;
+    private String levelName;
 }
