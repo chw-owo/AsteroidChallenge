@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -17,4 +18,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findAllByUser(User user);
 
     Page<Post> findAllByChallengeId(Long challengeId, Pageable pageable);
+
+    boolean existsByUserAndChallengeIdAndCreatedAtBetween(User user, Long challengeId, LocalDateTime localDateTime, LocalDateTime plusDays);
 }
