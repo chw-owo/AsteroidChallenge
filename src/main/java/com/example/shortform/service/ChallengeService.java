@@ -372,7 +372,7 @@ public class ChallengeService {
             authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
         }
 
-        authChallenge.setCurrentMember(authChallenge.getCurrentMember());
+        authChallenge.setCurrentMember(authChallenge.getCurrentMember() + 1);
         authChallengeRepository.save(authChallenge);
 
     }
@@ -558,7 +558,7 @@ public class ChallengeService {
             authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
         }
 
-        authChallenge.setCurrentMember(authChallenge.getCurrentMember());
+        authChallenge.setCurrentMember(authChallenge.getCurrentMember() + 1);
         authChallengeRepository.save(authChallenge);
     }
 

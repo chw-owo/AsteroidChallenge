@@ -86,20 +86,14 @@ public class PostService {
 
         //Write a Post per a day
         LocalDate now = LocalDate.now();
+        LocalDateTime today = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), 0, 0, 0);
 
-        if(postRepository.count()>0){
-            List<Post> Posts = postRepository.findAllByUser(principalDetails.getUser());
-
+        if(!postRepository.existsByUserAndChallengeIdAndCreatedAtBetween(principalDetails.getUser(), challengeId, today, today.plusDays(1))){
             // 해당 게시글에 인증하면 당일 인증여부 체크
             userChallenge.setDailyAuthenticated(true);
             userChallenge.setAuthCount(userChallenge.getAuthCount() + 1);
-
-            for(Post p: Posts){
-                LocalDate postTime = p.getCreatedAt().toLocalDate();
-                if(now.equals(postTime) && p.getChallenge().getId().equals(challengeId)) {
-                    throw new InvalidException("인증은 하루에 1회만 가능합니다.");
-                }
-            }
+        } else {
+            throw new InvalidException("인증은 하루에 1회만 가능합니다.");
         }
 
         // update percentage of report - plus authmember
