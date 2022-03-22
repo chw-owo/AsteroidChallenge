@@ -71,9 +71,11 @@ public class ChallengeController {
 //     }
 
     @GetMapping("/challenge/category/{categoryId}")
-    public List<ChallengesResponseDto> getCategoryChallenge(@PathVariable Long categoryId,
-                                                            @PageableDefault(size = 100, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
-        return challengeService.getCategoryChallenge(categoryId, pageable);
+    public ChallengePageResponseDto getCategoryChallenge(@PathVariable Long categoryId,
+                                                            @RequestParam("page") int page,
+                                                            @RequestParam("size") int size) throws ParseException, InternalServerException {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        return challengeService.getCategoryChallenge(categoryId, pageRequest);
     }
 
     @GetMapping("/challenge/search")

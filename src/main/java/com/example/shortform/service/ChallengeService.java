@@ -281,9 +281,9 @@ public class ChallengeService {
     }
 
 
-    public List<ChallengesResponseDto> getCategoryChallenge(Long categoryId, Pageable pageable) throws ParseException, InternalServerException {
-        Page<Challenge> challengePage = challengeRepository.findAllByCategoryId(categoryId, pageable);
-        List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
+    public ChallengePageResponseDto getCategoryChallenge(Long categoryId, PageRequest pageRequest) throws ParseException, InternalServerException {
+        Page<Challenge> challengePage = challengeRepository.findAllByCategoryId(categoryId, pageRequest);
+        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
 
         for(Challenge challenge: challengePage){
             List<String> challengeImages = new ArrayList<>();
@@ -296,10 +296,15 @@ public class ChallengeService {
 
             ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
             responseDto.setStatus(status);
-            ChallengesResponseDtos.add(responseDto);
+            challengesResponseDtos.add(responseDto);
         }
+        ChallengePageResponseDto challengePageResponseDto = ChallengePageResponseDto.builder()
+                .challengeList(challengesResponseDtos)
+                .next(challengePage.hasNext())
+                .totalCnt(challengePage.getTotalElements())
+                .build();
 
-        return ChallengesResponseDtos;
+        return challengePageResponseDto;
     }
 
     public List<ChallengesResponseDto> getKeywordChallenge(String keyword, Pageable pageable) throws ParseException, InternalServerException {
