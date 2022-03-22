@@ -221,4 +221,23 @@ public class PostService {
 
         return ResponseEntity.ok(responseDtoList);
     }
+
+    public ResponseEntity<PostResponseDto> getPost(Long challengeId, Long postId, Pageable pageable) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new NotFoundException("인증 게시글이 존재하지 않습니다.")
+        );
+
+        Page<Comment> commentPage = commentRepository.findAllByPostId(postId, pageable);
+        List<CommentResponseDto> commentDetailList = new ArrayList<>();
+
+        for (Comment comment : commentPage) {
+            // 댓글 날짜 형식 변경
+            CommentResponseDto commentDetailResponseDto = comment.toResponse();
+            String commentCreatedAt = comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
+            commentDetailResponseDto.setCreatedAt(commentCreatedAt);
+            commentDetailList.add(commentDetailResponseDto);
+        }
+        PostResponseDto postResponseDto = post.toResponse(commentDetailList);
+        return ResponseEntity.ok(postResponseDto);
+    }
 }
