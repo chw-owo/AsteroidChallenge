@@ -31,6 +31,7 @@ public class ChallengesResponseDto {
     private String category;
     private List<String> tagName;
     private String status;
+    private boolean next;
 
     public ChallengesResponseDto(Challenge challenge, List<String> challengeImage){
         this.challengeId = challenge.getId();
@@ -54,6 +55,31 @@ public class ChallengesResponseDto {
         }
 
         this.tagName = tagChallengeStrings;
+    }
+
+    public ChallengesResponseDto(Challenge challenge, List<String> challengeImage, boolean next){
+        this.challengeId = challenge.getId();
+        this.title=challenge.getTitle();
+        this.content=challenge.getContent();
+        this.category= challenge.getCategory().getName();
+        this.challengeImage=challengeImage;
+        this.currentMember = challenge.getCurrentMember();
+        this.maxMember=challenge.getMaxMember();
+        this.startDate=challenge.getStartDate();
+        this.endDate=challenge.getEndDate();
+        this.isPrivate=challenge.getIsPrivate();
+
+
+        List<String> tagChallengeStrings = new ArrayList<>();
+        List<TagChallenge> tagChallenges = challenge.getTagChallenges();
+
+        for(TagChallenge tagChallenge : tagChallenges){
+            String tagChallengeString = tagChallenge.getTag().getName();
+            tagChallengeStrings.add(tagChallengeString);
+        }
+
+        this.tagName = tagChallengeStrings;
+        this.next = next;
     }
 
 }
