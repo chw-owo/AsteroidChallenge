@@ -244,7 +244,7 @@ public class ChallengeService {
                 challengeImages.add(image.getFilePath());
             }
             String challengeStatus = challengeStatus(challenge);
-            ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
+            ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages, challengePage.hasNext());
             responseDto.setStatus(challengeStatus);
             challengesResponseDtos.add(responseDto);
         }

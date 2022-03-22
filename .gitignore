@@ -42,3 +42,4 @@ application.yml
 application-aws.yml
 application-credentials.yml
 application-local.yml
+application-test.yml
