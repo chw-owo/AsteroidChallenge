@@ -4,8 +4,10 @@ import com.example.shortform.config.auth.kakao.KakaoProfile;
 import com.example.shortform.config.auth.kakao.OAuthToken;
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
 import com.example.shortform.config.jwt.TokenDto;
+import com.example.shortform.domain.Level;
 import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
+import com.example.shortform.repository.LevelRepository;
 import com.example.shortform.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,9 +37,13 @@ public class KakaoService {
     @Value("${KAKAO.RAW_PASSWORD}")
     private String RAW_PASSWORD;
 
+    @Value(("${KAKAO.PROVIDER}"))
+    private String provider;
+
     private  String TOKEN_PREFIX = "Bearer ";
 
     private final UserRepository userRepository;
+    private final LevelRepository levelRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
@@ -74,7 +80,7 @@ public class KakaoService {
 
         // 데이터를 오브젝트에 담는다.
         // Gson, Json Simple, ObjectMapper
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper= new ObjectMapper();
 
         OAuthToken oAuthToken = null;
 
@@ -113,7 +119,13 @@ public class KakaoService {
             e.printStackTrace();
         }
 
-        log.info("kakao email: {}", kakaoProfile.getKakaoAccount().getEmail());
+        // email 값이 널일 경우
+        String kakaoEmail = kakaoProfile.getKakaoAccount().getEmail();
+
+        if (kakaoEmail == null)
+            kakaoEmail = "";
+
+        //log.info("kakao email: {}", kakaoEmail);
         log.info("kakao nickname: {}", kakaoProfile.getKakaoAccount().getProfile().getNickname());
 
         User userEntity = userRepository.findByProviderId(String.valueOf(kakaoProfile.getId()));
@@ -121,25 +133,35 @@ public class KakaoService {
         // 가입되어있는지 확인
         if (userEntity == null) {
 
-            String nickname = kakaoProfile.getKakaoAccount().getEmail().split("@")[0];
+            String nickname;
+
+            if (!kakaoEmail.equals(""))
+                nickname = kakaoProfile.getKakaoAccount().getEmail().split("@")[0];
+            else
+                nickname = kakaoProfile.getKakaoAccount().getProfile().getNickname();
+
+            Level level = levelRepository.findById(1L).get();
 
             // 강제 로그인 진행
             userEntity = User.builder()
-                    .email(kakaoProfile.getKakaoAccount().getEmail())
+                    .email(kakaoEmail)
                     .password(passwordEncoder.encode(RAW_PASSWORD))
                     .nickname(nickname)
-                    .rankingPoint(0)
+                    .rankingPoint(50)
                     .emailVerified(true)
+                    .level(level)
                     .role(Role.ROLE_USER)
-                    .provider("kakao")
+                    .provider(provider)
                     .providerId(String.valueOf(kakaoProfile.getId()))
                     .build();
 
-            userRepository.save(userEntity);
+            User savedUser = userRepository.save(userEntity);
         }
 
         // 토큰 정보 생성
         TokenDto token = jwtAuthenticationProvider.createToken(userEntity);
+        token.setEmail(userEntity.getEmail());
+        token.setEmailVerified(userEntity.isEmailVerified());
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(JwtAuthenticationProvider.AUTHORIZATION_HEADER, TOKEN_PREFIX + token);
