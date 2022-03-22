@@ -4,9 +4,7 @@ import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.domain.Category;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
 import com.example.shortform.dto.RequestDto.ReportRequestDto;
-import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
-import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
-import com.example.shortform.dto.ResponseDto.ReportResponseDto;
+import com.example.shortform.dto.ResponseDto.*;
 import com.example.shortform.dto.request.ChallengeModifyRequestDto;
 import com.example.shortform.dto.request.PasswordDto;
 import com.example.shortform.dto.resonse.CMResponseDto;
@@ -15,10 +13,10 @@ import com.example.shortform.exception.InternalServerException;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
-import com.example.shortform.dto.ResponseDto.TagResponseDto;
 import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.service.ChallengeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -56,8 +54,10 @@ public class ChallengeController {
 
 
     @GetMapping("/challenge")
-    public List<ChallengesResponseDto> getChallenges(@PageableDefault(size = 6, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
-        return challengeService.getChallenges(pageable);
+    public ChallengePageResponseDto getChallenges(@RequestParam("page") int page,
+                                                  @RequestParam("size") int size) throws ParseException, InternalServerException {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        return challengeService.getChallenges(pageRequest);
     }
 
     @GetMapping("/challenge/{challengeId}")

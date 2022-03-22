@@ -4,6 +4,7 @@ import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.domain.*;
 import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
 import com.example.shortform.dto.RequestDto.ReportRequestDto;
+import com.example.shortform.dto.ResponseDto.ChallengePageResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
 import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
 import com.example.shortform.dto.ResponseDto.ReportResponseDto;
@@ -16,8 +17,8 @@ import com.example.shortform.dto.resonse.UserChallengeInfo;
 import com.example.shortform.exception.*;
 import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.jni.Local;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -230,8 +231,8 @@ public class ChallengeService {
         }
     }
 
-    public List<ChallengesResponseDto> getChallenges(Pageable pageable) throws ParseException, InternalServerException {
-        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
+    public ChallengePageResponseDto getChallenges(PageRequest pageRequest) throws ParseException, InternalServerException {
+        Page<Challenge> challengePage = challengeRepository.findAll(pageRequest);
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
 
 
@@ -248,7 +249,11 @@ public class ChallengeService {
             responseDto.setStatus(challengeStatus);
             challengesResponseDtos.add(responseDto);
         }
-        return challengesResponseDtos;
+        ChallengePageResponseDto challengePageResponseDto = ChallengePageResponseDto.builder()
+                .challengeList(challengesResponseDtos)
+                .next(challengePage.hasNext())
+                .totalCnt(challengePage.getTotalElements()).build();
+        return challengePageResponseDto;
     }
 
     public ChallengeResponseDto getChallenge(Long challengeId) throws Exception, InternalServerException {
