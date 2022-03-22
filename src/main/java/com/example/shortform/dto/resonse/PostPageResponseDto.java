@@ -1,4 +1,4 @@
-package com.example.shortform.dto.ResponseDto;
+package com.example.shortform.dto.resonse;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,8 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ChallengePageResponseDto {
+public class PostPageResponseDto {
     private boolean next;
-    private long totalCnt;
-    private List<ChallengesResponseDto> challengeList;
+    private List<PostResponseDto> postList;
 }

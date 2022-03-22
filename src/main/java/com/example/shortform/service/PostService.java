@@ -3,16 +3,14 @@ package com.example.shortform.service;
 import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.domain.*;
 import com.example.shortform.dto.request.PostRequestDto;
-import com.example.shortform.dto.resonse.CommentResponseDto;
-import com.example.shortform.dto.resonse.PostIdResponseDto;
-import com.example.shortform.dto.resonse.PostResponseDto;
-import com.example.shortform.dto.resonse.PostWriteResponseDto;
+import com.example.shortform.dto.resonse.*;
 import com.example.shortform.exception.ForbiddenException;
 import com.example.shortform.exception.InvalidException;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,14 +20,11 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -177,14 +172,14 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity<List<PostResponseDto>> getListPost(Long challengeId, Pageable postPageable, Pageable commentPageable) {
+    public ResponseEntity<PostPageResponseDto> getListPost(Long challengeId, PageRequest postPageRequest, PageRequest commentPageRequest) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
 
 //        List<Post> postList = postRepository.findAllByChallengeIdOrderByCreatedAtDesc(challengeId);
         // DB에서 챌린지의 모든 인증게시글 조회
-        Page<Post> postPage = postRepository.findAllByChallengeId(challengeId, postPageable);
+        Page<Post> postPage = postRepository.findAllByChallengeId(challengeId, postPageRequest);
         List<PostResponseDto> responseDtoList = new ArrayList<>();
 
 
@@ -192,7 +187,7 @@ public class PostService {
             List<CommentResponseDto> commentDetailList = new ArrayList<>();
 //            List<Comment> commentList = commentRepository.findAllByPostIdOrderByCreatedAtDesc(post.getId());
             // DB에서 인증 게시글의 모든 댓글 조회
-            Page<Comment> commentPage = commentRepository.findAllByPostId(post.getId(), commentPageable);
+            List<Comment> commentPage = commentRepository.findAllByPostId(post.getId(), commentPageRequest);
             for (Comment comment : commentPage) {
                 // 댓글 날짜 형식 변경
                 CommentResponseDto commentDetailResponseDto = comment.toResponse();
@@ -218,8 +213,12 @@ public class PostService {
             postResponseDto.setCreatedAt(postCreatedAt);
             responseDtoList.add(postResponseDto);
         }
+        PostPageResponseDto postPageResponseDto = PostPageResponseDto.builder()
+                .postList(responseDtoList)
+                .next(postPage.hasNext())
+                .build();
 
-        return ResponseEntity.ok(responseDtoList);
+        return ResponseEntity.ok(postPageResponseDto);
     }
 
     public ResponseEntity<PostResponseDto> getPost(Long challengeId, Long postId, Pageable pageable) {

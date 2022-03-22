@@ -3,12 +3,14 @@ package com.example.shortform.controller;
 import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.dto.request.PostRequestDto;
 import com.example.shortform.dto.resonse.PostIdResponseDto;
+import com.example.shortform.dto.resonse.PostPageResponseDto;
 import com.example.shortform.dto.resonse.PostResponseDto;
 import com.example.shortform.dto.resonse.PostWriteResponseDto;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -69,12 +71,14 @@ public class PostController {
         }
     }
 
-    // 인증 게시글 및 댓글 조회 API
+    // 인증 게시글 전체조회
     @GetMapping("/challenge/{challengeId}/posts")
-    public ResponseEntity<List<PostResponseDto>> getListPost(@PathVariable Long challengeId,
-                                                             @Qualifier("post") @PageableDefault(size = 100, sort = "createdAt", direction = Sort.Direction.DESC) Pageable postPageable,
-                                                             @Qualifier("comment") @PageableDefault(size = 100, sort = "createdAt", direction = Sort.Direction.DESC) Pageable commentPageable) {
-        return postService.getListPost(challengeId, postPageable, commentPageable);
+    public ResponseEntity<PostPageResponseDto> getListPost(@PathVariable Long challengeId,
+                                                           @RequestParam("page") int page,
+                                                           @RequestParam("size") int size) {
+        PageRequest postPageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        PageRequest commentPageRequest = PageRequest.of(0, 2, Sort.Direction.DESC, "createdAt");
+        return postService.getListPost(challengeId, postPageRequest, commentPageRequest);
     }
 
     @GetMapping("/challenge/{challengeId}/posts/{postId}")
