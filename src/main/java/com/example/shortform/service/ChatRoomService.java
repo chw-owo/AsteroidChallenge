@@ -131,7 +131,7 @@ public class ChatRoomService {
             responseDtoList.add(responseDto);
         }
         responseDtoList = responseDtoList.stream()
-                .sorted(Comparator.comparing(ChatMessageResponseDto::getCreatedAt).reversed())
+                .sorted(Comparator.comparing(ChatMessageResponseDto::getCreatedAt))
                 .collect(Collectors.toList());
 
         // responseDto로 변경 후 return

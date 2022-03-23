@@ -18,6 +18,7 @@ public class PostResponseDto {
     private String postImage;
     private String content;
     private String createdAt;
+    private Long commentCnt;
     private List<CommentResponseDto> comments;
 
     public PostResponseDto setCreatedAt(String createdAt) {
