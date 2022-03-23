@@ -53,7 +53,7 @@ public class Post extends Timestamped{
         this.content = requestDto.getContent();
     }
 
-    public PostResponseDto toResponse(List<CommentResponseDto> commentList) {
+    public PostResponseDto toResponse(List<CommentResponseDto> commentList, long cnt) {
         return PostResponseDto.builder()
                 .postImage(imageFile.getFilePath())
                 .postId(id)
@@ -62,6 +62,7 @@ public class Post extends Timestamped{
                 .levelName(user.getLevel().getName())
                 .nickname(user.getNickname())
                 .comments(commentList)
+                .commentCnt(cnt)
                 .build();
     }
 

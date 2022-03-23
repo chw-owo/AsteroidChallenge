@@ -187,7 +187,7 @@ public class PostService {
             List<CommentResponseDto> commentDetailList = new ArrayList<>();
 //            List<Comment> commentList = commentRepository.findAllByPostIdOrderByCreatedAtDesc(post.getId());
             // DB에서 인증 게시글의 모든 댓글 조회
-            List<Comment> commentPage = commentRepository.findAllByPostId(post.getId(), commentPageable);
+            Page<Comment> commentPage = commentRepository.findAllByPostId(post.getId(), commentPageable);
             for (Comment comment : commentPage) {
                 // 댓글 날짜 형식 변경
                 CommentResponseDto commentDetailResponseDto = comment.toResponse();
@@ -202,7 +202,7 @@ public class PostService {
                 commentDetailList.add(commentDetailResponseDto);
             }
             // 인증 게시글 날짜 형식 변경
-            PostResponseDto postResponseDto = post.toResponse(commentDetailList);
+            PostResponseDto postResponseDto = post.toResponse(commentDetailList, commentPage.getTotalElements());
             String postCreatedAt = post.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
 //            String postCreatedAt = post.getCreatedAt().toString();
 //            String year = postCreatedAt.substring(0,4) + ".";
