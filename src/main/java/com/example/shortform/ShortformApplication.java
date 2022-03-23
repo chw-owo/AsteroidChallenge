@@ -16,8 +16,7 @@ public class ShortformApplication {
     public static final String APPLICATION_LOCATIONS = "spring.config.location="
             + "classpath:application.yml,"
             + "classpath:application-aws.yml,"
-            + "classpath:application-credentials.yml,"
-            + "classpath:application-dev.yml";
+            + "classpath:application-prod.yml";
 
     public static void main(String[] args) {
 
