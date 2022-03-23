@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PostResponseDto {
+public class PostDetailPageResponseDto {
     private Long postId;
     private String nickname;
     private String profileImage;
@@ -21,5 +21,6 @@ public class PostResponseDto {
     private String createdAt;
     private long commentCnt;
     private List<CommentResponseDto> comments;
+    private boolean next;
 
 }
