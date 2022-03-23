@@ -103,7 +103,7 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public ChatMessageListDto getAllMessages(Long roomId, PrincipalDetails principalDetails, PageRequest pageRequest) {
+    public ChatMessageListDto getAllMessages(Long roomId, PrincipalDetails principalDetails, Pageable pageable) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new NotFoundException("채팅방이 존재하지 않습니다.")
         );
@@ -111,7 +111,7 @@ public class ChatRoomService {
         User user = principalDetails.getUser();
 
         // 채팅 메세지 DB에서 이 채팅방의 메세지 전체 조회
-        Page<ChatMessage> messagePage = chatMessageRepository.findAllByChatRoom(chatRoom, pageRequest);
+        Page<ChatMessage> messagePage = chatMessageRepository.findAllByChatRoom(chatRoom, pageable);
 //        List<ChatMessage> messageList = chatMessageRepository.findAllByChatRoom(chatRoom);
         // 채팅 방 참가자 목록 조회
         List<UserChatRoom> memberList = userChatRoomRepository.findAllByChatRoom(chatRoom);

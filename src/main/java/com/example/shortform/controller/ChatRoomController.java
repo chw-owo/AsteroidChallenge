@@ -56,10 +56,10 @@ public class ChatRoomController {
                                              @AuthenticationPrincipal PrincipalDetails principalDetails,
                                              @RequestParam("page") int page,
                                              @RequestParam("size") int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
         // 로그인 한 유저만 이용가능하도록 설정
         if (principalDetails != null)
-            return chatRoomService.getAllMessages(roomId, principalDetails, pageRequest);
+            return chatRoomService.getAllMessages(roomId, principalDetails, pageable);
         else
             throw new UnauthorizedException("로그인 후 이용가능합니다.");
     }

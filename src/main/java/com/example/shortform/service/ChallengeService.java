@@ -231,8 +231,8 @@ public class ChallengeService {
         }
     }
 
-    public ChallengePageResponseDto getChallenges(PageRequest pageRequest) throws ParseException, InternalServerException {
-        Page<Challenge> challengePage = challengeRepository.findAll(pageRequest);
+    public ChallengePageResponseDto getChallenges(Pageable pageable) throws ParseException, InternalServerException {
+        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
 
 
@@ -281,8 +281,8 @@ public class ChallengeService {
     }
 
 
-    public ChallengePageResponseDto getCategoryChallenge(Long categoryId, PageRequest pageRequest) throws ParseException, InternalServerException {
-        Page<Challenge> challengePage = challengeRepository.findAllByCategoryId(categoryId, pageRequest);
+    public ChallengePageResponseDto getCategoryChallenge(Long categoryId, Pageable pageable) throws ParseException, InternalServerException {
+        Page<Challenge> challengePage = challengeRepository.findAllByCategoryId(categoryId, pageable);
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
 
         for(Challenge challenge: challengePage){
@@ -307,7 +307,7 @@ public class ChallengeService {
         return challengePageResponseDto;
     }
 
-    public ChallengePageResponseDto getKeywordChallenge(String keyword, PageRequest pageRequest) throws ParseException, InternalServerException {
+    public ChallengePageResponseDto getKeywordChallenge(String keyword, Pageable pageable) throws ParseException, InternalServerException {
         String searchKeyword = keyword.trim();
         if (searchKeyword.equals("")) {
             return ChallengePageResponseDto.builder()
@@ -316,7 +316,7 @@ public class ChallengeService {
                     .next(false)
                     .build();
         }
-        Page<Challenge> challengePage = challengeRepository.searchList(searchKeyword, pageRequest);
+        Page<Challenge> challengePage = challengeRepository.searchList(searchKeyword, pageable);
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
 
         for (Challenge challenge : challengePage) {

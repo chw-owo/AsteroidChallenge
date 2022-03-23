@@ -31,7 +31,6 @@ public class ChallengesResponseDto {
     private String category;
     private List<String> tagName;
     private String status;
-    private boolean next;
 
     public ChallengesResponseDto(Challenge challenge, List<String> challengeImage){
         this.challengeId = challenge.getId();
@@ -79,7 +78,6 @@ public class ChallengesResponseDto {
         }
 
         this.tagName = tagChallengeStrings;
-        this.next = next;
     }
 
 }

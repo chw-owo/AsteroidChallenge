@@ -172,14 +172,14 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity<PostPageResponseDto> getListPost(Long challengeId, PageRequest postPageRequest, PageRequest commentPageRequest) {
+    public ResponseEntity<PostPageResponseDto> getListPost(Long challengeId, Pageable postPageable, Pageable commentPageable) {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
 
 //        List<Post> postList = postRepository.findAllByChallengeIdOrderByCreatedAtDesc(challengeId);
         // DB에서 챌린지의 모든 인증게시글 조회
-        Page<Post> postPage = postRepository.findAllByChallengeId(challengeId, postPageRequest);
+        Page<Post> postPage = postRepository.findAllByChallengeId(challengeId, postPageable);
         List<PostResponseDto> responseDtoList = new ArrayList<>();
 
 
@@ -187,7 +187,7 @@ public class PostService {
             List<CommentResponseDto> commentDetailList = new ArrayList<>();
 //            List<Comment> commentList = commentRepository.findAllByPostIdOrderByCreatedAtDesc(post.getId());
             // DB에서 인증 게시글의 모든 댓글 조회
-            List<Comment> commentPage = commentRepository.findAllByPostId(post.getId(), commentPageRequest);
+            List<Comment> commentPage = commentRepository.findAllByPostId(post.getId(), commentPageable);
             for (Comment comment : commentPage) {
                 // 댓글 날짜 형식 변경
                 CommentResponseDto commentDetailResponseDto = comment.toResponse();
@@ -221,12 +221,12 @@ public class PostService {
         return ResponseEntity.ok(postPageResponseDto);
     }
 
-    public ResponseEntity<PostDetailPageResponseDto> getPost(Long challengeId, Long postId, PageRequest pageRequest) {
+    public ResponseEntity<PostDetailPageResponseDto> getPost(Long challengeId, Long postId, Pageable pageable) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NotFoundException("인증 게시글이 존재하지 않습니다.")
         );
 
-        Page<Comment> commentPage = commentRepository.findAllByPostId(pageRequest, postId);
+        Page<Comment> commentPage = commentRepository.findAllByPostId(pageable, postId);
         List<CommentResponseDto> commentDetailList = new ArrayList<>();
 
         for (Comment comment : commentPage) {
