@@ -17,7 +17,9 @@ import javax.transaction.Transactional;
 import java.text.ParseException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -128,6 +130,9 @@ public class ChatRoomService {
             ChatMessageResponseDto responseDto = chatMessage.toResponse(createdAt);
             responseDtoList.add(responseDto);
         }
+        responseDtoList = responseDtoList.stream()
+                .sorted(Comparator.comparing(ChatMessageResponseDto::getCreatedAt).reversed())
+                .collect(Collectors.toList());
 
         // responseDto로 변경 후 return
         ChatMessageListDto chatMessageList = ChatMessageListDto.builder()
