@@ -307,13 +307,17 @@ public class ChallengeService {
         return challengePageResponseDto;
     }
 
-    public List<ChallengesResponseDto> getKeywordChallenge(String keyword, Pageable pageable) throws ParseException, InternalServerException {
+    public ChallengePageResponseDto getKeywordChallenge(String keyword, PageRequest pageRequest) throws ParseException, InternalServerException {
         String searchKeyword = keyword.trim();
         if (searchKeyword.equals("")) {
-            return new ArrayList<>();
+            return ChallengePageResponseDto.builder()
+                    .challengeList(new ArrayList<>())
+                    .totalCnt(0)
+                    .next(false)
+                    .build();
         }
-        Page<Challenge> challengePage = challengeRepository.searchList(searchKeyword, pageable);
-        List<ChallengesResponseDto> ChallengesResponseDtos = new ArrayList<>();
+        Page<Challenge> challengePage = challengeRepository.searchList(searchKeyword, pageRequest);
+        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
 
         for (Challenge challenge : challengePage) {
             List<String> challengeImages = new ArrayList<>();
@@ -326,11 +330,16 @@ public class ChallengeService {
             String status = challengeStatus(challenge);
             ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
             responseDto.setStatus(status);
-            ChallengesResponseDtos.add(responseDto);
+            challengesResponseDtos.add(responseDto);
 
         }
+        ChallengePageResponseDto challengePageResponseDto = ChallengePageResponseDto.builder()
+                .challengeList(challengesResponseDtos)
+                .next(challengePage.hasNext())
+                .totalCnt(challengePage.getTotalElements())
+                .build();
 
-        return ChallengesResponseDtos;
+        return challengePageResponseDto;
     }
 
     @Transactional

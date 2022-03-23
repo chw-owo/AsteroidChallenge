@@ -79,8 +79,11 @@ public class ChallengeController {
     }
 
     @GetMapping("/challenge/search")
-    public List<ChallengesResponseDto> getKeywordChallenge(@RequestParam("keyword") String keyword, @PageableDefault(size = 100, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) throws ParseException, InternalServerException {
-        return challengeService.getKeywordChallenge(keyword, pageable);
+    public ChallengePageResponseDto getKeywordChallenge(@RequestParam("keyword") String keyword,
+                                                           @RequestParam("page") int page,
+                                                           @RequestParam("size") int size) throws ParseException, InternalServerException {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        return challengeService.getKeywordChallenge(keyword, pageRequest);
     }
 
     @PostMapping("/challenge/{challengeId}/user")
