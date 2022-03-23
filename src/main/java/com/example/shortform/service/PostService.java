@@ -221,12 +221,12 @@ public class PostService {
         return ResponseEntity.ok(postPageResponseDto);
     }
 
-    public ResponseEntity<PostResponseDto> getPost(Long challengeId, Long postId, Pageable pageable) {
+    public ResponseEntity<PostDetailPageResponseDto> getPost(Long challengeId, Long postId, PageRequest pageRequest) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new NotFoundException("인증 게시글이 존재하지 않습니다.")
         );
 
-        Page<Comment> commentPage = commentRepository.findAllByPostId(postId, pageable);
+        Page<Comment> commentPage = commentRepository.findAllByPostId(pageRequest, postId);
         List<CommentResponseDto> commentDetailList = new ArrayList<>();
 
         for (Comment comment : commentPage) {
@@ -236,7 +236,9 @@ public class PostService {
             commentDetailResponseDto.setCreatedAt(commentCreatedAt);
             commentDetailList.add(commentDetailResponseDto);
         }
-        PostResponseDto postResponseDto = post.toResponse(commentDetailList);
-        return ResponseEntity.ok(postResponseDto);
+        PostDetailPageResponseDto postDetailPageResponseDto = post.toPageResponse(commentDetailList, commentPage.hasNext(), commentPage.getTotalElements());
+        String postCreatedAt = post.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
+        postDetailPageResponseDto.setCreatedAt(postCreatedAt);
+        return ResponseEntity.ok(postDetailPageResponseDto);
     }
 }

@@ -2,6 +2,7 @@ package com.example.shortform.domain;
 
 import com.example.shortform.dto.request.PostRequestDto;
 import com.example.shortform.dto.resonse.CommentResponseDto;
+import com.example.shortform.dto.resonse.PostDetailPageResponseDto;
 import com.example.shortform.dto.resonse.PostIdResponseDto;
 import com.example.shortform.dto.resonse.PostResponseDto;
 import lombok.*;
@@ -61,6 +62,20 @@ public class Post extends Timestamped{
                 .levelName(user.getLevel().getName())
                 .nickname(user.getNickname())
                 .comments(commentList)
+                .build();
+    }
+
+    public PostDetailPageResponseDto toPageResponse(List<CommentResponseDto> commentList, boolean next, long num) {
+        return PostDetailPageResponseDto.builder()
+                .postImage(imageFile.getFilePath())
+                .postId(id)
+                .content(content)
+                .profileImage(user.getProfileImage())
+                .levelName(user.getLevel().getName())
+                .nickname(user.getNickname())
+                .comments(commentList)
+                .next(next)
+                .commentCnt(num)
                 .build();
     }
 }

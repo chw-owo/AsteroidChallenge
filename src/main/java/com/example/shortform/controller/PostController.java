@@ -2,10 +2,7 @@ package com.example.shortform.controller;
 
 import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.dto.request.PostRequestDto;
-import com.example.shortform.dto.resonse.PostIdResponseDto;
-import com.example.shortform.dto.resonse.PostPageResponseDto;
-import com.example.shortform.dto.resonse.PostResponseDto;
-import com.example.shortform.dto.resonse.PostWriteResponseDto;
+import com.example.shortform.dto.resonse.*;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,8 +79,10 @@ public class PostController {
     }
 
     @GetMapping("/challenge/{challengeId}/posts/{postId}")
-    public ResponseEntity<PostResponseDto> getPost(@PathVariable Long challengeId, @PathVariable Long postId,
-                                                   @PageableDefault(size = 100, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return postService.getPost(challengeId, postId, pageable);
+    public ResponseEntity<PostDetailPageResponseDto> getPost(@PathVariable Long challengeId, @PathVariable Long postId,
+                                                             @RequestParam("page") int page,
+                                                             @RequestParam("size") int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        return postService.getPost(challengeId, postId, pageRequest);
     }
 }
