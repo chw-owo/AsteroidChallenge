@@ -9,6 +9,7 @@ import com.example.shortform.dto.resonse.ChatRoomResponseDto;
 import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -53,10 +54,12 @@ public class ChatRoomController {
     @GetMapping("/chat/rooms/{roomId}/messages")
     public ChatMessageListDto getAllMessages(@PathVariable Long roomId,
                                              @AuthenticationPrincipal PrincipalDetails principalDetails,
-                                             @PageableDefault(size = 500, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable) {
+                                             @RequestParam("page") int page,
+                                             @RequestParam("size") int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
         // 로그인 한 유저만 이용가능하도록 설정
         if (principalDetails != null)
-            return chatRoomService.getAllMessages(roomId, principalDetails, pageable);
+            return chatRoomService.getAllMessages(roomId, principalDetails, pageRequest);
         else
             throw new UnauthorizedException("로그인 후 이용가능합니다.");
     }

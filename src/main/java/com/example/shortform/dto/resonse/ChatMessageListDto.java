@@ -15,6 +15,7 @@ public class ChatMessageListDto {
     private String roomName;
     private Long roomId;
     private int currentMember;
+    private boolean next;
     private List<ChatMessageResponseDto> messageList;
 
 //    public ChatMessageListDto(String roomName, String roomId, int currentMember) {
