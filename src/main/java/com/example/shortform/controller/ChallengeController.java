@@ -56,8 +56,8 @@ public class ChallengeController {
     @GetMapping("/challenge")
     public ChallengePageResponseDto getChallenges(@RequestParam("page") int page,
                                                   @RequestParam("size") int size) throws ParseException, InternalServerException {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        return challengeService.getChallenges(pageRequest);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        return challengeService.getChallenges(pageable);
     }
 
     @GetMapping("/challenge/{challengeId}")
@@ -74,16 +74,16 @@ public class ChallengeController {
     public ChallengePageResponseDto getCategoryChallenge(@PathVariable Long categoryId,
                                                             @RequestParam("page") int page,
                                                             @RequestParam("size") int size) throws ParseException, InternalServerException {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        return challengeService.getCategoryChallenge(categoryId, pageRequest);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        return challengeService.getCategoryChallenge(categoryId, pageable);
     }
 
     @GetMapping("/challenge/search")
     public ChallengePageResponseDto getKeywordChallenge(@RequestParam("keyword") String keyword,
                                                            @RequestParam("page") int page,
                                                            @RequestParam("size") int size) throws ParseException, InternalServerException {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        return challengeService.getKeywordChallenge(keyword, pageRequest);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        return challengeService.getKeywordChallenge(keyword, pageable);
     }
 
     @PostMapping("/challenge/{challengeId}/user")

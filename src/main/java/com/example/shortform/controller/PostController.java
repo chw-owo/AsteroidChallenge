@@ -73,16 +73,16 @@ public class PostController {
     public ResponseEntity<PostPageResponseDto> getListPost(@PathVariable Long challengeId,
                                                            @RequestParam("page") int page,
                                                            @RequestParam("size") int size) {
-        PageRequest postPageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        PageRequest commentPageRequest = PageRequest.of(0, 2, Sort.Direction.DESC, "createdAt");
-        return postService.getListPost(challengeId, postPageRequest, commentPageRequest);
+        Pageable postPageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        Pageable commentPagealbe = PageRequest.of(0, 2, Sort.Direction.DESC, "createdAt");
+        return postService.getListPost(challengeId, postPageable, commentPagealbe);
     }
 
     @GetMapping("/challenge/{challengeId}/posts/{postId}")
     public ResponseEntity<PostDetailPageResponseDto> getPost(@PathVariable Long challengeId, @PathVariable Long postId,
                                                              @RequestParam("page") int page,
                                                              @RequestParam("size") int size) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        return postService.getPost(challengeId, postId, pageRequest);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
+        return postService.getPost(challengeId, postId, pageable);
     }
 }
