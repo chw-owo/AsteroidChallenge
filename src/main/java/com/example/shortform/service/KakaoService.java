@@ -23,6 +23,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.UUID;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -44,6 +46,7 @@ public class KakaoService {
 
     private final UserRepository userRepository;
     private final LevelRepository levelRepository;
+    private final RankingService rankingService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
@@ -120,10 +123,12 @@ public class KakaoService {
         }
 
         // email 값이 널일 경우
-        String kakaoEmail = kakaoProfile.getKakaoAccount().getEmail();
+        String kakaoEmail;
 
-        if (kakaoEmail == null)
-            kakaoEmail = "";
+        if (kakaoProfile.getKakaoAccount().getEmail() == null)
+            kakaoEmail = "kakao_" + UUID.randomUUID();
+        else
+            kakaoEmail = "kakao_" + kakaoProfile.getKakaoAccount().getEmail();
 
         //log.info("kakao email: {}", kakaoEmail);
         log.info("kakao nickname: {}", kakaoProfile.getKakaoAccount().getProfile().getNickname());
@@ -133,12 +138,7 @@ public class KakaoService {
         // 가입되어있는지 확인
         if (userEntity == null) {
 
-            String nickname;
-
-            if (!kakaoEmail.equals(""))
-                nickname = kakaoProfile.getKakaoAccount().getEmail().split("@")[0];
-            else
-                nickname = kakaoProfile.getKakaoAccount().getProfile().getNickname();
+            String nickname = kakaoProfile.getKakaoAccount().getProfile().getNickname();
 
             Level level = levelRepository.findById(1L).get();
 
@@ -148,6 +148,7 @@ public class KakaoService {
                     .password(passwordEncoder.encode(RAW_PASSWORD))
                     .nickname(nickname)
                     .rankingPoint(50)
+                    .yesterdayRankingPoint(50)
                     .emailVerified(true)
                     .level(level)
                     .role(Role.ROLE_USER)
@@ -156,6 +157,8 @@ public class KakaoService {
                     .build();
 
             User savedUser = userRepository.save(userEntity);
+
+            rankingService.updateRank(savedUser);
         }
 
         // 토큰 정보 생성
