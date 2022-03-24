@@ -19,6 +19,8 @@ import org.springframework.web.cors.CorsUtils;
 
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
@@ -70,11 +72,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.addAllowedOrigin("http://localhost:3000");
-        configuration.addAllowedOrigin("http://hanghae-asteroid.s3-website.ap-northeast-2.amazonaws.com/");
-        configuration.addAllowedOrigin("http://sohangsung.co.kr/");
+        configuration.addAllowedOrigin("https://www.sohangsung.co.kr/");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.addExposedHeader("*");
+        configuration.setAllowedHeaders(Arrays.asList("authorization", "Authorization", "content-type"));
+        configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Headers", "Authorization, x-xsrf-token, Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, " +
+                "Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"));
         configuration.setAllowCredentials(true);
         configuration.validateAllowCredentials();
         configuration.setMaxAge(3600L);
