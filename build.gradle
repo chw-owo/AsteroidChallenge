@@ -14,6 +14,12 @@ configurations {
     }
 }
 
+bootJar{
+    archivesBaseName = 'asteroid-webservice'
+    archiveFileName = 'asteroid-webservice.jar'
+    archiveVersion = "0.0.0"
+}
+
 repositories {
     mavenCentral()
 }
@@ -33,6 +39,7 @@ dependencies {
     // validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    compileOnly 'org.mariadb.jdbc:mariadb-java-client'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.h2database:h2'

@@ -18,6 +18,7 @@ public class ShortformApplication {
             + "classpath:application-aws.yml,"
             + "classpath:application-dev.yml";
 
+
     public static void main(String[] args) {
 
         new SpringApplicationBuilder(ShortformApplication.class)
