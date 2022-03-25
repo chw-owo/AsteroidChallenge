@@ -3,10 +3,7 @@ package com.example.shortform.service;
 import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
 import com.example.shortform.config.jwt.TokenDto;
-import com.example.shortform.domain.Level;
-import com.example.shortform.domain.Role;
-import com.example.shortform.domain.User;
-import com.example.shortform.domain.UserChallenge;
+import com.example.shortform.domain.*;
 import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.dto.resonse.UserInfo;
@@ -18,6 +15,7 @@ import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.mail.EmailMessage;
 import com.example.shortform.mail.EmailService;
 import com.example.shortform.repository.LevelRepository;
+import com.example.shortform.repository.NoticeRepository;
 import com.example.shortform.repository.UserChallengeRepository;
 import com.example.shortform.repository.UserRepository;
 import com.example.shortform.util.S3Uploader;
@@ -30,6 +28,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -54,6 +54,8 @@ public class UserService {
     private final HttpServletRequest request;
 
     private final RankingService rankingService;
+    private final NoticeRepository noticeRepository;
+    private final TemplateEngine templateEngine;
 
     @Transactional
     public ResponseEntity<CMResponseDto> signup(SignupRequestDto signupRequestDto) {
@@ -91,6 +93,7 @@ public class UserService {
 
                 .role(Role.ROLE_USER)
                 .emailVerified(false)
+                .newbie(true)
                 .build();
 
         // 저장, 랭킹 매기기
@@ -100,6 +103,14 @@ public class UserService {
         // 메일 보내기
         savedUser.generateEmailCheckToken();
         sendSignupConfirmEmail(savedUser);
+
+        Notice notice = Notice.builder()
+                .noticeType(Notice.NoticeType.SIGNIN)
+                .is_read(false)
+                .user(savedUser)
+                .build();
+
+        noticeRepository.save(notice);
 
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
@@ -204,12 +215,17 @@ public class UserService {
     private void sendSignupConfirmEmail(User user) {
         String path = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
 
+        Context context = new Context();
+        context.setVariable("link", path+"/auth/check-email-token?token=" + user.getEmailCheckToken() +
+                "&email=" + user.getEmail());
+
+        String message = templateEngine.process("mail/email-link", context);
+
         // TODO 사진과 함께 보내기
         EmailMessage emailMessage = EmailMessage.builder()
                 .to(user.getEmail())
                 .subject("소행성(소소한 행동 습관 형성 챌린지), 회원 가입 인증 메일")
-                .message(path+"/auth/check-email-token?token=" + user.getEmailCheckToken() +
-                        "&email=" + user.getEmail())
+                .message(message)
                 .build();
 
         emailService.sendEmail(emailMessage);

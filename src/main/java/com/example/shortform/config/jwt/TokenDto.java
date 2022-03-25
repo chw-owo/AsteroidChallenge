@@ -9,13 +9,11 @@ import lombok.*;
 public class TokenDto {
 
     private String token;
-    private String refreshToken;
     private String email;
     private boolean emailVerified;
 
     @Builder
-    public TokenDto(String token, String refreshToken) {
+    public TokenDto(String token) {
         this.token = token;
-        this.refreshToken = refreshToken;
     }
 }

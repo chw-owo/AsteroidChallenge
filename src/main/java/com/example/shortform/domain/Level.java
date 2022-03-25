@@ -20,16 +20,16 @@ public class Level extends Timestamped{
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")//, nullable = false)
     private String name;
 
-    @Column(name = "level_icon", nullable = false)
+    @Column(name = "level_icon")//, nullable = false)
     private String levelIcon;
 
-    @Column(name = "experience_point", nullable = false)
+    @Column(name = "experience_point")//, nullable = false)
     private int experiencePoint;
 
-    @Column(name = "next_point", nullable = false)
+    @Column(name = "next_point")//, nullable = false)
     private int nextPoint;
 
     @OneToMany(mappedBy = "level", orphanRemoval = true, cascade = CascadeType.ALL)
