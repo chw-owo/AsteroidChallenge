@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 @Builder
 @AllArgsConstructor
@@ -79,7 +78,7 @@ public class Notice extends Timestamped {
     public NoticeResponseDto toResponse(MemberResponseDto memberResponseDto,
                                         String createdAt) {
         return NoticeResponseDto.builder()
-                .is_read(is_read)
+                .read(is_read)
                 .userInfo(memberResponseDto)
                 .date(createdAt)
                 .status(noticeType)
