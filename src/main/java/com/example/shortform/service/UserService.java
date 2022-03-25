@@ -28,6 +28,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -53,6 +55,7 @@ public class UserService {
 
     private final RankingService rankingService;
     private final NoticeRepository noticeRepository;
+    private final TemplateEngine templateEngine;
 
     @Transactional
     public ResponseEntity<CMResponseDto> signup(SignupRequestDto signupRequestDto) {
@@ -212,12 +215,17 @@ public class UserService {
     private void sendSignupConfirmEmail(User user) {
         String path = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
 
+        Context context = new Context();
+        context.setVariable("link", path+"/auth/check-email-token?token=" + user.getEmailCheckToken() +
+                "&email=" + user.getEmail());
+
+        String message = templateEngine.process("mail/email-link", context);
+
         // TODO 사진과 함께 보내기
         EmailMessage emailMessage = EmailMessage.builder()
                 .to(user.getEmail())
                 .subject("소행성(소소한 행동 습관 형성 챌린지), 회원 가입 인증 메일")
-                .message(path+"/auth/check-email-token?token=" + user.getEmailCheckToken() +
-                        "&email=" + user.getEmail())
+                .message(message)
                 .build();
 
         emailService.sendEmail(emailMessage);
