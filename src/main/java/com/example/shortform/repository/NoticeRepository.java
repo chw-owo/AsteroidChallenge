@@ -13,13 +13,13 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     boolean existsByUserIdAndIsSuccessAndChallengeId(Long id, boolean b, Long challengeId);
 
-    boolean existsByChallengeId(Long challengeId);
-
-    Notice findByChallengeId(Long challengeId);
-
-    boolean existsByRoomId(Long id);
-
-    Notice findByRoomId(Long id);
-
     boolean existsByUserIdAndNoticeTypeAndCreatedAtBetween(Long id, Notice.NoticeType recommend, LocalDateTime today, LocalDateTime plusDays);
+
+    boolean existsByPostIdAndUserId(Long postId, Long id);
+
+    Notice findByPostIdAndUserId(Long postId, Long id);
+
+    boolean existsByChallengeIdAndUserId(Long challengeId, Long id);
+
+    List<Notice> findAllByChallengeIdAndUserId(Long challengeId, Long id);
 }

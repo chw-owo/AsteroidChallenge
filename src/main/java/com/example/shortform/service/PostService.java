@@ -116,6 +116,7 @@ public class PostService {
                 .challengeId(challenge.getId())
                 .roomId(challenge.getChatRoom().getId())
                 .increasePoint(1)
+                .postId(post.getId())
                 .build();
 
         noticeRepository.save(notice);
@@ -159,8 +160,8 @@ public class PostService {
         // 레벨업, 다운 로직
         levelService.checkLevelPoint(user);
 
-        if (noticeRepository.existsByRoomId(post.getChallenge().getChatRoom().getId())) {
-            Notice notice = noticeRepository.findByRoomId(post.getChallenge().getChatRoom().getId());
+        if (noticeRepository.existsByPostIdAndUserId(postId, user.getId())) {
+            Notice notice = noticeRepository.findByPostIdAndUserId(postId, user.getId());
             notice.setNoticeType(Notice.NoticeType.RECORD);
         }
 
