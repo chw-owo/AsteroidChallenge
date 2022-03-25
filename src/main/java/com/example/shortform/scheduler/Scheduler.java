@@ -52,7 +52,7 @@ public class Scheduler {
                         .is_read(false)
                         .user(user)
                         .challengeCnt(challengingList.size())
-                        .challenge(challengingList.get(0))
+                        .challengeId(challengingList.get(0).getId())
                         .build();
                 noticeRepository.save(notice);
             }
@@ -105,7 +105,7 @@ public class Scheduler {
                                 .noticeType(Notice.NoticeType.INITIAL)
                                 .is_read(false)
                                 .user(user)
-                                .challenge(userChallenge.getChallenge())
+                                .challengeId(userChallenge.getChallenge().getId())
                                 .build();
 
                         noticeRepository.save(notice);
@@ -137,7 +137,7 @@ public class Scheduler {
                                     .noticeType(Notice.NoticeType.SUCCESS)
                                     .is_read(false)
                                     .user(user)
-                                    .challenge(userChallenge.getChallenge())
+                                    .challengeId(userChallenge.getChallenge().getId())
                                     .increasePoint(5)
                                     .build();
 

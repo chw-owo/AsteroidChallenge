@@ -113,8 +113,8 @@ public class PostService {
                 .noticeType(Notice.NoticeType.WRITE)
                 .is_read(false)
                 .user(user)
-                .challenge(challenge)
-                .post(post)
+                .challengeId(challenge.getId())
+                .roomId(challenge.getChatRoom().getId())
                 .increasePoint(1)
                 .build();
 
@@ -158,6 +158,11 @@ public class PostService {
 
         // 레벨업, 다운 로직
         levelService.checkLevelPoint(user);
+
+        if (noticeRepository.existsByRoomId(post.getChallenge().getChatRoom().getId())) {
+            Notice notice = noticeRepository.findByRoomId(post.getChallenge().getChatRoom().getId());
+            notice.setNoticeType(Notice.NoticeType.RECORD);
+        }
 
         postRepository.deleteById(postId);
         // // 해당 게시글에 인증삭제하면 당일 인증여부 체크

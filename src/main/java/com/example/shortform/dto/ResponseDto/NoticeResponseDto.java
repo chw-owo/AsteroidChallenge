@@ -20,6 +20,6 @@ public class NoticeResponseDto {
     private Long challengeId;
     private String title;
     private int challengeCnt;
-    private Long postId;
+    private Long roomId;
     private int levelPoint;
 }

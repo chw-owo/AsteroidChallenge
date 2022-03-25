@@ -654,6 +654,11 @@ public class ChallengeService {
         if (!"모집중".equals(challengeStatus(challenge)))
             throw new InvalidException("모집기간일 때만 삭제할 수 있습니다.");
 
+        if (noticeRepository.existsByChallengeId(challengeId)) {
+            Notice notice = noticeRepository.findByChallengeId(challengeId);
+            notice.setNoticeType(Notice.NoticeType.RECORD);
+        }
+
         // 해당 챌린지 삭제
         challengeRepository.delete(challenge);
 

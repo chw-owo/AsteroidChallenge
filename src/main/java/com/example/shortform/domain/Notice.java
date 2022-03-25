@@ -24,7 +24,8 @@ public class Notice extends Timestamped {
         SUCCESS,
         LEVEL,
         SIGNIN,
-        FIRST
+        FIRST,
+        RECORD
     }
 
     @Id
@@ -40,10 +41,10 @@ public class Notice extends Timestamped {
     private boolean is_read;
 
     @Column(name = "increase_point")
-    private int increasePoint;
+    private Integer increasePoint;
 
     @Column(name = "challenge_cnt")
-    private int challengeCnt;
+    private Integer challengeCnt;
 
     @Column(name = "notice_level")
     private Long noticeLevel;
@@ -55,13 +56,12 @@ public class Notice extends Timestamped {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "challenge_id")
-    private Challenge challenge;
+    @Column(name = "challenge_id")
+    private Long challengeId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "post_id")
-    private Post post;
+    @Column(name = "room_id")
+    private Long roomId;
+
 
     public void setIsSuccess(Boolean isSuccess) {
         this.isSuccess = isSuccess;
@@ -75,6 +75,25 @@ public class Notice extends Timestamped {
         this.is_read = fact;
     }
 
+    public void setNoticeType(NoticeType type) {
+        this.noticeType = type;
+    }
+
+    public NoticeResponseDto toChallengeResponse(MemberResponseDto memberResponseDto,
+                                                 String createdAt,
+                                                 Challenge challenge) {
+        return NoticeResponseDto.builder()
+                .read(is_read)
+                .userInfo(memberResponseDto)
+                .date(createdAt)
+                .status(noticeType)
+                .levelPoint(increasePoint)
+                .challengeId(challengeId)
+                .title(challenge.getTitle())
+                .roomId(challenge.getChatRoom().getId())
+                .build();
+    }
+
     public NoticeResponseDto toResponse(MemberResponseDto memberResponseDto,
                                         String createdAt) {
         return NoticeResponseDto.builder()
@@ -82,25 +101,21 @@ public class Notice extends Timestamped {
                 .userInfo(memberResponseDto)
                 .date(createdAt)
                 .status(noticeType)
-                .levelPoint(increasePoint)
-                .challengeId(isIdNull())
-                .title(isTitleNull())
-                .postId(isIdNull())
                 .build();
     }
 
-    public Long isIdNull() {
-        if (challenge == null)
-            return null;
-        else
-            return challenge.getId();
-    }
-
-    public String isTitleNull() {
-        if (challenge == null)
-            return null;
-        else
-            return challenge.getTitle();
-    }
+//    public Long isIdNull() {
+//        if (challenge == null)
+//            return null;
+//        else
+//            return challenge.getId();
+//    }
+//
+//    public String isTitleNull() {
+//        if (challenge == null)
+//            return null;
+//        else
+//            return challenge.getTitle();
+//    }
 
 }
