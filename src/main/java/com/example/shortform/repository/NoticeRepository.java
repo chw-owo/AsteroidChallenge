@@ -3,6 +3,7 @@ package com.example.shortform.repository;
 import com.example.shortform.domain.Notice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
@@ -19,4 +20,6 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     boolean existsByRoomId(Long id);
 
     Notice findByRoomId(Long id);
+
+    boolean existsByUserIdAndNoticeTypeAndCreatedAtBetween(Long id, Notice.NoticeType recommend, LocalDateTime today, LocalDateTime plusDays);
 }
