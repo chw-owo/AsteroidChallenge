@@ -73,9 +73,9 @@ public class ChallengeService {
         // 방 비밀번호 암호화
         if (requestDto.getPassword() != null) {
             String encPassword = passwordEncoder.encode(requestDto.getPassword());
-            challenge = new Challenge(requestDto, category, encPassword);
+            challenge = new Challenge(requestDto, category, encPassword,1);
         } else {
-            challenge = new Challenge(requestDto, category, null);
+            challenge = new Challenge(requestDto, category, null,1);
         }
 
         // Tag, TagChallenge 저장하기
@@ -136,7 +136,7 @@ public class ChallengeService {
             AuthChallenge authChallenge = AuthChallenge.builder()
                     .challenge(challenge)
                     .date(date)
-                    .currentMember(1)
+                    .currentMember(challenge.getCurrentMember())
                     .build();
             authChallengeRepository.save(authChallenge);
         }
@@ -150,10 +150,17 @@ public class ChallengeService {
     public void saveReport(){
         List<Challenge> challenges = challengeRepository.findAll();
         LocalDate yesterday = LocalDate.now().minusDays(1);
+        LocalDate today = LocalDate.now();
         for(Challenge challenge : challenges){
             AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, yesterday);
             authChallengeRepository.save(authChallenge);
             authChallenge.setAuthMember(0);
+            AuthChallenge authChallengeToday = AuthChallenge.builder()
+                    .challenge(challenge)
+                    .date(today)
+                    .currentMember(challenge.getCurrentMember())
+                    .build();
+            authChallengeRepository.save(authChallengeToday);
         }
     }
 
@@ -369,8 +376,8 @@ public class ChallengeService {
             throw new InvalidException("참가 가능 날짜가 지났습니다.");
 
         userChallengeRepository.save(new UserChallenge(challenge, user));
-
-        challenge.setCurrentMember(challenge.getCurrentMember()+1);
+        List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
+        challenge.setCurrentMember(userChallenges.size());
         challengeRepository.save(challenge);
         // update percentage of report - plus currentMember
         // 현재 진행 중이라면 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
@@ -389,7 +396,7 @@ public class ChallengeService {
             authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
         }
 
-        authChallenge.setCurrentMember(authChallenge.getCurrentMember() + 1);
+        authChallenge.setCurrentMember(challenge.getCurrentMember());
         authChallengeRepository.save(authChallenge);
 
     }
@@ -553,8 +560,8 @@ public class ChallengeService {
         if (passwordEncoder.matches(passwordDto.getPassword(), challenge.getPassword())) {
             UserChallenge userChallenge = new UserChallenge(challenge, user);
             userChallengeRepository.save(userChallenge);
-            //List<UserChallenge> userChallengeList = userChallengeRepository.findAllByChallenge(challenge);
-            challenge.setCurrentMember(challenge.getCurrentMember()+1);
+            List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
+            challenge.setCurrentMember(userChallenges.size());
             challengeRepository.save(challenge);
 
         } else {
@@ -578,7 +585,7 @@ public class ChallengeService {
             authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
         }
 
-        authChallenge.setCurrentMember(authChallenge.getCurrentMember() + 1);
+        authChallenge.setCurrentMember(challenge.getCurrentMember());
         authChallengeRepository.save(authChallenge);
     }
 
