@@ -61,6 +61,8 @@ public class ChallengeService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final LevelService levelService;
 
+    private final NoticeRepository noticeRepository;
+
     @Transactional
     public Long postChallenge(ChallengeRequestDto requestDto,
                                               PrincipalDetails principal,
@@ -142,6 +144,17 @@ public class ChallengeService {
         }
 
         challengeRepository.save(challenge);
+
+        if (user.isNewbie()) {
+            Notice notice = Notice.builder()
+                    .noticeType(Notice.NoticeType.FIRST)
+                    .is_read(false)
+                    .user(user)
+                    .build();
+
+            noticeRepository.save(notice);
+            user.setNewbie(false);
+        }
 
         return challenge.getId();
     }
@@ -392,6 +405,18 @@ public class ChallengeService {
         authChallenge.setCurrentMember(authChallenge.getCurrentMember() + 1);
         authChallengeRepository.save(authChallenge);
 
+        if (user.isNewbie()) {
+            Notice notice = Notice.builder()
+                    .noticeType(Notice.NoticeType.FIRST)
+                    .is_read(false)
+                    .user(user)
+                    .build();
+
+            noticeRepository.save(notice);
+            user.setNewbie(false);
+            userRepository.save(user);
+        }
+
     }
 
 
@@ -577,6 +602,18 @@ public class ChallengeService {
 
         authChallenge.setCurrentMember(authChallenge.getCurrentMember() + 1);
         authChallengeRepository.save(authChallenge);
+
+        if (user.isNewbie()) {
+            Notice notice = Notice.builder()
+                    .noticeType(Notice.NoticeType.FIRST)
+                    .is_read(false)
+                    .user(user)
+                    .build();
+
+            noticeRepository.save(notice);
+            user.setNewbie(false);
+            userRepository.save(user);
+        }
     }
 
     public ResponseEntity<CMResponseDto> deleteChallenge(Long challengeId, PrincipalDetails principalDetails) throws ParseException {

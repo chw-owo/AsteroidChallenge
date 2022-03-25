@@ -10,7 +10,6 @@ import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,6 +37,7 @@ public class PostService {
     private final DateCheckRepository dateCheckRepository;
     private final UserChallengeRepository userChallengeRepository;
     private final AuthChallengeRepository authChallengeRepository;
+    private final NoticeRepository noticeRepository;
 
 
     @Autowired
@@ -49,8 +49,8 @@ public class PostService {
                        DateCheckRepository dateCheckRepository,
                        UserChallengeRepository userChallengeRepository,
                        LevelService levelService,
-                       AuthChallengeRepository authChallengeRepository
-) {
+                       AuthChallengeRepository authChallengeRepository,
+                       NoticeRepository noticeRepository) {
         this.postRepository = postRepository;
         this.challengeRepository = challengeRepository;
         this.commentRepository = commentRepository;
@@ -61,6 +61,7 @@ public class PostService {
 
         this.authChallengeRepository = authChallengeRepository;
         this.levelService = levelService;
+        this.noticeRepository = noticeRepository;
     }
 
     @Transactional
@@ -106,6 +107,31 @@ public class PostService {
 
         // level
         boolean isLevelUp = levelService.checkLevelPoint(user);
+
+        // 인증 게시글 작성 후 point 증가 알림
+        Notice notice = Notice.builder()
+                .noticeType(Notice.NoticeType.WRITE)
+                .is_read(false)
+                .user(user)
+                .challenge(challenge)
+                .post(post)
+                .increasePoint(1)
+                .build();
+
+        noticeRepository.save(notice);
+
+        // 챌린지 종료 날 인증 시 다른 챌린지 추천
+        if (challenge.getEndDate().equals(now.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))) {
+            Notice recommendNotice = Notice.builder()
+                    .noticeType(Notice.NoticeType.RECOMMEND)
+                    .is_read(false)
+                    .user(user)
+                    .build();
+
+            noticeRepository.save(recommendNotice);
+        }
+
+
 
         PostWriteResponseDto responseDto = PostWriteResponseDto.builder()
                 .postId(post.getId())

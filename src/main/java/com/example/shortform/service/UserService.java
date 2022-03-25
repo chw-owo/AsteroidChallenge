@@ -3,10 +3,7 @@ package com.example.shortform.service;
 import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
 import com.example.shortform.config.jwt.TokenDto;
-import com.example.shortform.domain.Level;
-import com.example.shortform.domain.Role;
-import com.example.shortform.domain.User;
-import com.example.shortform.domain.UserChallenge;
+import com.example.shortform.domain.*;
 import com.example.shortform.dto.request.*;
 import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.dto.resonse.UserInfo;
@@ -18,6 +15,7 @@ import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.mail.EmailMessage;
 import com.example.shortform.mail.EmailService;
 import com.example.shortform.repository.LevelRepository;
+import com.example.shortform.repository.NoticeRepository;
 import com.example.shortform.repository.UserChallengeRepository;
 import com.example.shortform.repository.UserRepository;
 import com.example.shortform.util.S3Uploader;
@@ -54,6 +52,7 @@ public class UserService {
     private final HttpServletRequest request;
 
     private final RankingService rankingService;
+    private final NoticeRepository noticeRepository;
 
     @Transactional
     public ResponseEntity<CMResponseDto> signup(SignupRequestDto signupRequestDto) {
@@ -91,6 +90,7 @@ public class UserService {
 
                 .role(Role.ROLE_USER)
                 .emailVerified(false)
+                .newbie(true)
                 .build();
 
         // 저장, 랭킹 매기기
@@ -100,6 +100,14 @@ public class UserService {
         // 메일 보내기
         savedUser.generateEmailCheckToken();
         sendSignupConfirmEmail(savedUser);
+
+        Notice notice = Notice.builder()
+                .noticeType(Notice.NoticeType.SIGNIN)
+                .is_read(false)
+                .user(savedUser)
+                .build();
+
+        noticeRepository.save(notice);
 
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
