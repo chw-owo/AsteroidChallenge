@@ -9,4 +9,6 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     List<Notice> findAllByUserId(Long id);
 
     boolean existsByUserIdAndNoticeLevel(Long id, Long id1);
+
+    boolean existsByUserIdAndIsSuccessAndChallengeId(Long id, boolean b, Long challengeId);
 }

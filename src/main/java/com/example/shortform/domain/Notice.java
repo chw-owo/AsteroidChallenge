@@ -49,17 +49,24 @@ public class Notice extends Timestamped {
     @Column(name = "notice_level")
     private Long noticeLevel;
 
+    @Column(name = "is_success")
+    private Boolean isSuccess;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "post_id")
     private Post post;
+
+    public void setIsSuccess(Boolean isSuccess) {
+        this.isSuccess = isSuccess;
+    }
 
     public void setNoticeLevel(Long noticeLevel) {
         this.noticeLevel = noticeLevel;
