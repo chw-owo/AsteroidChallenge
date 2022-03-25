@@ -27,7 +27,7 @@ public class User extends Timestamped{
     @Column(name = "nickname", unique = true, nullable = false)
     private String nickname;
 
-    @Column(name = "profile_image")
+    @Column(name = "profile_image", columnDefinition = "TEXT")
     private String profileImage;
 
     @Column(name = "password", nullable = false)

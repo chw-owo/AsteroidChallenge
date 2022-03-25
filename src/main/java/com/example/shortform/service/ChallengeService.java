@@ -401,8 +401,9 @@ public class ChallengeService {
 
         userChallengeRepository.save(new UserChallenge(challenge, user));
         List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
-        challenge.setCurrentMember(userChallenges.size());
-
+        //challenge.setCurrentMember(userChallenges.size());
+        challenge.setCurrentMember(challenge.getCurrentMember()+1);
+        challengeRepository.save(challenge);
         // update percentage of report - plus currentMember
         // 현재 진행 중이라면 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
         LocalDate now = LocalDate.now();
@@ -596,7 +597,9 @@ public class ChallengeService {
             UserChallenge userChallenge = new UserChallenge(challenge, user);
             userChallengeRepository.save(userChallenge);
             List<UserChallenge> userChallengeList = userChallengeRepository.findAllByChallenge(challenge);
-            challenge.setCurrentMember(userChallengeList.size());
+            //challenge.setCurrentMember(userChallenges.size());
+            challenge.setCurrentMember(challenge.getCurrentMember()+1);
+            challengeRepository.save(challenge);
         } else {
             throw new InvalidException("비밀번호가 틀렸습니다");
         }
