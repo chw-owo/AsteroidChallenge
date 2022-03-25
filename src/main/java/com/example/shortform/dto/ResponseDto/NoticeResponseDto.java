@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class NoticeResponseDto {
 
-    private boolean is_read;
+    private boolean read;
     private MemberResponseDto userInfo;
     private String date;
     private Notice.NoticeType status;
