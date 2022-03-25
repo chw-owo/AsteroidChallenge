@@ -5,9 +5,11 @@ import com.example.shortform.config.auth.kakao.OAuthToken;
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
 import com.example.shortform.config.jwt.TokenDto;
 import com.example.shortform.domain.Level;
+import com.example.shortform.domain.Notice;
 import com.example.shortform.domain.Role;
 import com.example.shortform.domain.User;
 import com.example.shortform.repository.LevelRepository;
+import com.example.shortform.repository.NoticeRepository;
 import com.example.shortform.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,6 +51,7 @@ public class KakaoService {
     private final RankingService rankingService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
+    private final NoticeRepository noticeRepository;
 
     @Transactional
     public ResponseEntity<TokenDto> kakaoLogin(String code) {
@@ -157,6 +160,14 @@ public class KakaoService {
                     .build();
 
             User savedUser = userRepository.save(userEntity);
+
+            Notice notice = Notice.builder()
+                    .noticeType(Notice.NoticeType.SIGNIN)
+                    .is_read(false)
+                    .user(savedUser)
+                    .build();
+
+            noticeRepository.save(notice);
 
             rankingService.updateRank(savedUser);
         }
