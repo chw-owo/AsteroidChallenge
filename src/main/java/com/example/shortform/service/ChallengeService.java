@@ -61,6 +61,8 @@ public class ChallengeService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final LevelService levelService;
 
+    private final NoticeRepository noticeRepository;
+
     @Transactional
     public Long postChallenge(ChallengeRequestDto requestDto,
                                               PrincipalDetails principal,
@@ -143,6 +145,17 @@ public class ChallengeService {
 
         challengeRepository.save(challenge);
 
+        if (user.isNewbie()) {
+            Notice notice = Notice.builder()
+                    .noticeType(Notice.NoticeType.FIRST)
+                    .is_read(false)
+                    .user(user)
+                    .build();
+
+            noticeRepository.save(notice);
+            user.setNewbie(false);
+        }
+
         return challenge.getId();
     }
 
@@ -214,21 +227,39 @@ public class ChallengeService {
     }
 
     public String challengeStatus(Challenge challenge) throws ParseException {
-        Date now = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-        Date startDate = dateFormat.parse(challenge.getStartDate());
-        Date endDate = dateFormat.parse(challenge.getEndDate());
+//        Date now = new Date();
+//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+//        Date startDate = dateFormat.parse(challenge.getStartDate());
+//        Date endDate = dateFormat.parse(challenge.getEndDate());
 
-        if(now.getTime() < startDate.getTime()){
+        LocalDate now = LocalDate.now();
+
+        String startDate = challenge.getStartDate();
+        String endDate = challenge.getEndDate();
+
+        LocalDate localStartDate = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
+        LocalDate localEndDate = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
+
+        if (now.isBefore(localStartDate)) {
             challenge.setStatus(ChallengeStatus.BEFORE);
             return "모집중";
-        }else if (startDate.getTime() <= now.getTime() && now.getTime() <= endDate.getTime()){
+        }else if (now.isBefore(localEndDate.plusDays(1))){
             challenge.setStatus(ChallengeStatus.ING);
             return "진행중";
         }else{
             challenge.setStatus(ChallengeStatus.SUCCESS);
             return "완료";
         }
+//        if(now.getTime() < startDate.getTime()){
+//            challenge.setStatus(ChallengeStatus.BEFORE);
+//            return "모집중";
+//        }else if (startDate.getTime() <= now.getTime() && now.getTime() <= endDate.getTime()){
+//            challenge.setStatus(ChallengeStatus.ING);
+//            return "진행중";
+//        }else{
+//            challenge.setStatus(ChallengeStatus.SUCCESS);
+//            return "완료";
+//        }
     }
 
     public ChallengePageResponseDto getChallenges(Pageable pageable) throws ParseException, InternalServerException {
@@ -370,6 +401,8 @@ public class ChallengeService {
 
         userChallengeRepository.save(new UserChallenge(challenge, user));
 
+        List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
+        //challenge.setCurrentMember(userChallenges.size());
         challenge.setCurrentMember(challenge.getCurrentMember()+1);
         challengeRepository.save(challenge);
         // update percentage of report - plus currentMember
@@ -391,6 +424,18 @@ public class ChallengeService {
 
         authChallenge.setCurrentMember(authChallenge.getCurrentMember() + 1);
         authChallengeRepository.save(authChallenge);
+
+        if (user.isNewbie()) {
+            Notice notice = Notice.builder()
+                    .noticeType(Notice.NoticeType.FIRST)
+                    .is_read(false)
+                    .user(user)
+                    .build();
+
+            noticeRepository.save(notice);
+            user.setNewbie(false);
+            userRepository.save(user);
+        }
 
     }
 
@@ -553,10 +598,11 @@ public class ChallengeService {
         if (passwordEncoder.matches(passwordDto.getPassword(), challenge.getPassword())) {
             UserChallenge userChallenge = new UserChallenge(challenge, user);
             userChallengeRepository.save(userChallenge);
+
             //List<UserChallenge> userChallengeList = userChallengeRepository.findAllByChallenge(challenge);
             challenge.setCurrentMember(challenge.getCurrentMember()+1);
             challengeRepository.save(challenge);
-
+          
         } else {
             throw new InvalidException("비밀번호가 틀렸습니다");
         }
@@ -580,6 +626,18 @@ public class ChallengeService {
 
         authChallenge.setCurrentMember(authChallenge.getCurrentMember() + 1);
         authChallengeRepository.save(authChallenge);
+
+        if (user.isNewbie()) {
+            Notice notice = Notice.builder()
+                    .noticeType(Notice.NoticeType.FIRST)
+                    .is_read(false)
+                    .user(user)
+                    .build();
+
+            noticeRepository.save(notice);
+            user.setNewbie(false);
+            userRepository.save(user);
+        }
     }
 
     public ResponseEntity<CMResponseDto> deleteChallenge(Long challengeId, PrincipalDetails principalDetails) throws ParseException {
