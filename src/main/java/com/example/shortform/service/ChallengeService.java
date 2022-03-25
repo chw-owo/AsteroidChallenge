@@ -369,9 +369,9 @@ public class ChallengeService {
             throw new InvalidException("참가 가능 날짜가 지났습니다.");
 
         userChallengeRepository.save(new UserChallenge(challenge, user));
-        List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
-        challenge.setCurrentMember(userChallenges.size());
 
+        challenge.setCurrentMember(challenge.getCurrentMember()+1);
+        challengeRepository.save(challenge);
         // update percentage of report - plus currentMember
         // 현재 진행 중이라면 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
         LocalDate now = LocalDate.now();
@@ -486,6 +486,7 @@ public class ChallengeService {
             // 챌린지에서 퇴장 및 참여 인원 수 차감
             userChallengeRepository.deleteByUserIdAndChallengeId(user.getId(),challengeId);
             challenge.setCurrentMember(challenge.getCurrentMember() - 1);
+            challengeRepository.save(challenge);
 
             LocalDate now = LocalDate.now();
             String start = challenge.getStartDate().substring(0,10);
@@ -552,8 +553,10 @@ public class ChallengeService {
         if (passwordEncoder.matches(passwordDto.getPassword(), challenge.getPassword())) {
             UserChallenge userChallenge = new UserChallenge(challenge, user);
             userChallengeRepository.save(userChallenge);
-            List<UserChallenge> userChallengeList = userChallengeRepository.findAllByChallenge(challenge);
-            challenge.setCurrentMember(userChallengeList.size());
+            //List<UserChallenge> userChallengeList = userChallengeRepository.findAllByChallenge(challenge);
+            challenge.setCurrentMember(challenge.getCurrentMember()+1);
+            challengeRepository.save(challenge);
+
         } else {
             throw new InvalidException("비밀번호가 틀렸습니다");
         }
