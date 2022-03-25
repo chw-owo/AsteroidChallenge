@@ -26,8 +26,6 @@ public class JwtAuthenticationProvider implements InitializingBean{
 
     private final String secret;
     private final long accessTokenValidityInMilliseconds;
-    private final long refreshTokenValidityInMilliseconds;
-    //private final RedisUtil redisUtil;
 
     private Key key;
 
@@ -36,11 +34,9 @@ public class JwtAuthenticationProvider implements InitializingBean{
     public JwtAuthenticationProvider(
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.access-token-validity-in-seconds}") long accessTokenValidityInSeconds,
-            @Value("${jwt.refresh-token-validity-in-seconds}") long refreshTokenValidityInSeconds,
             PrincipalDetailsService principalDetailsService) {
         this.secret = secret;
         this.accessTokenValidityInMilliseconds = accessTokenValidityInSeconds * 1000;
-        this.refreshTokenValidityInMilliseconds = refreshTokenValidityInSeconds * 1000;
         this.principalDetailsService = principalDetailsService;
         //this.redisUtil = redisUtil;
     }
@@ -64,15 +60,7 @@ public class JwtAuthenticationProvider implements InitializingBean{
                 .setExpiration(new Date(now + accessTokenValidityInMilliseconds))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
-
-        String refreshToken = Jwts.builder()
-                .claim("email", user.getEmail())
-                .claim("nickname", user.getNickname())
-                .setExpiration(new Date(now + refreshTokenValidityInMilliseconds))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-
-        return new TokenDto(accessToken, refreshToken);
+        return new TokenDto(accessToken);
     }
 
     // 권한 가져오는 메서드
@@ -96,7 +84,7 @@ public class JwtAuthenticationProvider implements InitializingBean{
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             //log.info("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 토큰입니다.");
+            log.info("Expired access_Token : {}", token);
         } catch (UnsupportedJwtException e) {
             log.info("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalArgumentException e) {
