@@ -121,7 +121,7 @@ public class PostService {
         noticeRepository.save(notice);
 
         // 챌린지 종료 날 인증 시 다른 챌린지 추천
-        if (challenge.getEndDate().equals(now.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))) {
+        if (challenge.getEndDate().equals(today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
             Notice recommendNotice = Notice.builder()
                     .noticeType(Notice.NoticeType.RECOMMEND)
                     .is_read(false)
