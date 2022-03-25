@@ -62,6 +62,8 @@ public class Notice extends Timestamped {
     @Column(name = "room_id")
     private Long roomId;
 
+    @Column(name = "post_id")
+    private Long postId;
 
     public void setIsSuccess(Boolean isSuccess) {
         this.isSuccess = isSuccess;

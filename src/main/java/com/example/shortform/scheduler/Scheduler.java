@@ -74,12 +74,14 @@ public class Scheduler {
             for (UserChallenge userChallenge : userChallengeList) {
                 if (userChallenge.getChallenge().getEndDate().equals(today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
                     if(!postRepository.existsByUserAndChallengeIdAndCreatedAtBetween(user, userChallenge.getChallenge().getId(), today.minusDays(1), today)) {
-                        Notice notice = Notice.builder()
-                                .noticeType(Notice.NoticeType.RECOMMEND)
-                                .is_read(false)
-                                .user(user)
-                                .build();
-                        noticeRepository.save(notice);
+                        if (!noticeRepository.existsByUserIdAndNoticeTypeAndCreatedAtBetween(user.getId(), Notice.NoticeType.RECOMMEND, today, today.plusDays(1))) {
+                            Notice notice = Notice.builder()
+                                    .noticeType(Notice.NoticeType.RECOMMEND)
+                                    .is_read(false)
+                                    .user(user)
+                                    .build();
+                            noticeRepository.save(notice);
+                        }
                     }
                 }
             }
