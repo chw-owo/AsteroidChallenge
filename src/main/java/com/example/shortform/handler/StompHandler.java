@@ -68,22 +68,22 @@ public class StompHandler implements ChannelInterceptor {
                 String sessionId = (String) message.getHeaders().get("simpSessionId");
                 //log.info("sub sessionId = {}", sessionId);
                 // 토큰에서 유저 정보 추출
-                String email = jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("authorization"));
-                //log.info("sub email = {}", email);
-                User user = userRepository.findByEmail(email).orElseThrow(
-                        () -> new NotFoundException("")
-                );
+//                String email = jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("authorization"));
+//                //log.info("sub email = {}", email);
+//                User user = userRepository.findByEmail(email).orElseThrow(
+//                        () -> new NotFoundException("")
+//                );
 
                 // redis 에 sessionId와 roomId 매핑
                 redisRepository.setUserEnterInfo(sessionId, roomId);
 
-                ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
-                        .type(ChatMessage.MessageType.ENTER)
-                        .roomId(roomId)
-                        .userId(user.getId())
-                        .build();
-
-                chatMessageService.sendChatMessage(requestDto);
+//                ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
+//                        .type(ChatMessage.MessageType.ENTER)
+//                        .roomId(roomId)
+//                        .userId(user.getId())
+//                        .build();
+//
+//                chatMessageService.sendChatMessage(requestDto);
                 //log.info("SUBSCRIBED {}, {}", user.getNickname(), roomId);
             }
         } else if (StompCommand.DISCONNECT == accessor.getCommand()) {
