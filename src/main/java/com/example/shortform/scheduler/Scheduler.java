@@ -43,7 +43,8 @@ public class Scheduler {
             for (UserChallenge userChallenge : userChallengeList) {
                 String status = challengeService.challengeStatus(userChallenge.getChallenge());
                 if (status.equals("진행중")) {
-                    challengingList.add(userChallenge.getChallenge());
+                    if (!userChallenge.isDailyAuthenticated())
+                        challengingList.add(userChallenge.getChallenge());
                 }
             }
             if (challengingList.size() != 0) {
