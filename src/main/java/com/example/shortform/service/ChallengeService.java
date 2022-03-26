@@ -180,11 +180,11 @@ public class ChallengeService {
                         .date(today)
                         .currentMember(challenge.getCurrentMember())
                         .build();
-                authChallengeRepository.save(authChallenge);
             }else{
                 authChallengeToday = authChallengeRepository.findByChallengeAndDate(challenge, today);
             }
 
+            authChallenge.setCurrentMember(challenge.getCurrentMember());
             authChallengeRepository.save(authChallengeToday);
         }
     }
@@ -219,28 +219,36 @@ public class ChallengeService {
                 authChallenge = AuthChallenge.builder()
                         .challenge(challenge)
                         .date(date)
-                        .currentMember(challenge.getCurrentMember())
+                        .currentMember(1)
                         .build();
-                authChallengeRepository.save(authChallenge);
             }else{
                 authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, date);
-                authChallenge.setCurrentMember(challenge.getCurrentMember());
-                authChallengeRepository.save(authChallenge);
             }
 
+            authChallenge.setCurrentMember(challenge.getCurrentMember());
+            authChallengeRepository.save(authChallenge);
+
             int division = authChallenge.getCurrentMember();
-            int divisor = authChallenge.getAuthMember();
+            int divisor = 0;
             double percentage_d = 0.0;
             int percentage;
 
             if(authChallenge.equals(null)){
-                percentage = 0;
+
+                division = 1;
+
             } else if(!date.isAfter(now)) {
-                percentage_d = ( (double) divisor / (double) division ) * 100.0;
-                percentage = (int) percentage_d;
+                authChallenge.setCurrentMember(challenge.getCurrentMember());
+                division = authChallenge.getCurrentMember();
+                divisor = authChallenge.getAuthMember();
+
             }else{
-                percentage = 0;
+                division = 1;
             }
+
+            percentage_d = ( (double) divisor / (double) division ) * 100.0;
+            percentage = (int) percentage_d;
+
             ReportResponseDto responseDto = ReportResponseDto.builder().date(date.toString()).percentage(percentage).build();
             responseDtos.add(responseDto);
         }
