@@ -18,9 +18,8 @@ public class PrincipalDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws CustomUsernameNotFoundException {
-
         User findUser = userRepository.findByEmail(email).orElseThrow(
-                () -> new CustomUsernameNotFoundException("존재하지 않는 이메일입니다.")
+                () -> new CustomUsernameNotFoundException("존재하지 않는 이메일입니다. email : "+ email)
         );
 
 
