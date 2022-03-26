@@ -59,7 +59,7 @@ public class UserApiController {
     public void checkEmailToken(String token, String email, HttpServletResponse response) {
         userService.checkEmailToken(token, email);
         try {
-            response.sendRedirect("https://www.sohangsung.co.kr/login");
+            response.sendRedirect("https://www.sohangsung.co.kr/signup/complete");
         } catch (IOException e) {
             throw new InvalidException("유효하지 않은 주소입니다.");
         }
