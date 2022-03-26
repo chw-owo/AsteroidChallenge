@@ -152,6 +152,7 @@ public class ChallengeService {
                     .user(user)
                     .build();
 
+            user.setRankingPoint(user.getRankingPoint() + 5);
             noticeRepository.save(notice);
             user.setNewbie(false);
         }
@@ -439,6 +440,7 @@ public class ChallengeService {
                     .build();
 
             noticeRepository.save(notice);
+            user.setRankingPoint(user.getRankingPoint() + 5);
             user.setNewbie(false);
             userRepository.save(user);
         }
@@ -641,6 +643,7 @@ public class ChallengeService {
                     .build();
 
             noticeRepository.save(notice);
+            user.setRankingPoint(user.getRankingPoint() + 5);
             user.setNewbie(false);
             userRepository.save(user);
         }
