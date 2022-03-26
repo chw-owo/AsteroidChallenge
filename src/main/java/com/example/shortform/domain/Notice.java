@@ -41,13 +41,13 @@ public class Notice extends Timestamped {
     private boolean is_read;
 
     @Column(name = "increase_point")
-    private Integer increasePoint;
+    private int increasePoint;
 
     @Column(name = "challenge_cnt")
-    private Integer challengeCnt;
+    private int challengeCnt;
 
     @Column(name = "notice_level")
-    private Long noticeLevel;
+    private long noticeLevel;
 
     @Column(name = "is_success")
     private Boolean isSuccess;
@@ -106,18 +106,5 @@ public class Notice extends Timestamped {
                 .build();
     }
 
-//    public Long isIdNull() {
-//        if (challenge == null)
-//            return null;
-//        else
-//            return challenge.getId();
-//    }
-//
-//    public String isTitleNull() {
-//        if (challenge == null)
-//            return null;
-//        else
-//            return challenge.getTitle();
-//    }
 
 }
