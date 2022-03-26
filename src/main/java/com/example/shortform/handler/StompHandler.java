@@ -68,22 +68,22 @@ public class StompHandler implements ChannelInterceptor {
                 String sessionId = (String) message.getHeaders().get("simpSessionId");
                 //log.info("sub sessionId = {}", sessionId);
                 // 토큰에서 유저 정보 추출
-                String email = jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("authorization"));
-                //log.info("sub email = {}", email);
-                User user = userRepository.findByEmail(email).orElseThrow(
-                        () -> new NotFoundException("")
-                );
+//                String email = jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("authorization"));
+//                //log.info("sub email = {}", email);
+//                User user = userRepository.findByEmail(email).orElseThrow(
+//                        () -> new NotFoundException("")
+//                );
 
                 // redis 에 sessionId와 roomId 매핑
                 redisRepository.setUserEnterInfo(sessionId, roomId);
 
-                ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
-                        .type(ChatMessage.MessageType.ENTER)
-                        .roomId(roomId)
-                        .userId(user.getId())
-                        .build();
-
-                chatMessageService.sendChatMessage(requestDto);
+//                ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
+//                        .type(ChatMessage.MessageType.ENTER)
+//                        .roomId(roomId)
+//                        .userId(user.getId())
+//                        .build();
+//
+//                chatMessageService.sendChatMessage(requestDto);
                 //log.info("SUBSCRIBED {}, {}", user.getNickname(), roomId);
             }
         } else if (StompCommand.DISCONNECT == accessor.getCommand()) {
@@ -95,24 +95,24 @@ public class StompHandler implements ChannelInterceptor {
 
             //log.info("sessionId = {}, roomId = {}", sessionId, roomId);
 
-            String token = Optional.ofNullable(accessor.getFirstNativeHeader("authorization")).orElse("unknownUser");
+//            String token = Optional.ofNullable(accessor.getFirstNativeHeader("authorization")).orElse("unknownUser");
             //log.info("token = {}", token);
 
-            if (accessor.getFirstNativeHeader("authorization") != null) {
-                // 토큰에서 유저 정보 추출
-                String email = jwtAuthenticationProvider.getUser(token);
-                //log.info("email = {}", email);
-                User user = userRepository.findByEmail(email).orElseThrow(
-                        () -> new NotFoundException("로그인 하지 않은 유저입니다.")
-                );
-                ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
-                        .type(ChatMessage.MessageType.QUIT)
-                        .roomId(roomId)
-                        .userId(user.getId())
-                        .build();
-                chatMessageService.sendChatMessage(requestDto);
-
-            }
+//            if (accessor.getFirstNativeHeader("authorization") != null) {
+//                // 토큰에서 유저 정보 추출
+//                String email = jwtAuthenticationProvider.getUser(token);
+//                //log.info("email = {}", email);
+//                User user = userRepository.findByEmail(email).orElseThrow(
+//                        () -> new NotFoundException("로그인 하지 않은 유저입니다.")
+//                );
+//                ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
+//                        .type(ChatMessage.MessageType.QUIT)
+//                        .roomId(roomId)
+//                        .userId(user.getId())
+//                        .build();
+//                chatMessageService.sendChatMessage(requestDto);
+//
+//            }
 
             if (roomId != null) {
                 // redis 에서 sessionId와 매핑했던 roomId 제거

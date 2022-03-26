@@ -20,18 +20,21 @@ public class UserProfileInfo {
     private String levelIcon; // 레벨 아이콘
     private int experiencePoint; // 다음 레벨에 필요한 경험치
 
+    private boolean isKakao;
+
     public static UserProfileInfo of(User user) {
         return UserProfileInfo.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
-
                 .rankingPoint(user.getRankingPoint())
-
                 .nickname(user.getNickname())
                 .profileUrl(user.getProfileImage())
+
                 .levelName(user.getLevel().getName())
                 .levelIcon(user.getLevel().getLevelIcon())
                 .experiencePoint(user.getLevel().getNextPoint())
+
+                .isKakao(user.getProvider() != null)
                 .build();
     }
 }

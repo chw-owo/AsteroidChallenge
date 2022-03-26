@@ -8,6 +8,7 @@ import com.example.shortform.dto.resonse.CMResponseDto;
 import com.example.shortform.dto.resonse.UserChallengeInfo;
 import com.example.shortform.dto.resonse.UserInfo;
 import com.example.shortform.dto.resonse.UserProfileInfo;
+import com.example.shortform.exception.InvalidException;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.service.ChallengeService;
 import com.example.shortform.service.KakaoService;
@@ -19,6 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.text.ParseException;
@@ -54,8 +56,14 @@ public class UserApiController {
 
     // 이메일 인증 확인
     @GetMapping("/auth/check-email-token")
-    public ResponseEntity<CMResponseDto> checkEmailToken(String token, String email) {
-        return userService.checkEmailToken(token, email);
+    public void checkEmailToken(String token, String email, HttpServletResponse response) {
+        userService.checkEmailToken(token, email);
+        try {
+            response.sendRedirect("https://www.sohangsung.co.kr/signup/complete");
+        } catch (IOException e) {
+            throw new InvalidException("유효하지 않은 주소입니다.");
+        }
+
     }
 
     // 이메일 인증 재전송
