@@ -86,7 +86,7 @@ public class Challenge extends Timestamped{
     private List<UserChallenge> memberList = new ArrayList<>();
 
 
-    public Challenge(ChallengeRequestDto requestDto, Category category, String password){
+    public Challenge(ChallengeRequestDto requestDto, Category category, String password, int currentMember){
         this.title=requestDto.getTitle();
         this.content=requestDto.getContent();
         this.category= category;
@@ -95,7 +95,7 @@ public class Challenge extends Timestamped{
         this.endDate=requestDto.getEndDate();
         this.isPrivate=requestDto.getIsPrivate();
         this.password = password;
-        this.currentMember = 1; // 참가인원 방장 포함
+        this.currentMember = currentMember;
     }
 
     public void ChallengeRelative(List<TagChallenge> tags, List<UserChallenge> users, List<ImageFile> images){

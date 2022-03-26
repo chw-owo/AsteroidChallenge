@@ -11,7 +11,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 @Slf4j
-@Profile("prod")
+@Profile("dev")
 @Component
 @RequiredArgsConstructor
 public class HtmlEmailService implements EmailService {
@@ -28,7 +28,7 @@ public class HtmlEmailService implements EmailService {
             mimeMessageHelper.setText(emailMessage.getMessage(), true);
             javaMailSender.send(mimeMessage);
 
-            log.info("sent email: {}", emailMessage.getMessage());
+            //log.info("sent email: {}", emailMessage.getMessage());
         } catch (MessagingException e) {
             log.error("failed to send email", e);
         }

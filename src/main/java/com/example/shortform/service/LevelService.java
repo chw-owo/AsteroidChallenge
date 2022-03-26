@@ -1,8 +1,10 @@
 package com.example.shortform.service;
 
 import com.example.shortform.domain.Level;
+import com.example.shortform.domain.Notice;
 import com.example.shortform.domain.User;
 import com.example.shortform.repository.LevelRepository;
+import com.example.shortform.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,7 @@ import java.util.List;
 public class LevelService {
 
     private final LevelRepository levelRepository;
+    private final NoticeRepository noticeRepository;
 
     @Transactional
     public boolean checkLevelPoint(User user) {
@@ -37,6 +40,23 @@ public class LevelService {
 
         // 경험치 확인 후 유저 레벨
         String newUserLevel = user.getLevel().getName();
+
+        // 레벨업 근처일 시 알림 (중복알림 제거 필요)
+        if (!checkLevelUp(userLevel, newUserLevel)) {
+            Level userPresentLevel = levelRepository.findByName(userLevel);
+            if (!noticeRepository.existsByUserIdAndNoticeLevel(user.getId(), userPresentLevel.getId())){
+                if (userPresentLevel.getNextPoint() - userPoint <= 5 && userPresentLevel.getNextPoint() - userPoint > 0) {
+                    Notice notice = Notice.builder()
+                            .noticeType(Notice.NoticeType.LEVEL)
+                            .is_read(false)
+                            .user(user)
+                            .noticeLevel(userPresentLevel.getId())
+                            .build();
+
+                    noticeRepository.save(notice);
+                }
+            }
+        }
 
         return checkLevelUp(userLevel, newUserLevel);
     }

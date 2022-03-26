@@ -54,6 +54,9 @@ public class User extends Timestamped{
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(name = "newbie", nullable = false)
+    private boolean newbie;
+
     @Setter
     private boolean emailVerified;
 
@@ -83,6 +86,13 @@ public class User extends Timestamped{
 
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     private List<ChatMessage> messages = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    private List<Notice> notices = new ArrayList<>();
+
+    public void setNewbie(boolean newbie) {
+        this.newbie = newbie;
+    }
 
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();

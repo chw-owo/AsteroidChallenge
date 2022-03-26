@@ -23,4 +23,5 @@ public interface UserChallengeRepository extends JpaRepository<UserChallenge, Lo
             "order by uc.challenge.createdAt desc ")
     List<UserChallenge> findAllUserChallengeInfo(@Param("user_id") Long user_id);
 
+    List<UserChallenge> findAllByUserIdOrderByCreatedAtDesc(Long id);
 }
