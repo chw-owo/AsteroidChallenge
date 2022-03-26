@@ -152,6 +152,7 @@ public class ChallengeService {
                     .user(user)
                     .build();
 
+
             user.setRankingPoint(user.getRankingPoint() + 5);
             noticeRepository.save(notice);
             user.setNewbie(false);

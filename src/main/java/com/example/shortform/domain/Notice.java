@@ -41,6 +41,7 @@ public class Notice extends Timestamped {
     private boolean is_read;
 
     @Column(name = "increase_point")
+<<<<<<< HEAD
     private int increasePoint;
 
     @Column(name = "challenge_cnt")
@@ -48,6 +49,15 @@ public class Notice extends Timestamped {
 
     @Column(name = "notice_level")
     private long noticeLevel;
+=======
+    private Integer increasePoint;
+
+    @Column(name = "challenge_cnt")
+    private Integer challengeCnt;
+
+    @Column(name = "notice_level")
+    private Long noticeLevel;
+>>>>>>> edcfad9b6e86ba5d8eed761e058b02561439bc80
 
     @Column(name = "is_success")
     private Boolean isSuccess;
@@ -106,5 +116,21 @@ public class Notice extends Timestamped {
                 .build();
     }
 
+<<<<<<< HEAD
+=======
+//    public Long isIdNull() {
+//        if (challenge == null)
+//            return null;
+//        else
+//            return challenge.getId();
+//    }
+//
+//    public String isTitleNull() {
+//        if (challenge == null)
+//            return null;
+//        else
+//            return challenge.getTitle();
+//    }
+>>>>>>> edcfad9b6e86ba5d8eed761e058b02561439bc80
 
 }
