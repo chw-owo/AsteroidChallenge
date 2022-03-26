@@ -221,7 +221,6 @@ public class UserService {
 
         String message = templateEngine.process("mail/email-link", context);
 
-        // TODO 사진과 함께 보내기
         EmailMessage emailMessage = EmailMessage.builder()
                 .to(user.getEmail())
                 .subject("소행성(소소한 행동 습관 형성 챌린지), 회원 가입 인증 메일")

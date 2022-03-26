@@ -43,7 +43,9 @@ public class Scheduler {
             for (UserChallenge userChallenge : userChallengeList) {
                 String status = challengeService.challengeStatus(userChallenge.getChallenge());
                 if (status.equals("진행중")) {
-                    challengingList.add(userChallenge.getChallenge());
+
+                    if (!userChallenge.isDailyAuthenticated())
+                        challengingList.add(userChallenge.getChallenge());
 
                 }
             }
@@ -137,17 +139,20 @@ public class Scheduler {
                     if ((int)Math.ceil(userChallenge.getChallengeDate() * 0.8) <= userChallenge.getAuthCount()) {
                         if (userChallenge.getChallenge().getEndDate().equals(today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
 
-                            Notice notice = Notice.builder()
-                                    .noticeType(Notice.NoticeType.SUCCESS)
-                                    .is_read(false)
-                                    .user(user)
-                                    .challengeId(userChallenge.getChallenge().getId())
-                                    .increasePoint(5)
-                                    .build();
+                            if (!noticeRepository.existsByChallengeIdAndIsSuccess(userChallenge.getChallenge().getId(), true)) {
+                                Notice notice = Notice.builder()
+                                        .noticeType(Notice.NoticeType.SUCCESS)
+                                        .is_read(false)
+                                        .isSuccess(true)
+                                        .user(user)
+                                        .challengeId(userChallenge.getChallenge().getId())
+                                        .increasePoint(5)
+                                        .build();
 
-                            user.setRankingPoint(user.getRankingPoint() + 5);
+                                user.setRankingPoint(user.getRankingPoint() + 5);
 
-                            noticeRepository.save(notice);
+                                noticeRepository.save(notice);
+                            }
 
                         }
                     }

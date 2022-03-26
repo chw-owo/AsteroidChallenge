@@ -23,7 +23,6 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     List<Notice> findAllByChallengeIdAndUserId(Long challengeId, Long id);
 
-
     boolean existsByChallengeIdAndIsSuccess(Long id, boolean b);
 
 }
