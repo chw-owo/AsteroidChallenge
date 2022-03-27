@@ -59,8 +59,6 @@ public class UserApiController {
     public void checkEmailToken(String token, String email, HttpServletResponse response) {
         userService.checkEmailToken(token, email);
         try {
-
-            response.sendRedirect("https://www.sohangsung.co.kr/login");
             response.sendRedirect("https://www.sohangsung.co.kr/signup/complete");
 
         } catch (IOException e) {

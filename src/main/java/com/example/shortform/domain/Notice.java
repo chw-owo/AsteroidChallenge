@@ -41,7 +41,6 @@ public class Notice extends Timestamped {
     private boolean is_read;
 
     @Column(name = "increase_point")
-
     private int increasePoint;
 
     @Column(name = "challenge_cnt")
