@@ -153,6 +153,7 @@ public class ChallengeService {
                     .user(user)
                     .build();
 
+
             user.setRankingPoint(user.getRankingPoint() + 5);
             noticeRepository.save(notice);
             user.setNewbie(true);
@@ -170,11 +171,21 @@ public class ChallengeService {
             AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, yesterday);
             authChallengeRepository.save(authChallenge);
             authChallenge.setAuthMember(0);
-            AuthChallenge authChallengeToday = AuthChallenge.builder()
-                    .challenge(challenge)
-                    .date(today)
-                    .currentMember(challenge.getCurrentMember())
-                    .build();
+
+            Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, today));
+            AuthChallenge authChallengeToday;
+
+            if(!authChallengeCheck.isPresent()){
+                authChallengeToday = AuthChallenge.builder()
+                        .challenge(challenge)
+                        .date(today)
+                        .currentMember(challenge.getCurrentMember())
+                        .build();
+            }else{
+                authChallengeToday = authChallengeRepository.findByChallengeAndDate(challenge, today);
+            }
+
+            authChallenge.setCurrentMember(challenge.getCurrentMember());
             authChallengeRepository.save(authChallengeToday);
         }
     }
@@ -209,26 +220,29 @@ public class ChallengeService {
                 authChallenge = AuthChallenge.builder()
                         .challenge(challenge)
                         .date(date)
-                        .currentMember(challenge.getCurrentMember())
+                        .currentMember(1)
                         .build();
-                authChallengeRepository.save(authChallenge);
             }else{
                 authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, date);
             }
 
-            int division = authChallenge.getCurrentMember();
-            int divisor = authChallenge.getAuthMember();
-            double percentage_d = 0.0;
-            int percentage;
+            authChallenge.setCurrentMember(challenge.getCurrentMember());
+                authChallengeRepository.save(authChallenge);
 
-            if(authChallenge.equals(null)){
-                percentage = 0;
-            } else if(!date.isAfter(now)) {
-                percentage_d = ( (double) divisor / (double) division ) * 100.0;
-                percentage = (int) percentage_d;
-            }else{
-                percentage = 0;
+                int division = 1;
+                int divisor = 0;
+                double percentage_d = 0.0;
+                int percentage;
+
+               if(!date.isAfter(now)) {
+                authChallenge.setCurrentMember(challenge.getCurrentMember());
+                division = authChallenge.getCurrentMember();
+                divisor = authChallenge.getAuthMember();
+
             }
+            percentage_d = ( (double) divisor / (double) division ) * 100.0;
+            percentage = (int) percentage_d;
+
             ReportResponseDto responseDto = ReportResponseDto.builder().date(date.toString()).percentage(percentage).build();
             responseDtos.add(responseDto);
         }
