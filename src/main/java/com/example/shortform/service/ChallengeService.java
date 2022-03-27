@@ -145,7 +145,7 @@ public class ChallengeService {
 
         challengeRepository.save(challenge);
 
-        if (!user.isNewbie()) {
+        if (user.isNewbie()) {
             Notice notice = Notice.builder()
                     .noticeType(Notice.NoticeType.FIRST)
                     .is_read(false)
@@ -153,10 +153,10 @@ public class ChallengeService {
                     .user(user)
                     .build();
 
-
-            user.setRankingPoint(user.getRankingPoint() + 5);
             noticeRepository.save(notice);
-            user.setNewbie(true);
+            user.setRankingPoint(user.getRankingPoint() + 5);
+            user.setNewbie(false);
+            userRepository.save(user);
         }
 
         return challenge.getId();
@@ -447,7 +447,7 @@ public class ChallengeService {
         authChallenge.setCurrentMember(challenge.getCurrentMember());
         authChallengeRepository.save(authChallenge);
 
-        if (!user.isNewbie()) {
+        if (user.isNewbie()) {
             Notice notice = Notice.builder()
                     .noticeType(Notice.NoticeType.FIRST)
                     .is_read(false)
@@ -457,7 +457,7 @@ public class ChallengeService {
 
             noticeRepository.save(notice);
             user.setRankingPoint(user.getRankingPoint() + 5);
-            user.setNewbie(true);
+            user.setNewbie(false);
             userRepository.save(user);
         }
 
@@ -651,7 +651,7 @@ public class ChallengeService {
         authChallenge.setCurrentMember(challenge.getCurrentMember());
         authChallengeRepository.save(authChallenge);
 
-        if (!user.isNewbie()) {
+        if (user.isNewbie()) {
             Notice notice = Notice.builder()
                     .noticeType(Notice.NoticeType.FIRST)
                     .is_read(false)
@@ -661,7 +661,7 @@ public class ChallengeService {
 
             noticeRepository.save(notice);
             user.setRankingPoint(user.getRankingPoint() + 5);
-            user.setNewbie(true);
+            user.setNewbie(false);
             userRepository.save(user);
         }
     }
