@@ -60,6 +60,7 @@ public class UserApiController {
         userService.checkEmailToken(token, email);
         try {
             response.sendRedirect("https://www.sohangsung.co.kr/signup/complete");
+
         } catch (IOException e) {
             throw new InvalidException("유효하지 않은 주소입니다.");
         }

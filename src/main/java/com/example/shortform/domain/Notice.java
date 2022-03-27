@@ -106,5 +106,4 @@ public class Notice extends Timestamped {
                 .build();
     }
 
-
 }

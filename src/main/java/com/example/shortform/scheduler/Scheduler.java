@@ -43,8 +43,10 @@ public class Scheduler {
             for (UserChallenge userChallenge : userChallengeList) {
                 String status = challengeService.challengeStatus(userChallenge.getChallenge());
                 if (status.equals("진행중")) {
+
                     if (!userChallenge.isDailyAuthenticated())
                         challengingList.add(userChallenge.getChallenge());
+
                 }
             }
             if (challengingList.size() != 0) {
@@ -150,6 +152,7 @@ public class Scheduler {
 
                                 noticeRepository.save(notice);
                             }
+
                         }
                     }
                 }
