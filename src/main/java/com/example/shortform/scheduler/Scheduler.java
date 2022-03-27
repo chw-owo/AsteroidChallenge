@@ -43,8 +43,10 @@ public class Scheduler {
             for (UserChallenge userChallenge : userChallengeList) {
                 String status = challengeService.challengeStatus(userChallenge.getChallenge());
                 if (status.equals("진행중")) {
+
                     if (!userChallenge.isDailyAuthenticated())
                         challengingList.add(userChallenge.getChallenge());
+
                 }
             }
             if (challengingList.size() != 0) {
@@ -136,6 +138,7 @@ public class Scheduler {
                     // 성공일수(챌린지 진행일 * 0.8) > 인증횟수
                     if ((int)Math.ceil(userChallenge.getChallengeDate() * 0.8) <= userChallenge.getAuthCount()) {
                         if (userChallenge.getChallenge().getEndDate().equals(today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
+
                             if (!noticeRepository.existsByChallengeIdAndIsSuccess(userChallenge.getChallenge().getId(), true)) {
                                 Notice notice = Notice.builder()
                                         .noticeType(Notice.NoticeType.SUCCESS)
@@ -150,6 +153,7 @@ public class Scheduler {
 
                                 noticeRepository.save(notice);
                             }
+
                         }
                     }
                 }
