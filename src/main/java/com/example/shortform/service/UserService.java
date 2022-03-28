@@ -315,6 +315,21 @@ public class UserService {
             findUser.setProfileImage(imgUrl);
         }
 
+        // 닉네임 변경
+        if (!"".equals(requestDto.getNickname().trim())) {
+
+            // 기존 닉네임과 중복일 경우
+            if (findUser.getNickname().equals(requestDto.getNickname()))
+                throw new DuplicateException("기존 닉네임과 동일합니다.");
+
+            // 이미 있는 닉네임일 경우
+            if (userRepository.findByNickname(requestDto.getNickname()).isPresent())
+                throw new DuplicateException("이미 존재하는 닉네임입니다.");
+
+            // 닉네임 변경
+            findUser.setNickname(requestDto.getNickname());
+        }
+
         // 비밀번호 변경
         if (!"".equals(requestDto.getPassword().trim()) ||
                 !"".equals(requestDto.getPasswordCheck().trim())) {

@@ -38,6 +38,8 @@ dependencies {
 
     // validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // sentry
+    implementation 'io.sentry:sentry-spring-boot-starter:4.3.0'
 
     compileOnly 'org.mariadb.jdbc:mariadb-java-client'
     compileOnly 'org.projectlombok:lombok'
