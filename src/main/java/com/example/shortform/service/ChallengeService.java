@@ -149,13 +149,14 @@ public class ChallengeService {
             Notice notice = Notice.builder()
                     .noticeType(Notice.NoticeType.FIRST)
                     .is_read(false)
+                    .increasePoint(5)
                     .user(user)
                     .build();
 
-
-            user.setRankingPoint(user.getRankingPoint() + 5);
             noticeRepository.save(notice);
+            user.setRankingPoint(user.getRankingPoint() + 5);
             user.setNewbie(false);
+            userRepository.save(user);
         }
 
         return challenge.getId();
@@ -450,6 +451,7 @@ public class ChallengeService {
             Notice notice = Notice.builder()
                     .noticeType(Notice.NoticeType.FIRST)
                     .is_read(false)
+                    .increasePoint(5)
                     .user(user)
                     .build();
 
@@ -653,6 +655,7 @@ public class ChallengeService {
             Notice notice = Notice.builder()
                     .noticeType(Notice.NoticeType.FIRST)
                     .is_read(false)
+                    .increasePoint(5)
                     .user(user)
                     .build();
 
