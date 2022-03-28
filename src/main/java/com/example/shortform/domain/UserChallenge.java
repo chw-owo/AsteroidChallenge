@@ -77,7 +77,7 @@ public class UserChallenge extends Timestamped{
 
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
-            cal.add(Calendar.DATE, possibleParticipateDate - 1); // 시작일 포함해야돼서 -1 해준다.
+            cal.add(Calendar.DATE, possibleParticipateDate);
 
             // 80%까지 참여할 수 있는 날짜
             String participateDate = format.format(cal.getTime());
