@@ -138,7 +138,6 @@ public class Scheduler {
                     // 성공일수(챌린지 진행일 * 0.8) > 인증횟수
                     if ((int)Math.ceil(userChallenge.getChallengeDate() * 0.8) <= userChallenge.getAuthCount()) {
                         if (userChallenge.getChallenge().getEndDate().equals(today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
-
                             if (!noticeRepository.existsByChallengeIdAndIsSuccess(userChallenge.getChallenge().getId(), true)) {
                                 Notice notice = Notice.builder()
                                         .noticeType(Notice.NoticeType.SUCCESS)
