@@ -1,5 +1,6 @@
 package com.example.shortform.exception;
 
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,36 +20,42 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateException(DuplicateException e) {
+        Sentry.captureException(e);
         return new ResponseEntity<>(new ErrorResponse(e.getErrorCode(), e.getMessage()),
                 HttpStatus.valueOf(e.getErrorCode().getStatus()));
     }
 
     @ExceptionHandler(InvalidException.class)
     public ResponseEntity<ErrorResponse> handleInvalidException(InvalidException e) {
+        Sentry.captureException(e);
         return new ResponseEntity<>(new ErrorResponse(e.getErrorCode(), e.getMessage()),
                 HttpStatus.valueOf(e.getErrorCode().getStatus()));
     }
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException e) {
+        Sentry.captureException(e);
         return new ResponseEntity<>(new ErrorResponse(e.getErrorCode(), e.getMessage()),
                 HttpStatus.valueOf(e.getErrorCode().getStatus()));
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException e) {
+        Sentry.captureException(e);
         return new ResponseEntity<>(new ErrorResponse(e.getErrorCode(), e.getMessage()),
                 HttpStatus.valueOf(e.getErrorCode().getStatus()));
     }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException e) {
+        Sentry.captureException(e);
         return new ResponseEntity<>(new ErrorResponse(e.getErrorCode(), e.getMessage()),
                 HttpStatus.valueOf(e.getErrorCode().getStatus()));
     }
 
     @ExceptionHandler(InternalServerException.class)
     public ResponseEntity<ErrorResponse> handleInternalServerException(InternalServerException e) {
+        Sentry.captureException(e);
         return new ResponseEntity<>(new ErrorResponse(e.getErrorCode(), e.getMessage()),
                 HttpStatus.valueOf(e.getErrorCode().getStatus()));
     }
@@ -56,12 +63,14 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(CustomUsernameNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(CustomUsernameNotFoundException e) {
+        Sentry.captureException(e);
         return new ResponseEntity<>(new ErrorResponse(ErrorCode.NOT_FOUND, e.getMessage()),
                 HttpStatus.valueOf(ErrorCode.NOT_FOUND.getStatus()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        Sentry.captureException(e);
         return new ResponseEntity<>(new ErrorResponse(ErrorCode.BAD_REQUEST, Objects.requireNonNull(e.getFieldError()).getDefaultMessage())
                 , HttpStatus.valueOf(ErrorCode.BAD_REQUEST.getStatus()));
     }
