@@ -11,6 +11,8 @@ import javax.validation.constraints.NotBlank;
 @Setter
 public class ProfileRequestDto {
 
+    private String nickname;
+
     private String password;
 
     private String passwordCheck;

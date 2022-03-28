@@ -119,6 +119,10 @@ public class User extends Timestamped{
         this.password = encPassword;
     }
 
+    public void setNickname(String nickname){
+        this.nickname = nickname;
+    }
+
     public void setRankingPoint(int point) {
         this.rankingPoint = Math.max(point, 0);
     }
