@@ -9,7 +9,6 @@ import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -112,7 +111,7 @@ public class ChatRoomService {
 
         // 채팅 메세지 DB에서 이 채팅방의 메세지 전체 조회
         Page<ChatMessage> messagePage = chatMessageRepository.findAllByChatRoom(chatRoom, pageable);
-//        List<ChatMessage> messageList = chatMessageRepository.findAllByChatRoom(chatRoom);
+
         // 채팅 방 참가자 목록 조회
         List<UserChatRoom> memberList = userChatRoomRepository.findAllByChatRoom(chatRoom);
 
@@ -120,12 +119,6 @@ public class ChatRoomService {
 
         //메세지 날짜 형식 변경
         for (ChatMessage chatMessage : messagePage) {
-//            String createdAt = chatMessage.getCreatedAt().toString();
-//            String year = createdAt.substring(0,4) + ".";
-//            String month = createdAt.substring(5,7) + ".";
-//            String day = createdAt.substring(8,10) + " ";
-//            String time = createdAt.substring(11,16);
-//            createdAt = year + month + day + time;
             String createdAt = chatMessage.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
             ChatMessageResponseDto responseDto = chatMessage.toResponse(createdAt);
             responseDtoList.add(responseDto);

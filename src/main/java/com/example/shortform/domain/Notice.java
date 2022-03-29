@@ -89,6 +89,7 @@ public class Notice extends Timestamped {
                 .userInfo(memberResponseDto)
                 .date(createdAt)
                 .status(noticeType)
+                .challengeCnt(challengeCnt)
                 .levelPoint(increasePoint)
                 .challengeId(challengeId)
                 .title(challenge.getTitle())
@@ -102,6 +103,7 @@ public class Notice extends Timestamped {
                 .read(is_read)
                 .userInfo(memberResponseDto)
                 .levelPoint(increasePoint)
+                .challengeCnt(challengeCnt)
                 .date(createdAt)
                 .status(noticeType)
                 .build();
