@@ -220,26 +220,26 @@ public class ChallengeService {
                 authChallenge = AuthChallenge.builder()
                         .challenge(challenge)
                         .date(date)
-                        .currentMember(1)
+                        .currentMember(challenge.getCurrentMember())
                         .build();
             }else{
                 authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, date);
             }
 
-            authChallenge.setCurrentMember(challenge.getCurrentMember());
-                authChallengeRepository.save(authChallenge);
+            //authChallenge.setCurrentMember(challenge.getCurrentMember());
+            authChallengeRepository.save(authChallenge);
 
-                int division = 1;
-                int divisor = 0;
-                double percentage_d = 0.0;
-                int percentage;
+            int division = 1;
+            int divisor = 0;
+            double percentage_d = 0.0;
+            int percentage;
 
-               if(!date.isAfter(now)) {
-                authChallenge.setCurrentMember(challenge.getCurrentMember());
-                division = authChallenge.getCurrentMember();
-                divisor = authChallenge.getAuthMember();
-
+           if(!date.isAfter(now)) {
+            //authChallenge.setCurrentMember(challenge.getCurrentMember());
+            division = authChallenge.getCurrentMember();
+            divisor = authChallenge.getAuthMember();
             }
+
             percentage_d = ( (double) divisor / (double) division ) * 100.0;
             percentage = (int) percentage_d;
 
