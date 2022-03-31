@@ -1,10 +1,6 @@
 package com.example.shortform.handler;
 
 import com.example.shortform.config.jwt.JwtAuthenticationProvider;
-import com.example.shortform.domain.ChatMessage;
-import com.example.shortform.domain.User;
-import com.example.shortform.dto.request.ChatMessageRequestDto;
-import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.repository.RedisRepository;
 import com.example.shortform.repository.UserRepository;
@@ -19,11 +15,9 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Slf4j
-//@Transactional
 @Component
 @RequiredArgsConstructor
 public class StompHandler implements ChannelInterceptor {
@@ -41,7 +35,6 @@ public class StompHandler implements ChannelInterceptor {
         //accessor를 사용하면 패킷에 접근이 가능
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         String jwtToken = accessor.getFirstNativeHeader("authorization");
-//        jwtAuthenticationProvider.validateToken(jwtToken);
         //log.info("Web Socket 들어올 때 token 검증 = {}", message.getHeaders());
         //log.info("Web Socket 들어올 때 token 검증 = {}", jwtToken);
 
@@ -67,23 +60,9 @@ public class StompHandler implements ChannelInterceptor {
                 //메세지 헤더에서 sessionId 추출
                 String sessionId = (String) message.getHeaders().get("simpSessionId");
                 //log.info("sub sessionId = {}", sessionId);
-                // 토큰에서 유저 정보 추출
-//                String email = jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("authorization"));
-//                //log.info("sub email = {}", email);
-//                User user = userRepository.findByEmail(email).orElseThrow(
-//                        () -> new NotFoundException("")
-//                );
 
                 // redis 에 sessionId와 roomId 매핑
                 redisRepository.setUserEnterInfo(sessionId, roomId);
-
-//                ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
-//                        .type(ChatMessage.MessageType.ENTER)
-//                        .roomId(roomId)
-//                        .userId(user.getId())
-//                        .build();
-//
-//                chatMessageService.sendChatMessage(requestDto);
                 //log.info("SUBSCRIBED {}, {}", user.getNickname(), roomId);
             }
         } else if (StompCommand.DISCONNECT == accessor.getCommand()) {
@@ -92,27 +71,6 @@ public class StompHandler implements ChannelInterceptor {
             String sessionId = (String) message.getHeaders().get("simpSessionId");
             //sessionId를 이용해 redis 에 매핑된 roomId를 찾는다.
             String roomId = redisRepository.getUserEnterRoomId(sessionId);
-
-            //log.info("sessionId = {}, roomId = {}", sessionId, roomId);
-
-//            String token = Optional.ofNullable(accessor.getFirstNativeHeader("authorization")).orElse("unknownUser");
-            //log.info("token = {}", token);
-
-//            if (accessor.getFirstNativeHeader("authorization") != null) {
-//                // 토큰에서 유저 정보 추출
-//                String email = jwtAuthenticationProvider.getUser(token);
-//                //log.info("email = {}", email);
-//                User user = userRepository.findByEmail(email).orElseThrow(
-//                        () -> new NotFoundException("로그인 하지 않은 유저입니다.")
-//                );
-//                ChatMessageRequestDto requestDto = ChatMessageRequestDto.builder()
-//                        .type(ChatMessage.MessageType.QUIT)
-//                        .roomId(roomId)
-//                        .userId(user.getId())
-//                        .build();
-//                chatMessageService.sendChatMessage(requestDto);
-//
-//            }
 
             if (roomId != null) {
                 // redis 에서 sessionId와 매핑했던 roomId 제거
