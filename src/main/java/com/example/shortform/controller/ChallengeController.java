@@ -147,4 +147,13 @@ public class ChallengeController {
         else
             throw new NotFoundException("로그인 후 이용가능합니다.");
     }
+
+    @GetMapping("/challenge/recommend/{challengeId}")
+    public List<ChallengesResponseDto> recommendChallenge(@PathVariable Long challengeId,
+                                                         @AuthenticationPrincipal PrincipalDetails principalDetails) throws ParseException {
+        if (principalDetails != null)
+            return challengeService.recommendChallenges(challengeId, principalDetails);
+        else
+            throw new NotFoundException("로그인 후 이용가능합니다.");
+    }
 }
