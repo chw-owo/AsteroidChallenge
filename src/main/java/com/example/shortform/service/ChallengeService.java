@@ -270,6 +270,46 @@ public class ChallengeService {
         }
     }
 
+    public List<ChallengesResponseDto> recommendChallenges(Long challengeId, PrincipalDetails principalDetails) throws ParseException {
+        Optional<Challenge> challenge = challengeRepository.findById(challengeId);
+        Category category= challenge.get().getCategory();
+        List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(category.getId());
+        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
+        int cnt = 0;
+
+        for(Challenge c: challenges){
+
+            List<String> challengeImages = new ArrayList<>();
+            List<ImageFile> ImageFiles =  c.getChallengeImage();
+
+            for(ImageFile image:ImageFiles){
+                challengeImages.add(image.getFilePath());
+            }
+
+            Optional<UserChallenge> userChallengeOptional = Optional.ofNullable(userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(), c.getId()));
+            Optional<UserChallenge> userChallengeCheckDate = Optional.ofNullable(userChallengeRepository.findByUserIdAndChallengeId(c.getUser().getId(), c.getId()));
+            int challengeDate = userChallengeCheckDate.get().getChallengeDate();
+
+            if((!userChallengeOptional.isPresent()) &&
+                    (c.getMaxMember() > c.getCurrentMember()) &&
+                    userChallengeCheckDate.get().getParticipateDate(challengeDate, c)
+            ) {
+
+                String challengeStatus = challengeStatus(c);
+                ChallengesResponseDto responseDto = new ChallengesResponseDto(c, challengeImages);
+                responseDto.setStatus(challengeStatus);
+                challengesResponseDtos.add(responseDto);
+                cnt++;
+
+            }
+
+            if (cnt >= 5){
+                break;
+            }
+        }
+        return challengesResponseDtos;
+    }
+
     public ChallengeResponseDto getChallenge(Long challengeId) throws Exception, InternalServerException {
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new NotFoundException("존재하지 않는 챌린지입니다."));
         List<String> challengeImage = new ArrayList<>();
