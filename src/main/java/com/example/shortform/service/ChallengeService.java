@@ -18,7 +18,6 @@ import com.example.shortform.exception.*;
 import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -250,10 +249,6 @@ public class ChallengeService {
     }
 
     public String challengeStatus(Challenge challenge) throws ParseException {
-//        Date now = new Date();
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-//        Date startDate = dateFormat.parse(challenge.getStartDate());
-//        Date endDate = dateFormat.parse(challenge.getEndDate());
 
         LocalDate now = LocalDate.now();
 
@@ -273,41 +268,6 @@ public class ChallengeService {
             challenge.setStatus(ChallengeStatus.SUCCESS);
             return "완료";
         }
-//        if(now.getTime() < startDate.getTime()){
-//            challenge.setStatus(ChallengeStatus.BEFORE);
-//            return "모집중";
-//        }else if (startDate.getTime() <= now.getTime() && now.getTime() <= endDate.getTime()){
-//            challenge.setStatus(ChallengeStatus.ING);
-//            return "진행중";
-//        }else{
-//            challenge.setStatus(ChallengeStatus.SUCCESS);
-//            return "완료";
-//        }
-    }
-
-    public ChallengePageResponseDto getChallenges(Pageable pageable) throws ParseException, InternalServerException {
-        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
-        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
-
-
-        for(Challenge challenge: challengePage){
-
-            List<String> challengeImages = new ArrayList<>();
-            List<ImageFile> ImageFiles =  challenge.getChallengeImage();
-
-            for(ImageFile image:ImageFiles){
-                challengeImages.add(image.getFilePath());
-            }
-            String challengeStatus = challengeStatus(challenge);
-            ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages, challengePage.hasNext());
-            responseDto.setStatus(challengeStatus);
-            challengesResponseDtos.add(responseDto);
-        }
-        ChallengePageResponseDto challengePageResponseDto = ChallengePageResponseDto.builder()
-                .challengeList(challengesResponseDtos)
-                .next(challengePage.hasNext())
-                .totalCnt(challengePage.getTotalElements()).build();
-        return challengePageResponseDto;
     }
 
     public ChallengeResponseDto getChallenge(Long challengeId) throws Exception, InternalServerException {
@@ -334,31 +294,14 @@ public class ChallengeService {
         return challengeResponseDto;
     }
 
+    public ChallengePageResponseDto getChallenges(Pageable pageable) throws ParseException, InternalServerException {
+        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
+        return getChallengePageResponseDto(challengePage);
+    }
 
     public ChallengePageResponseDto getCategoryChallenge(Long categoryId, Pageable pageable) throws ParseException, InternalServerException {
         Page<Challenge> challengePage = challengeRepository.findAllByCategoryId(categoryId, pageable);
-        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
-
-        for(Challenge challenge: challengePage){
-            List<String> challengeImages = new ArrayList<>();
-            List<ImageFile> ImageFiles =  challenge.getChallengeImage();
-
-            for(ImageFile image:ImageFiles){
-                challengeImages.add(image.getFilePath());
-            }
-            String status = challengeStatus(challenge);
-
-            ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
-            responseDto.setStatus(status);
-            challengesResponseDtos.add(responseDto);
-        }
-        ChallengePageResponseDto challengePageResponseDto = ChallengePageResponseDto.builder()
-                .challengeList(challengesResponseDtos)
-                .next(challengePage.hasNext())
-                .totalCnt(challengePage.getTotalElements())
-                .build();
-
-        return challengePageResponseDto;
+        return getChallengePageResponseDto(challengePage);
     }
 
     public ChallengePageResponseDto getKeywordChallenge(String keyword, Pageable pageable) throws ParseException, InternalServerException {
@@ -371,7 +314,11 @@ public class ChallengeService {
                     .build();
         }
         Page<Challenge> challengePage = challengeRepository.searchList(searchKeyword, pageable);
-        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
+        return getChallengePageResponseDto(challengePage);
+    }
+
+    public ChallengePageResponseDto getChallengePageResponseDto(Page<Challenge> challengePage) throws ParseException {
+        List<ChallengesResponseDto> challengesResponseDtoList = new ArrayList<>();
 
         for (Challenge challenge : challengePage) {
             List<String> challengeImages = new ArrayList<>();
@@ -384,11 +331,11 @@ public class ChallengeService {
             String status = challengeStatus(challenge);
             ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
             responseDto.setStatus(status);
-            challengesResponseDtos.add(responseDto);
+            challengesResponseDtoList.add(responseDto);
 
         }
         ChallengePageResponseDto challengePageResponseDto = ChallengePageResponseDto.builder()
-                .challengeList(challengesResponseDtos)
+                .challengeList(challengesResponseDtoList)
                 .next(challengePage.hasNext())
                 .totalCnt(challengePage.getTotalElements())
                 .build();
