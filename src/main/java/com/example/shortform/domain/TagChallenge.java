@@ -17,7 +17,7 @@ public class TagChallenge extends Timestamped{
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 

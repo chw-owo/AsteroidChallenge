@@ -88,12 +88,9 @@ public class ChallengeService {
             tagRepository.save(tag);
 
             TagChallenge tagChallenge = new TagChallenge(challenge, tag);
-            if (!tagChallenges.contains(tagChallenge)) { // 한 게시물 내부의 중복태그 방지
-                tagChallenges.add(tagChallenge);
-                tagChallengeRepository.save(tagChallenge);
-            } else {
-                throw new DuplicateException("중복된 태그는 사용할 수 없습니다.");
-            }
+            tagChallenges.add(tagChallenge);
+            tagChallengeRepository.save(tagChallenge);
+
         }
 
         //User, UserChallenge 저장하기
@@ -486,38 +483,32 @@ public class ChallengeService {
             List<TagChallenge> tagChallenges = tagChallengeRepository.findAllByChallenge(challenge);
             List<String> tagNames = requestDto.getTagName();
 
-            if (requestDto.getTagName() != null) {
-                for (TagChallenge tagChallenge : tagChallenges) {
-                    boolean imEmpty = true;
-                    for (String tagName : tagNames) {
-                        if (tagChallenge.getTag().getName().equals(tagName)) {
-                            imEmpty = false;
-                            break;
-                        }
+            for (TagChallenge tagChallenge : tagChallenges) {
+                boolean imEmpty = true;
+                for (String tagName : tagNames) {
+                    if (tagChallenge.getTag().getName().equals(tagName)) {
+                        imEmpty = false;
+                        break;
                     }
-                    if(imEmpty) {
-                        tagRepository.deleteById(tagChallenge.getTag().getId());
-                    }
-
+                }
+                if(imEmpty) {
+                    tagRepository.deleteById(tagChallenge.getTag().getId());
                 }
 
-                List<TagChallenge> tagChallengeList = new ArrayList<>();
-                for (String tagString : tagNames) {
-                    Tag tag = new Tag(tagString);
+            }
 
+            List<TagChallenge> tagChallengeList = new ArrayList<>();
+            for (String tagString : tagNames) {
+                Tag tag = new Tag(tagString);
+
+                if (!tagChallengeRepository.existsByChallengeAndTagName(challenge, tagString)) {
+                    tagRepository.save(tag);
                     TagChallenge newTagChallenge = TagChallenge.builder()
                             .challenge(challenge)
                             .tag(tag)
                             .build();
-                    if (!tagChallengeList.contains(newTagChallenge)) {
-                        if (!tagChallengeRepository.existsByChallengeAndTagName(challenge, tagString)) {
-                            tagRepository.save(tag);
-                            tagChallengeList.add(newTagChallenge);
-                            tagChallengeRepository.save(newTagChallenge);
-                        }
-                    } else {
-                        throw new DuplicateException("중복된 태그는 사용할 수 없습니다.");
-                    }
+                    tagChallengeList.add(newTagChallenge);
+                    tagChallengeRepository.save(newTagChallenge);
                 }
             }
 
