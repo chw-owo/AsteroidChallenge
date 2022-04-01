@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,9 @@ public class NoticeService {
     public ResponseEntity<List<NoticeResponseDto>> getNoticeList(PrincipalDetails principalDetails) {
         User user = principalDetails.getUser();
 
-        List<Notice> noticeList = noticeRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Notice> noticeList = noticeRepository.findAllByUserIdAndCreatedAtAfterOrderByCreatedAtDesc(user.getId(), now.minusWeeks(1));
         List<NoticeResponseDto> noticeResponseDtoList = new ArrayList<>();
 
         for (Notice notice : noticeList) {
