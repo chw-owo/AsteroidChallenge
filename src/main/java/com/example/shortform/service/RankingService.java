@@ -118,7 +118,8 @@ public class RankingService {
             rankDtos.add(rankingDto);
         }
 
-        User user = userRepository.findByEmail(principalDetails.getUser().getEmail()).orElseThrow(()->new NotFoundException("존재하지 않는 사용자입니다."));
+        User user = userRepository.findByEmail(principalDetails.getUser().getEmail())
+                .orElseThrow(()->new NotFoundException("존재하지 않는 사용자입니다."));
         RankingResponseDto rankingDto = new RankingResponseDto(user);
         rankDtos.add(rankingDto);
 
