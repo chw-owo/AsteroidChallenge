@@ -288,7 +288,7 @@ public class ChallengeService {
 
             int challengeDate = userChallengeCheckDate.get().getChallengeDate();
 
-            if((    !c.equals(challenge)&&
+            if((    !c.equals(challenge.get())&&
                     !userChallengeOptional.isPresent()) &&
                     (c.getMaxMember() > c.getCurrentMember()) &&
                     userChallengeCheckDate.get().getParticipateDate(challengeDate, c)
