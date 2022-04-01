@@ -164,21 +164,18 @@ public class ChallengeService {
     @Scheduled(cron = "0 0 0 * * *")
     public void saveReport(){
         List<Challenge> challenges = challengeRepository.findAll();
-        LocalDate yesterday = LocalDate.now().minusDays(1);
         LocalDate today = LocalDate.now();
         for(Challenge challenge : challenges){
-            AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, yesterday);
-            authChallengeRepository.save(authChallenge);
-            authChallenge.setAuthMember(0);
 
-            Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, today));
+            Optional<AuthChallenge> authChallengeTodayCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, today));
             AuthChallenge authChallengeToday;
 
-            if(!authChallengeCheck.isPresent()){
+            if(!authChallengeTodayCheck.isPresent()){
                 authChallengeToday = AuthChallenge.builder()
                         .challenge(challenge)
                         .date(today)
                         .currentMember(challenge.getCurrentMember())
+                        .authMember(0)
                         .build();
             }else{
                 authChallengeToday = authChallengeRepository.findByChallengeAndDate(challenge, today);
@@ -286,21 +283,23 @@ public class ChallengeService {
                 challengeImages.add(image.getFilePath());
             }
 
-            Optional<UserChallenge> userChallengeOptional = Optional.ofNullable(userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(), c.getId()));
-            Optional<UserChallenge> userChallengeCheckDate = Optional.ofNullable(userChallengeRepository.findByUserIdAndChallengeId(c.getUser().getId(), c.getId()));
+            Optional<UserChallenge> userChallengeOptional = Optional.ofNullable(userChallengeRepository.findByUserIdAndChallengeId(
+                    principalDetails.getUser().getId(), c.getId()));
+
+            Optional<UserChallenge> userChallengeCheckDate = Optional.ofNullable(userChallengeRepository.findByUserIdAndChallengeId(
+                    c.getUser().getId(), c.getId()));
+
             int challengeDate = userChallengeCheckDate.get().getChallengeDate();
 
             if((!userChallengeOptional.isPresent()) &&
                     (c.getMaxMember() > c.getCurrentMember()) &&
                     userChallengeCheckDate.get().getParticipateDate(challengeDate, c)
             ) {
-
                 String challengeStatus = challengeStatus(c);
                 ChallengesResponseDto responseDto = new ChallengesResponseDto(c, challengeImages);
                 responseDto.setStatus(challengeStatus);
                 challengesResponseDtos.add(responseDto);
                 cnt++;
-
             }
 
             if (cnt >= 5){
