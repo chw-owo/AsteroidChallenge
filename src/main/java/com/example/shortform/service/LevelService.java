@@ -33,7 +33,7 @@ public class LevelService {
         // 기존 레벨 경험치보다 유저 레벨 경험치가 많을 경우만 레벨 비교해주기
         if (user.getLevel().getExperiencePoint() < userPoint) {
             for (Level level : levelList) {
-                if (userPoint <= level.getExperiencePoint()) // 15 <= 15
+                if (userPoint >= level.getExperiencePoint()) // 15 <= 15
                     user.changeLevel(level);
             }
         }
