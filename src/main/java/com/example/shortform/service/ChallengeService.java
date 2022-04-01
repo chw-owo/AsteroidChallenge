@@ -18,7 +18,6 @@ import com.example.shortform.exception.*;
 import com.example.shortform.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -165,21 +164,18 @@ public class ChallengeService {
     @Scheduled(cron = "0 0 0 * * *")
     public void saveReport(){
         List<Challenge> challenges = challengeRepository.findAll();
-        LocalDate yesterday = LocalDate.now().minusDays(1);
         LocalDate today = LocalDate.now();
         for(Challenge challenge : challenges){
-            AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, yesterday);
-            authChallengeRepository.save(authChallenge);
-            authChallenge.setAuthMember(0);
 
-            Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, today));
+            Optional<AuthChallenge> authChallengeTodayCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, today));
             AuthChallenge authChallengeToday;
 
-            if(!authChallengeCheck.isPresent()){
+            if(!authChallengeTodayCheck.isPresent()){
                 authChallengeToday = AuthChallenge.builder()
                         .challenge(challenge)
                         .date(today)
                         .currentMember(challenge.getCurrentMember())
+                        .authMember(0)
                         .build();
             }else{
                 authChallengeToday = authChallengeRepository.findByChallengeAndDate(challenge, today);
@@ -250,10 +246,6 @@ public class ChallengeService {
     }
 
     public String challengeStatus(Challenge challenge) throws ParseException {
-//        Date now = new Date();
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-//        Date startDate = dateFormat.parse(challenge.getStartDate());
-//        Date endDate = dateFormat.parse(challenge.getEndDate());
 
         LocalDate now = LocalDate.now();
 
@@ -273,16 +265,6 @@ public class ChallengeService {
             challenge.setStatus(ChallengeStatus.SUCCESS);
             return "완료";
         }
-//        if(now.getTime() < startDate.getTime()){
-//            challenge.setStatus(ChallengeStatus.BEFORE);
-//            return "모집중";
-//        }else if (startDate.getTime() <= now.getTime() && now.getTime() <= endDate.getTime()){
-//            challenge.setStatus(ChallengeStatus.ING);
-//            return "진행중";
-//        }else{
-//            challenge.setStatus(ChallengeStatus.SUCCESS);
-//            return "완료";
-//        }
     }
 
     public ChallengePageResponseDto getChallenges(Pageable pageable) throws ParseException, InternalServerException {
@@ -308,6 +290,48 @@ public class ChallengeService {
                 .next(challengePage.hasNext())
                 .totalCnt(challengePage.getTotalElements()).build();
         return challengePageResponseDto;
+    }
+
+    public List<ChallengesResponseDto> recommendChallenges(Long challengeId, PrincipalDetails principalDetails) throws ParseException {
+        Optional<Challenge> challenge = challengeRepository.findById(challengeId);
+        Category category= challenge.get().getCategory();
+        List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(category.getId());
+        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
+        int cnt = 0;
+
+        for(Challenge c: challenges){
+
+            List<String> challengeImages = new ArrayList<>();
+            List<ImageFile> ImageFiles =  c.getChallengeImage();
+
+            for(ImageFile image:ImageFiles){
+                challengeImages.add(image.getFilePath());
+            }
+
+            Optional<UserChallenge> userChallengeOptional = Optional.ofNullable(userChallengeRepository.findByUserIdAndChallengeId(
+                    principalDetails.getUser().getId(), c.getId()));
+
+            Optional<UserChallenge> userChallengeCheckDate = Optional.ofNullable(userChallengeRepository.findByUserIdAndChallengeId(
+                    c.getUser().getId(), c.getId()));
+
+            int challengeDate = userChallengeCheckDate.get().getChallengeDate();
+
+            if((!userChallengeOptional.isPresent()) &&
+                    (c.getMaxMember() > c.getCurrentMember()) &&
+                    userChallengeCheckDate.get().getParticipateDate(challengeDate, c)
+            ) {
+                String challengeStatus = challengeStatus(c);
+                ChallengesResponseDto responseDto = new ChallengesResponseDto(c, challengeImages);
+                responseDto.setStatus(challengeStatus);
+                challengesResponseDtos.add(responseDto);
+                cnt++;
+            }
+
+            if (cnt >= 5){
+                break;
+            }
+        }
+        return challengesResponseDtos;
     }
 
     public ChallengeResponseDto getChallenge(Long challengeId) throws Exception, InternalServerException {
