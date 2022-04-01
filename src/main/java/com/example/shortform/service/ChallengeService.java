@@ -267,31 +267,6 @@ public class ChallengeService {
         }
     }
 
-    public ChallengePageResponseDto getChallenges(Pageable pageable) throws ParseException, InternalServerException {
-        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
-        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
-
-
-        for(Challenge challenge: challengePage){
-
-            List<String> challengeImages = new ArrayList<>();
-            List<ImageFile> ImageFiles =  challenge.getChallengeImage();
-
-            for(ImageFile image:ImageFiles){
-                challengeImages.add(image.getFilePath());
-            }
-            String challengeStatus = challengeStatus(challenge);
-            ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages, challengePage.hasNext());
-            responseDto.setStatus(challengeStatus);
-            challengesResponseDtos.add(responseDto);
-        }
-        ChallengePageResponseDto challengePageResponseDto = ChallengePageResponseDto.builder()
-                .challengeList(challengesResponseDtos)
-                .next(challengePage.hasNext())
-                .totalCnt(challengePage.getTotalElements()).build();
-        return challengePageResponseDto;
-    }
-
     public List<ChallengesResponseDto> recommendChallenges(Long challengeId, PrincipalDetails principalDetails) throws ParseException {
         Optional<Challenge> challenge = challengeRepository.findById(challengeId);
         Category category= challenge.get().getCategory();
@@ -358,31 +333,14 @@ public class ChallengeService {
         return challengeResponseDto;
     }
 
+    public ChallengePageResponseDto getChallenges(Pageable pageable) throws ParseException, InternalServerException {
+        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
+        return getChallengePageResponseDto(challengePage);
+    }
 
     public ChallengePageResponseDto getCategoryChallenge(Long categoryId, Pageable pageable) throws ParseException, InternalServerException {
         Page<Challenge> challengePage = challengeRepository.findAllByCategoryId(categoryId, pageable);
-        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
-
-        for(Challenge challenge: challengePage){
-            List<String> challengeImages = new ArrayList<>();
-            List<ImageFile> ImageFiles =  challenge.getChallengeImage();
-
-            for(ImageFile image:ImageFiles){
-                challengeImages.add(image.getFilePath());
-            }
-            String status = challengeStatus(challenge);
-
-            ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
-            responseDto.setStatus(status);
-            challengesResponseDtos.add(responseDto);
-        }
-        ChallengePageResponseDto challengePageResponseDto = ChallengePageResponseDto.builder()
-                .challengeList(challengesResponseDtos)
-                .next(challengePage.hasNext())
-                .totalCnt(challengePage.getTotalElements())
-                .build();
-
-        return challengePageResponseDto;
+        return getChallengePageResponseDto(challengePage);
     }
 
     public ChallengePageResponseDto getKeywordChallenge(String keyword, Pageable pageable) throws ParseException, InternalServerException {
@@ -395,7 +353,11 @@ public class ChallengeService {
                     .build();
         }
         Page<Challenge> challengePage = challengeRepository.searchList(searchKeyword, pageable);
-        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
+        return getChallengePageResponseDto(challengePage);
+    }
+
+    public ChallengePageResponseDto getChallengePageResponseDto(Page<Challenge> challengePage) throws ParseException {
+        List<ChallengesResponseDto> challengesResponseDtoList = new ArrayList<>();
 
         for (Challenge challenge : challengePage) {
             List<String> challengeImages = new ArrayList<>();
@@ -408,11 +370,11 @@ public class ChallengeService {
             String status = challengeStatus(challenge);
             ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
             responseDto.setStatus(status);
-            challengesResponseDtos.add(responseDto);
+            challengesResponseDtoList.add(responseDto);
 
         }
         ChallengePageResponseDto challengePageResponseDto = ChallengePageResponseDto.builder()
-                .challengeList(challengesResponseDtos)
+                .challengeList(challengesResponseDtoList)
                 .next(challengePage.hasNext())
                 .totalCnt(challengePage.getTotalElements())
                 .build();
