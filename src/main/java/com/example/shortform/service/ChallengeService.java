@@ -293,8 +293,8 @@ public class ChallengeService {
     }
 
     public List<ChallengesResponseDto> recommendChallenges(Long challengeId, PrincipalDetails principalDetails) throws ParseException {
-        Optional<Challenge> challenge = challengeRepository.findById(challengeId);
-        Category category= challenge.get().getCategory();
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()-> new NotFoundException("존재하지 않는 챌린지입니다.") );
+        Category category= challenge.getCategory();
         List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(category.getId());
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
         int cnt = 0;
@@ -316,7 +316,7 @@ public class ChallengeService {
 
             int challengeDate = userChallengeCheckDate.get().getChallengeDate();
 
-            if((    !c.equals(challenge.get())&&
+            if((    !c.equals(challenge)&&
                     !userChallengeOptional.isPresent()) &&
                     (c.getMaxMember() > c.getCurrentMember()) &&
                     userChallengeCheckDate.get().getParticipateDate(challengeDate, c)
