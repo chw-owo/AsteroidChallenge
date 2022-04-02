@@ -1,7 +1,6 @@
 package com.example.shortform.service;
 
 import com.example.shortform.domain.Tag;
-import com.example.shortform.dto.ResponseDto.TagResponseDto;
 import com.example.shortform.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

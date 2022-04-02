@@ -11,6 +11,7 @@ import com.example.shortform.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +25,7 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final ChallengeRepository challengeRepository;
 
+    @Transactional
     public ResponseEntity<List<NoticeResponseDto>> getNoticeList(PrincipalDetails principalDetails) {
         User user = principalDetails.getUser();
 
