@@ -73,7 +73,7 @@ public class Challenge extends Timestamped{
     @JoinColumn(name = "category_id", nullable =false)
     private Category category;
 
-    @OneToMany(mappedBy = "challenge")
+    @OneToMany(mappedBy = "challenge", cascade = CascadeType.REMOVE)
     private List<TagChallenge> tagChallenges = new ArrayList<>();
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
