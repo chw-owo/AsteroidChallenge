@@ -17,12 +17,12 @@ public class TagChallenge extends Timestamped{
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST})
-    @JoinColumn(name = "challenge_id")
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, optional = false)
+    @JoinColumn(name = "challenge_id", nullable = false)
     private Challenge challenge;
 
-    @ManyToOne
-    @JoinColumn(name = "tag_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tag_id", nullable = false)
     private Tag tag;
 
 

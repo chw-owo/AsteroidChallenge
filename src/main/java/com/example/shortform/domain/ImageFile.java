@@ -31,7 +31,7 @@ public class ImageFile {
     private Long fileSize;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 
