@@ -23,12 +23,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -64,8 +65,8 @@ public class ChallengeService {
 
     @Transactional
     public Long postChallenge(ChallengeRequestDto requestDto,
-                                              PrincipalDetails principal,
-                                            List<MultipartFile> multipartFiles) throws IOException, ParseException {
+                              PrincipalDetails principal,
+                              List<MultipartFile> multipartFiles) throws IOException, ParseException {
 
         // 카테고리 받아오기
         Category category = categoryRepository.findByName(requestDto.getCategory());
@@ -88,12 +89,9 @@ public class ChallengeService {
             tagRepository.save(tag);
 
             TagChallenge tagChallenge = new TagChallenge(challenge, tag);
-            if (!tagChallenges.contains(tagChallenge)) { // 한 게시물 내부의 중복태그 방지
-                tagChallenges.add(tagChallenge);
-                tagChallengeRepository.save(tagChallenge);
-            } else {
-                throw new DuplicateException("중복된 태그는 사용할 수 없습니다.");
-            }
+            tagChallenges.add(tagChallenge);
+            tagChallengeRepository.save(tagChallenge);
+
         }
 
         //User, UserChallenge 저장하기
@@ -157,54 +155,18 @@ public class ChallengeService {
             user.setNewbie(false);
             userRepository.save(user);
         }
+        LocalDate now = LocalDate.now();
+        saveReport(challenge, now);
 
         return challenge.getId();
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
-    public void saveReport(){
-        List<Challenge> challenges = challengeRepository.findAll();
-        LocalDate today = LocalDate.now();
-        for(Challenge challenge : challenges){
+    public void saveReport(Challenge challenge, LocalDate date){
 
-            AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, today)).orElse(
-                    AuthChallenge.builder()
-                            .challenge(challenge)
-                            .date(today)
-                            .currentMember(challenge.getCurrentMember())
-                            .authMember(0)
-                            .build()
-            );
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        int dayOfWeekNumber = dayOfWeek.getValue();
 
-
-            authChallenge.setCurrentMember(challenge.getCurrentMember());
-            authChallengeRepository.save(authChallenge);
-        }
-    }
-
-    public List<ReportResponseDto> getReport(Long challengeId, ReportRequestDto requestDto) throws ParseException {
-
-        List<ReportResponseDto> responseDtos = new ArrayList<>();
-        List<LocalDate> dateList = new ArrayList<>();
-        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()->new NotFoundException("존재하지 않는 챌린지입니다."));
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
-        LocalDate now = LocalDate.now();
-
-        Date startDate = format.parse(requestDto.getStartDate());
-        Calendar startCalendar = Calendar.getInstance();
-        startCalendar.setTime(startDate);   // calendar 구조체에 오늘 날짜를 저장함
-        startCalendar.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
-
-        for(int i =0; i<7; i++){
-            startCalendar.add(Calendar.DATE, 1);
-            LocalDate localDate = LocalDateTime.ofInstant(startCalendar.toInstant(), ZoneId.systemDefault()).toLocalDate();
-            localDate = localDate.minusDays(1);
-            dateList.add(localDate);
-        }
-
-        for (LocalDate date:dateList){
-
+        do {
             AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, date)).orElse(
                     AuthChallenge.builder()
                             .challenge(challenge)
@@ -213,27 +175,57 @@ public class ChallengeService {
                             .authMember(0)
                             .build()
             );
-
-
-            authChallenge.setCurrentMember(challenge.getCurrentMember());
+            if(dayOfWeekNumber == 7){
+                dayOfWeekNumber =1;
+            }else{
+                dayOfWeekNumber +=1;
+            }
+            date = date.plusDays(1);
             authChallengeRepository.save(authChallenge);
+        }
+        while(dayOfWeekNumber<7);
+
+    }
+
+    @Scheduled(cron = "0 0 0 * * 0")
+    public void saveWeeklyReport(){
+
+        List<Challenge> challenges = challengeRepository.findAll();
+        LocalDate now = LocalDate.now();
+
+        for(Challenge challenge : challenges){
+            saveReport(challenge, now);
+        }
+    }
+
+    public List<ReportResponseDto> getReport(Long challengeId, ReportRequestDto requestDto) throws ParseException {
+
+        List<ReportResponseDto> responseDtos = new ArrayList<>();
+
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()-> new NotFoundException("존재하지 않는 챌린지입니다."));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        LocalDate startDate = LocalDate.parse(requestDto.getStartDate(), formatter);
+        LocalDate now = LocalDate.now();
+
+        for(int i =0; i<7; i++) {
+            LocalDate date = startDate.plusDays(i);
+            AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, date);
 
             int division = 1;
             int divisor = 0;
-            double percentage_d = 0.0;
-            int percentage;
 
-           if(!date.isAfter(now)) {
-            division = authChallenge.getCurrentMember();
-            divisor = authChallenge.getAuthMember();
+            if (date.isBefore(now) || date.isEqual(now)) {
+                division = authChallenge.getCurrentMember();
+                divisor = authChallenge.getAuthMember();
             }
 
-            percentage_d = ( (double) divisor / (double) division ) * 100.0;
-            percentage = (int) percentage_d;
+            int percentage = (int)(((double) divisor / (double) division) * 100.0);
 
             ReportResponseDto responseDto = ReportResponseDto.builder().date(date.toString()).percentage(percentage).build();
             responseDtos.add(responseDto);
         }
+
         return responseDtos;
     }
 
@@ -257,31 +249,6 @@ public class ChallengeService {
             challenge.setStatus(ChallengeStatus.SUCCESS);
             return "완료";
         }
-    }
-
-    public ChallengePageResponseDto getChallenges(Pageable pageable) throws ParseException, InternalServerException {
-        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
-        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
-
-
-        for(Challenge challenge: challengePage){
-
-            List<String> challengeImages = new ArrayList<>();
-            List<ImageFile> ImageFiles =  challenge.getChallengeImage();
-
-            for(ImageFile image:ImageFiles){
-                challengeImages.add(image.getFilePath());
-            }
-            String challengeStatus = challengeStatus(challenge);
-            ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages, challengePage.hasNext());
-            responseDto.setStatus(challengeStatus);
-            challengesResponseDtos.add(responseDto);
-        }
-        ChallengePageResponseDto challengePageResponseDto = ChallengePageResponseDto.builder()
-                .challengeList(challengesResponseDtos)
-                .next(challengePage.hasNext())
-                .totalCnt(challengePage.getTotalElements()).build();
-        return challengePageResponseDto;
     }
 
     public List<ChallengesResponseDto> recommendChallenges(Long challengeId, PrincipalDetails principalDetails) throws ParseException {
@@ -351,31 +318,14 @@ public class ChallengeService {
         return challengeResponseDto;
     }
 
+    public ChallengePageResponseDto getChallenges(Pageable pageable) throws ParseException, InternalServerException {
+        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
+        return getChallengePageResponseDto(challengePage);
+    }
 
     public ChallengePageResponseDto getCategoryChallenge(Long categoryId, Pageable pageable) throws ParseException, InternalServerException {
         Page<Challenge> challengePage = challengeRepository.findAllByCategoryId(categoryId, pageable);
-        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
-
-        for(Challenge challenge: challengePage){
-            List<String> challengeImages = new ArrayList<>();
-            List<ImageFile> ImageFiles =  challenge.getChallengeImage();
-
-            for(ImageFile image:ImageFiles){
-                challengeImages.add(image.getFilePath());
-            }
-            String status = challengeStatus(challenge);
-
-            ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
-            responseDto.setStatus(status);
-            challengesResponseDtos.add(responseDto);
-        }
-        ChallengePageResponseDto challengePageResponseDto = ChallengePageResponseDto.builder()
-                .challengeList(challengesResponseDtos)
-                .next(challengePage.hasNext())
-                .totalCnt(challengePage.getTotalElements())
-                .build();
-
-        return challengePageResponseDto;
+        return getChallengePageResponseDto(challengePage);
     }
 
     public ChallengePageResponseDto getKeywordChallenge(String keyword, Pageable pageable) throws ParseException, InternalServerException {
@@ -388,7 +338,11 @@ public class ChallengeService {
                     .build();
         }
         Page<Challenge> challengePage = challengeRepository.searchList(searchKeyword, pageable);
-        List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
+        return getChallengePageResponseDto(challengePage);
+    }
+
+    public ChallengePageResponseDto getChallengePageResponseDto(Page<Challenge> challengePage) throws ParseException {
+        List<ChallengesResponseDto> challengesResponseDtoList = new ArrayList<>();
 
         for (Challenge challenge : challengePage) {
             List<String> challengeImages = new ArrayList<>();
@@ -401,11 +355,11 @@ public class ChallengeService {
             String status = challengeStatus(challenge);
             ChallengesResponseDto responseDto = new ChallengesResponseDto(challenge, challengeImages);
             responseDto.setStatus(status);
-            challengesResponseDtos.add(responseDto);
+            challengesResponseDtoList.add(responseDto);
 
         }
         ChallengePageResponseDto challengePageResponseDto = ChallengePageResponseDto.builder()
-                .challengeList(challengesResponseDtos)
+                .challengeList(challengesResponseDtoList)
                 .next(challengePage.hasNext())
                 .totalCnt(challengePage.getTotalElements())
                 .build();
@@ -512,38 +466,32 @@ public class ChallengeService {
             List<TagChallenge> tagChallenges = tagChallengeRepository.findAllByChallenge(challenge);
             List<String> tagNames = requestDto.getTagName();
 
-            if (requestDto.getTagName() != null) {
-                for (TagChallenge tagChallenge : tagChallenges) {
-                    boolean imEmpty = true;
-                    for (String tagName : tagNames) {
-                        if (tagChallenge.getTag().getName().equals(tagName)) {
-                            imEmpty = false;
-                            break;
-                        }
+            for (TagChallenge tagChallenge : tagChallenges) {
+                boolean imEmpty = true;
+                for (String tagName : tagNames) {
+                    if (tagChallenge.getTag().getName().equals(tagName)) {
+                        imEmpty = false;
+                        break;
                     }
-                    if(imEmpty) {
-                        tagRepository.deleteById(tagChallenge.getTag().getId());
-                    }
-
+                }
+                if(imEmpty) {
+                    tagRepository.deleteById(tagChallenge.getTag().getId());
                 }
 
-                List<TagChallenge> tagChallengeList = new ArrayList<>();
-                for (String tagString : tagNames) {
-                    Tag tag = new Tag(tagString);
+            }
 
+            List<TagChallenge> tagChallengeList = new ArrayList<>();
+            for (String tagString : tagNames) {
+                Tag tag = new Tag(tagString);
+
+                if (!tagChallengeRepository.existsByChallengeAndTagName(challenge, tagString)) {
+                    tagRepository.save(tag);
                     TagChallenge newTagChallenge = TagChallenge.builder()
                             .challenge(challenge)
                             .tag(tag)
                             .build();
-                    if (!tagChallengeList.contains(newTagChallenge)) {
-                        if (!tagChallengeRepository.existsByChallengeAndTagName(challenge, tagString)) {
-                            tagRepository.save(tag);
-                            tagChallengeList.add(newTagChallenge);
-                            tagChallengeRepository.save(newTagChallenge);
-                        }
-                    } else {
-                        throw new DuplicateException("중복된 태그는 사용할 수 없습니다.");
-                    }
+                    tagChallengeList.add(newTagChallenge);
+                    tagChallengeRepository.save(newTagChallenge);
                 }
             }
 
@@ -639,7 +587,7 @@ public class ChallengeService {
             List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
             challenge.setCurrentMember(userChallenges.size());
             challengeRepository.save(challenge);
-          
+
         } else {
             throw new InvalidException("비밀번호가 틀렸습니다");
         }
@@ -679,6 +627,7 @@ public class ChallengeService {
         }
     }
 
+    @Transactional
     public ResponseEntity<CMResponseDto> deleteChallenge(Long challengeId, PrincipalDetails principalDetails) throws ParseException {
 
         Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
@@ -707,7 +656,7 @@ public class ChallengeService {
         return ResponseEntity.ok(new CMResponseDto("true"));
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public ResponseEntity<List<UserChallengeInfo>> getUserChallenge(Long userId) throws ParseException {
         User findUser = userRepository.findUserInfo(userId).orElseThrow(
                 () -> new NotFoundException("존재하지 않는 유저입니다.")
