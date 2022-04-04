@@ -32,12 +32,12 @@ public class ChatMessage extends Timestamped{
     @Enumerated(EnumType.STRING)
     private MessageType type;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "chat_room_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "chat_room_id", nullable = false)
     private ChatRoom chatRoom;
 
     @Column(name = "room_id", nullable = false)

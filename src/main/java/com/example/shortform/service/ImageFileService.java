@@ -5,18 +5,14 @@ import com.example.shortform.domain.ImageFile;
 import com.example.shortform.domain.Post;
 import com.example.shortform.dto.RequestDto.ImageFileRequestDto;
 import com.example.shortform.exception.FileUploadException;
-import com.example.shortform.dto.request.ChallengeModifyRequestDto;
 import com.example.shortform.repository.ImageFileRepository;
 import com.example.shortform.util.S3Uploader;
-import org.apache.tomcat.util.http.fileupload.FileUploadBase;
-import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +59,7 @@ public class ImageFileService {
     }
 
 
+    @Transactional
     public ImageFile upload(MultipartFile multipartFile, Challenge challenge) throws IOException {
 
         String originalFileName = multipartFile.getOriginalFilename();
@@ -80,6 +77,7 @@ public class ImageFileService {
         return challengeImage;
     }
 
+    @Transactional
     public ImageFile upload(MultipartFile multipartFile, Post post) throws IOException {
 
         String originalFileName = multipartFile.getOriginalFilename();

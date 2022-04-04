@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
-    List<Notice> findAllByUserIdOrderByCreatedAtDesc(Long id);
+    List<Notice> findAllByUserIdAndCreatedAtAfterOrderByCreatedAtDesc(Long id, LocalDateTime now);
 
     boolean existsByUserIdAndNoticeLevel(Long id, Long id1);
 

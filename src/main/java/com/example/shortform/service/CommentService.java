@@ -13,6 +13,7 @@ import com.example.shortform.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CommentService {
@@ -25,6 +26,7 @@ public class CommentService {
         this.postRepository = postRepository;
     }
 
+    @Transactional
     public ResponseEntity<CommentIdResponseDto> writeComment(Long postId, CommentRequestDto requestDto, PrincipalDetails principalDetails) {
         // postId를 사용해 DB에서 인증 게시글 조회
         Post post = postRepository.findById(postId).orElseThrow(
@@ -37,7 +39,7 @@ public class CommentService {
         return ResponseEntity.ok(comment.toPKResponse());
     }
 
-
+    @Transactional
     public void deleteComment(Long commentId, PrincipalDetails principalDetails) {
         // commentID를 이용해 DB에서 댓글 조회
         Comment comment = commentRepository.findById(commentId).orElseThrow(

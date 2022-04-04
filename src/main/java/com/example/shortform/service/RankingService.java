@@ -1,10 +1,8 @@
 package com.example.shortform.service;
 
 import com.example.shortform.config.auth.PrincipalDetails;
-import com.example.shortform.domain.Ranking;
 import com.example.shortform.domain.User;
 import com.example.shortform.domain.UserChallenge;
-import com.example.shortform.dto.RequestDto.RankingRequestDto;
 import com.example.shortform.dto.ResponseDto.RankingResponseDto;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.RankingRepository;
@@ -12,13 +10,9 @@ import com.example.shortform.repository.UserChallengeRepository;
 import com.example.shortform.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.table.TableCellEditor;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -75,6 +69,7 @@ public class RankingService {
     }
 
     //새로 가입한 유저의 랭킹 매기기
+    @Transactional
     public void updateRank(User user) {
         List<User> users = userRepository.findAllByOrderByRankingPointDesc();
 
