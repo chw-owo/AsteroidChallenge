@@ -167,22 +167,18 @@ public class ChallengeService {
         LocalDate today = LocalDate.now();
         for(Challenge challenge : challenges){
 
-            Optional<AuthChallenge> authChallengeTodayCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, today));
-            AuthChallenge authChallengeToday;
+            AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, today)).orElse(
+                    AuthChallenge.builder()
+                            .challenge(challenge)
+                            .date(today)
+                            .currentMember(challenge.getCurrentMember())
+                            .authMember(0)
+                            .build()
+            );
 
-            if(!authChallengeTodayCheck.isPresent()){
-                authChallengeToday = AuthChallenge.builder()
-                        .challenge(challenge)
-                        .date(today)
-                        .currentMember(challenge.getCurrentMember())
-                        .authMember(0)
-                        .build();
-            }else{
-                authChallengeToday = authChallengeRepository.findByChallengeAndDate(challenge, today);
-            }
 
-            authChallengeToday.setCurrentMember(challenge.getCurrentMember());
-            authChallengeRepository.save(authChallengeToday);
+            authChallenge.setCurrentMember(challenge.getCurrentMember());
+            authChallengeRepository.save(authChallenge);
         }
     }
 
@@ -209,20 +205,17 @@ public class ChallengeService {
 
         for (LocalDate date:dateList){
 
-            Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, date));
-            AuthChallenge authChallenge;
+            AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, date)).orElse(
+                    AuthChallenge.builder()
+                            .challenge(challenge)
+                            .date(date)
+                            .currentMember(challenge.getCurrentMember())
+                            .authMember(0)
+                            .build()
+            );
 
-            if(!authChallengeCheck.isPresent()){
-                authChallenge = AuthChallenge.builder()
-                        .challenge(challenge)
-                        .date(date)
-                        .currentMember(challenge.getCurrentMember())
-                        .build();
-            }else{
-                authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, date);
-            }
 
-            //authChallenge.setCurrentMember(challenge.getCurrentMember());
+            authChallenge.setCurrentMember(challenge.getCurrentMember());
             authChallengeRepository.save(authChallenge);
 
             int division = 1;
@@ -231,7 +224,6 @@ public class ChallengeService {
             int percentage;
 
            if(!date.isAfter(now)) {
-            //authChallenge.setCurrentMember(challenge.getCurrentMember());
             division = authChallenge.getCurrentMember();
             divisor = authChallenge.getAuthMember();
             }
