@@ -25,12 +25,12 @@ public class Post extends Timestamped{
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "challenge_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "challenge_id", nullable = false)
     private Challenge challenge;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "post", orphanRemoval = true)
