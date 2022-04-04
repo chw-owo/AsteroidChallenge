@@ -69,11 +69,11 @@ public class Challenge extends Timestamped{
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)
     private List<AuthChallenge> authChallenges = new ArrayList<>();
 
-    @ManyToOne(cascade = CascadeType.MERGE, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE, optional = false)
     @JoinColumn(name = "category_id", nullable =false)
     private Category category;
 
-    @OneToMany(mappedBy = "challenge", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "challenge", cascade = CascadeType.REMOVE)
     private List<TagChallenge> tagChallenges = new ArrayList<>();
 
     @OneToMany(mappedBy = "challenge", orphanRemoval = true)

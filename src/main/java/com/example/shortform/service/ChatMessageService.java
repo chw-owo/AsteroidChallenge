@@ -6,7 +6,6 @@ import com.example.shortform.domain.User;
 import com.example.shortform.domain.UserChatRoom;
 import com.example.shortform.dto.request.ChatMessageRequestDto;
 import com.example.shortform.dto.resonse.ChatMessageResponseDto;
-import com.example.shortform.dto.resonse.CommentResponseDto;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.ChatMessageRepository;
 import com.example.shortform.repository.ChatRoomRepository;
@@ -16,12 +15,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -68,12 +65,9 @@ public class ChatMessageService {
     public ChatMessageResponseDto save(ChatMessageRequestDto requestDto, User user) {
 
         // 메세지 생성 시간 삽입
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-        Calendar cal = Calendar.getInstance();
-        Date date = cal.getTime();
-        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-        String dateResult = sdf.format(date);
-        requestDto.setCreatedAt(dateResult);
+        LocalDateTime now = LocalDateTime.now();
+        String create = now.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
+        requestDto.setCreatedAt(create);
 
         // roomId를 이용해 채팅 방 유무 확인
         ChatRoom chatRoom = chatRoomRepository.findById(Long.valueOf(requestDto.getRoomId())).orElseThrow(
@@ -96,19 +90,11 @@ public class ChatMessageService {
         // 아닐 경우는 DB에 저장하지 않고 responseDto 변환
         if (ChatMessage.MessageType.TALK.equals(requestDto.getType())) {
             ChatMessage chatMessage = chatMessageRepository.save(requestDto.toEntity(user, chatRoom));
-            responseDto = chatMessage.toResponse(chatMessage.getCreatedAt().toString());
+            String createAt = chatMessage.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
+            responseDto = chatMessage.toResponse(createAt);
         } else {
             responseDto = requestDto.toMessageResponse(user.toChatMemberResponse());
         }
-
-        // 프론트에서 사용하기 편하게 날짜 형식 변경
-        String createdAt = responseDto.getCreatedAt();
-        String year = createdAt.substring(0,4) + ".";
-        String month = createdAt.substring(5,7) + ".";
-        String day = createdAt.substring(8,10) + " ";
-        String time = createdAt.substring(11,19);
-        createdAt = year + month + day + time;
-        responseDto.setCreatedAt(createdAt);
 
         return responseDto;
 

@@ -13,9 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
 
@@ -168,7 +168,13 @@ public class PostService {
         postRepository.deleteById(postId);
         // // 해당 게시글에 인증삭제하면 당일 인증여부 체크
         UserChallenge userChallenge = userChallengeRepository.findByUserIdAndChallengeId(principalDetails.getUser().getId(), post.getChallenge().getId());
-        userChallenge.setDailyAuthenticated(false);
+
+        LocalDate now = LocalDate.now();
+
+        // 과거 인증 게시글 삭제할 경우 dailyAuthenticated는 그대로
+        if (now.isEqual(post.getCreatedAt().toLocalDate()))
+            userChallenge.setDailyAuthenticated(false);
+
         userChallenge.setAuthCount(userChallenge.getAuthCount() - 1);
 
         //for Report, 퍼센테이지 업데이트====================================================

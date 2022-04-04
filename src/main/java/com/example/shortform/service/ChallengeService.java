@@ -473,6 +473,7 @@ public class ChallengeService {
                         imEmpty = false;
                         break;
                     }
+
                 }
                 if(imEmpty) {
                     tagRepository.deleteById(tagChallenge.getTag().getId());
@@ -480,9 +481,11 @@ public class ChallengeService {
 
             }
 
+
             List<TagChallenge> tagChallengeList = new ArrayList<>();
             for (String tagString : tagNames) {
                 Tag tag = new Tag(tagString);
+
 
                 if (!tagChallengeRepository.existsByChallengeAndTagName(challenge, tagString)) {
                     tagRepository.save(tag);

@@ -11,7 +11,9 @@ import com.example.shortform.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +25,13 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final ChallengeRepository challengeRepository;
 
+    @Transactional
     public ResponseEntity<List<NoticeResponseDto>> getNoticeList(PrincipalDetails principalDetails) {
         User user = principalDetails.getUser();
 
-        List<Notice> noticeList = noticeRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Notice> noticeList = noticeRepository.findAllByUserIdAndCreatedAtAfterOrderByCreatedAtDesc(user.getId(), now.minusWeeks(1));
         List<NoticeResponseDto> noticeResponseDtoList = new ArrayList<>();
 
         for (Notice notice : noticeList) {
