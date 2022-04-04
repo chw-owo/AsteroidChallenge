@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -64,8 +65,8 @@ public class ChallengeService {
 
     @Transactional
     public Long postChallenge(ChallengeRequestDto requestDto,
-                                              PrincipalDetails principal,
-                                            List<MultipartFile> multipartFiles) throws IOException, ParseException {
+                              PrincipalDetails principal,
+                              List<MultipartFile> multipartFiles) throws IOException, ParseException {
 
         // 카테고리 받아오기
         Category category = categoryRepository.findByName(requestDto.getCategory());
@@ -154,54 +155,18 @@ public class ChallengeService {
             user.setNewbie(false);
             userRepository.save(user);
         }
+        LocalDate now = LocalDate.now();
+        saveReport(challenge, now);
 
         return challenge.getId();
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
-    public void saveReport(){
-        List<Challenge> challenges = challengeRepository.findAll();
-        LocalDate today = LocalDate.now();
-        for(Challenge challenge : challenges){
+    public void saveReport(Challenge challenge, LocalDate date){
 
-            AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, today)).orElse(
-                    AuthChallenge.builder()
-                            .challenge(challenge)
-                            .date(today)
-                            .currentMember(challenge.getCurrentMember())
-                            .authMember(0)
-                            .build()
-            );
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        int dayOfWeekNumber = dayOfWeek.getValue();
 
-
-            authChallenge.setCurrentMember(challenge.getCurrentMember());
-            authChallengeRepository.save(authChallenge);
-        }
-    }
-
-    public List<ReportResponseDto> getReport(Long challengeId, ReportRequestDto requestDto) throws ParseException {
-
-        List<ReportResponseDto> responseDtos = new ArrayList<>();
-        List<LocalDate> dateList = new ArrayList<>();
-        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()->new NotFoundException("존재하지 않는 챌린지입니다."));
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
-        LocalDate now = LocalDate.now();
-
-        Date startDate = format.parse(requestDto.getStartDate());
-        Calendar startCalendar = Calendar.getInstance();
-        startCalendar.setTime(startDate);   // calendar 구조체에 오늘 날짜를 저장함
-        startCalendar.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
-
-        for(int i =0; i<7; i++){
-            startCalendar.add(Calendar.DATE, 1);
-            LocalDate localDate = LocalDateTime.ofInstant(startCalendar.toInstant(), ZoneId.systemDefault()).toLocalDate();
-            localDate = localDate.minusDays(1);
-            dateList.add(localDate);
-        }
-
-        for (LocalDate date:dateList){
-
+        do {
             AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, date)).orElse(
                     AuthChallenge.builder()
                             .challenge(challenge)
@@ -210,27 +175,57 @@ public class ChallengeService {
                             .authMember(0)
                             .build()
             );
-
-
-            authChallenge.setCurrentMember(challenge.getCurrentMember());
+            if(dayOfWeekNumber == 7){
+                dayOfWeekNumber =1;
+            }else{
+                dayOfWeekNumber +=1;
+            }
+            date = date.plusDays(1);
             authChallengeRepository.save(authChallenge);
+        }
+        while(dayOfWeekNumber<7);
+
+    }
+
+    @Scheduled(cron = "0 0 0 * * 0")
+    public void saveWeeklyReport(){
+
+        List<Challenge> challenges = challengeRepository.findAll();
+        LocalDate now = LocalDate.now();
+
+        for(Challenge challenge : challenges){
+            saveReport(challenge, now);
+        }
+    }
+
+    public List<ReportResponseDto> getReport(Long challengeId, ReportRequestDto requestDto) throws ParseException {
+
+        List<ReportResponseDto> responseDtos = new ArrayList<>();
+
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()-> new NotFoundException("존재하지 않는 챌린지입니다."));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        LocalDate startDate = LocalDate.parse(requestDto.getStartDate(), formatter);
+        LocalDate now = LocalDate.now();
+
+        for(int i =0; i<7; i++) {
+            LocalDate date = startDate.plusDays(i);
+            AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, date);
 
             int division = 1;
             int divisor = 0;
-            double percentage_d = 0.0;
-            int percentage;
 
-           if(!date.isAfter(now)) {
-            division = authChallenge.getCurrentMember();
-            divisor = authChallenge.getAuthMember();
+            if (date.isBefore(now) || date.isEqual(now)) {
+                division = authChallenge.getCurrentMember();
+                divisor = authChallenge.getAuthMember();
             }
 
-            percentage_d = ( (double) divisor / (double) division ) * 100.0;
-            percentage = (int) percentage_d;
+            int percentage = (int)(((double) divisor / (double) division) * 100.0);
 
             ReportResponseDto responseDto = ReportResponseDto.builder().date(date.toString()).percentage(percentage).build();
             responseDtos.add(responseDto);
         }
+
         return responseDtos;
     }
 
@@ -478,6 +473,7 @@ public class ChallengeService {
                         imEmpty = false;
                         break;
                     }
+
                 }
                 if(imEmpty) {
                     tagRepository.deleteById(tagChallenge.getTag().getId());
@@ -485,9 +481,11 @@ public class ChallengeService {
 
             }
 
+
             List<TagChallenge> tagChallengeList = new ArrayList<>();
             for (String tagString : tagNames) {
                 Tag tag = new Tag(tagString);
+
 
                 if (!tagChallengeRepository.existsByChallengeAndTagName(challenge, tagString)) {
                     tagRepository.save(tag);
@@ -592,7 +590,7 @@ public class ChallengeService {
             List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
             challenge.setCurrentMember(userChallenges.size());
             challengeRepository.save(challenge);
-          
+
         } else {
             throw new InvalidException("비밀번호가 틀렸습니다");
         }
