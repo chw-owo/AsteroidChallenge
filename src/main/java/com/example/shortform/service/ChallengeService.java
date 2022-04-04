@@ -447,19 +447,15 @@ public class ChallengeService {
         // update percentage of report - plus currentMember
         // 현재 진행 중이라면 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
         LocalDate now = LocalDate.now();
-        Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, now));
-        AuthChallenge authChallenge;
+        AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, now)).orElse(
+                AuthChallenge.builder()
+                        .challenge(challenge)
+                        .date(now)
+                        .currentMember(challenge.getCurrentMember())
+                        .authMember(0)
+                        .build()
+        );
 
-        if(!authChallengeCheck.isPresent()){
-            authChallenge = AuthChallenge.builder()
-                    .challenge(challenge)
-                    .date(now)
-                    .currentMember(challenge.getCurrentMember())
-                    .build();
-            authChallengeRepository.save(authChallenge);
-        }else{
-            authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
-        }
 
         authChallenge.setCurrentMember(challenge.getCurrentMember());
         authChallengeRepository.save(authChallenge);
