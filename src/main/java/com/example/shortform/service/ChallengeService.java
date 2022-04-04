@@ -164,22 +164,18 @@ public class ChallengeService {
         LocalDate today = LocalDate.now();
         for(Challenge challenge : challenges){
 
-            Optional<AuthChallenge> authChallengeTodayCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, today));
-            AuthChallenge authChallengeToday;
+            AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, today)).orElse(
+                    AuthChallenge.builder()
+                            .challenge(challenge)
+                            .date(today)
+                            .currentMember(challenge.getCurrentMember())
+                            .authMember(0)
+                            .build()
+            );
 
-            if(!authChallengeTodayCheck.isPresent()){
-                authChallengeToday = AuthChallenge.builder()
-                        .challenge(challenge)
-                        .date(today)
-                        .currentMember(challenge.getCurrentMember())
-                        .authMember(0)
-                        .build();
-            }else{
-                authChallengeToday = authChallengeRepository.findByChallengeAndDate(challenge, today);
-            }
 
-            authChallengeToday.setCurrentMember(challenge.getCurrentMember());
-            authChallengeRepository.save(authChallengeToday);
+            authChallenge.setCurrentMember(challenge.getCurrentMember());
+            authChallengeRepository.save(authChallenge);
         }
     }
 
@@ -206,20 +202,17 @@ public class ChallengeService {
 
         for (LocalDate date:dateList){
 
-            Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, date));
-            AuthChallenge authChallenge;
+            AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, date)).orElse(
+                    AuthChallenge.builder()
+                            .challenge(challenge)
+                            .date(date)
+                            .currentMember(challenge.getCurrentMember())
+                            .authMember(0)
+                            .build()
+            );
 
-            if(!authChallengeCheck.isPresent()){
-                authChallenge = AuthChallenge.builder()
-                        .challenge(challenge)
-                        .date(date)
-                        .currentMember(challenge.getCurrentMember())
-                        .build();
-            }else{
-                authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, date);
-            }
 
-            //authChallenge.setCurrentMember(challenge.getCurrentMember());
+            authChallenge.setCurrentMember(challenge.getCurrentMember());
             authChallengeRepository.save(authChallenge);
 
             int division = 1;
@@ -228,7 +221,6 @@ public class ChallengeService {
             int percentage;
 
            if(!date.isAfter(now)) {
-            //authChallenge.setCurrentMember(challenge.getCurrentMember());
             division = authChallenge.getCurrentMember();
             divisor = authChallenge.getAuthMember();
             }
@@ -265,8 +257,8 @@ public class ChallengeService {
     }
 
     public List<ChallengesResponseDto> recommendChallenges(Long challengeId, PrincipalDetails principalDetails) throws ParseException {
-        Optional<Challenge> challenge = challengeRepository.findById(challengeId);
-        Category category= challenge.get().getCategory();
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()-> new NotFoundException("존재하지 않는 챌린지입니다.") );
+        Category category= challenge.getCategory();
         List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(category.getId());
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
         int cnt = 0;
@@ -288,7 +280,7 @@ public class ChallengeService {
 
             int challengeDate = userChallengeCheckDate.get().getChallengeDate();
 
-            if((    !c.equals(challenge.get())&&
+            if((    !c.equals(challenge)&&
                     !userChallengeOptional.isPresent()) &&
                     (c.getMaxMember() > c.getCurrentMember()) &&
                     userChallengeCheckDate.get().getParticipateDate(challengeDate, c)
@@ -414,19 +406,15 @@ public class ChallengeService {
         // update percentage of report - plus currentMember
         // 현재 진행 중이라면 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
         LocalDate now = LocalDate.now();
-        Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, now));
-        AuthChallenge authChallenge;
+        AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, now)).orElse(
+                AuthChallenge.builder()
+                        .challenge(challenge)
+                        .date(now)
+                        .currentMember(challenge.getCurrentMember())
+                        .authMember(0)
+                        .build()
+        );
 
-        if(!authChallengeCheck.isPresent()){
-            authChallenge = AuthChallenge.builder()
-                    .challenge(challenge)
-                    .date(now)
-                    .currentMember(challenge.getCurrentMember())
-                    .build();
-            authChallengeRepository.save(authChallenge);
-        }else{
-            authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
-        }
 
         authChallenge.setCurrentMember(challenge.getCurrentMember());
         authChallengeRepository.save(authChallenge);
