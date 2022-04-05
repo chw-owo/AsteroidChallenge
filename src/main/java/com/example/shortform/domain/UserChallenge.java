@@ -99,4 +99,8 @@ public class UserChallenge extends Timestamped{
 
     }
 
+    public boolean isSuccessChallenge() {
+        // 성공일수(챌린지 진행일 * 0.8) > 인증횟수
+        return (int)Math.ceil(this.getChallengeDate() * 0.8) < this.getAuthCount();
+    }
 }
