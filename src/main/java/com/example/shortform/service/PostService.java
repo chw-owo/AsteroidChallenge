@@ -109,26 +109,12 @@ public class PostService {
         boolean isLevelUp = levelService.checkLevelPoint(user);
 
         // 인증 게시글 작성 후 point 증가 알림
-        Notice notice = Notice.builder()
-                .noticeType(Notice.NoticeType.WRITE)
-                .is_read(false)
-                .user(user)
-                .challengeId(challenge.getId())
-                .roomId(challenge.getChatRoom().getId())
-                .increasePoint(1)
-                .postId(post.getId())
-                .build();
-
+        Notice notice = new Notice(user, challenge, post, 1);
         noticeRepository.save(notice);
 
         // 챌린지 종료 날 인증 시 다른 챌린지 추천
         if (challenge.getEndDate().equals(today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
-            Notice recommendNotice = Notice.builder()
-                    .noticeType(Notice.NoticeType.RECOMMEND)
-                    .is_read(false)
-                    .user(user)
-                    .build();
-
+            Notice recommendNotice = new Notice(user);
             noticeRepository.save(recommendNotice);
         }
 
@@ -219,7 +205,6 @@ public class PostService {
         // DB에서 챌린지의 모든 인증게시글 조회
         Page<Post> postPage = postRepository.findAllByChallengeId(challengeId, postPageable);
         List<PostResponseDto> responseDtoList = new ArrayList<>();
-
 
         for (Post post : postPage) {
             List<CommentResponseDto> commentDetailList = new ArrayList<>();

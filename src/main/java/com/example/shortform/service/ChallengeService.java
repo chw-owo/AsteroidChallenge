@@ -143,13 +143,7 @@ public class ChallengeService {
         challengeRepository.save(challenge);
 
         if (user.isNewbie()) {
-            Notice notice = Notice.builder()
-                    .noticeType(Notice.NoticeType.FIRST)
-                    .is_read(false)
-                    .increasePoint(5)
-                    .user(user)
-                    .build();
-
+            Notice notice = new Notice(user, 5);
             noticeRepository.save(notice);
             user.setRankingPoint(user.getRankingPoint() + 5);
             user.setNewbie(false);
@@ -415,13 +409,7 @@ public class ChallengeService {
         authChallengeRepository.save(authChallenge);
 
         if (user.isNewbie()) {
-            Notice notice = Notice.builder()
-                    .noticeType(Notice.NoticeType.FIRST)
-                    .is_read(false)
-                    .increasePoint(5)
-                    .user(user)
-                    .build();
-
+            Notice notice = new Notice(user, 5);
             noticeRepository.save(notice);
             user.setRankingPoint(user.getRankingPoint() + 5);
             user.setNewbie(false);
@@ -616,13 +604,7 @@ public class ChallengeService {
         authChallengeRepository.save(authChallenge);
 
         if (user.isNewbie()) {
-            Notice notice = Notice.builder()
-                    .noticeType(Notice.NoticeType.FIRST)
-                    .is_read(false)
-                    .increasePoint(5)
-                    .user(user)
-                    .build();
-
+            Notice notice = new Notice(user, 5);
             noticeRepository.save(notice);
             user.setRankingPoint(user.getRankingPoint() + 5);
             user.setNewbie(false);
