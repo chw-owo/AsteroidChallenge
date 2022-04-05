@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -64,8 +65,8 @@ public class ChallengeService {
 
     @Transactional
     public Long postChallenge(ChallengeRequestDto requestDto,
-                                              PrincipalDetails principal,
-                                            List<MultipartFile> multipartFiles) throws IOException, ParseException {
+                              PrincipalDetails principal,
+                              List<MultipartFile> multipartFiles) throws IOException, ParseException {
 
         // 카테고리 받아오기
         Category category = categoryRepository.findByName(requestDto.getCategory());
@@ -154,91 +155,77 @@ public class ChallengeService {
             user.setNewbie(false);
             userRepository.save(user);
         }
+        LocalDate now = LocalDate.now();
+        saveReport(challenge, now);
 
         return challenge.getId();
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
-    public void saveReport(){
-        List<Challenge> challenges = challengeRepository.findAll();
-        LocalDate today = LocalDate.now();
-        for(Challenge challenge : challenges){
+    public void saveReport(Challenge challenge, LocalDate date){
 
-            Optional<AuthChallenge> authChallengeTodayCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, today));
-            AuthChallenge authChallengeToday;
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        int dayOfWeekNumber = dayOfWeek.getValue();
 
-            if(!authChallengeTodayCheck.isPresent()){
-                authChallengeToday = AuthChallenge.builder()
-                        .challenge(challenge)
-                        .date(today)
-                        .currentMember(challenge.getCurrentMember())
-                        .authMember(0)
-                        .build();
+        do {
+            AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, date)).orElse(
+                    AuthChallenge.builder()
+                            .challenge(challenge)
+                            .date(date)
+                            .currentMember(challenge.getCurrentMember())
+                            .authMember(0)
+                            .build()
+            );
+            if(dayOfWeekNumber == 7){
+                dayOfWeekNumber =1;
             }else{
-                authChallengeToday = authChallengeRepository.findByChallengeAndDate(challenge, today);
+                dayOfWeekNumber +=1;
             }
+            date = date.plusDays(1);
+            authChallengeRepository.save(authChallenge);
+        }
+        while(dayOfWeekNumber<7);
 
-            authChallengeToday.setCurrentMember(challenge.getCurrentMember());
-            authChallengeRepository.save(authChallengeToday);
+    }
+
+    @Scheduled(cron = "0 0 0 * * 0")
+    public void saveWeeklyReport(){
+
+        List<Challenge> challenges = challengeRepository.findAll();
+        LocalDate now = LocalDate.now();
+
+        for(Challenge challenge : challenges){
+            saveReport(challenge, now);
         }
     }
 
     public List<ReportResponseDto> getReport(Long challengeId, ReportRequestDto requestDto) throws ParseException {
 
         List<ReportResponseDto> responseDtos = new ArrayList<>();
-        List<LocalDate> dateList = new ArrayList<>();
-        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()->new NotFoundException("존재하지 않는 챌린지입니다."));
 
-        SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()-> new NotFoundException("존재하지 않는 챌린지입니다."));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        LocalDate startDate = LocalDate.parse(requestDto.getStartDate(), formatter);
         LocalDate now = LocalDate.now();
 
-        Date startDate = format.parse(requestDto.getStartDate());
-        Calendar startCalendar = Calendar.getInstance();
-        startCalendar.setTime(startDate);   // calendar 구조체에 오늘 날짜를 저장함
-        startCalendar.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
-
-        for(int i =0; i<7; i++){
-            startCalendar.add(Calendar.DATE, 1);
-            LocalDate localDate = LocalDateTime.ofInstant(startCalendar.toInstant(), ZoneId.systemDefault()).toLocalDate();
-            localDate = localDate.minusDays(1);
-            dateList.add(localDate);
-        }
-
-        for (LocalDate date:dateList){
-
-            Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, date));
-            AuthChallenge authChallenge;
-
-            if(!authChallengeCheck.isPresent()){
-                authChallenge = AuthChallenge.builder()
-                        .challenge(challenge)
-                        .date(date)
-                        .currentMember(challenge.getCurrentMember())
-                        .build();
-            }else{
-                authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, date);
-            }
-
-            //authChallenge.setCurrentMember(challenge.getCurrentMember());
-            authChallengeRepository.save(authChallenge);
+        for(int i =0; i<7; i++) {
+            LocalDate date = startDate.plusDays(i);
+            AuthChallenge authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, date);
 
             int division = 1;
             int divisor = 0;
-            double percentage_d = 0.0;
-            int percentage;
 
-           if(!date.isAfter(now)) {
-            //authChallenge.setCurrentMember(challenge.getCurrentMember());
-            division = authChallenge.getCurrentMember();
-            divisor = authChallenge.getAuthMember();
+            if (date.isBefore(now) || date.isEqual(now)) {
+                division = authChallenge.getCurrentMember();
+                divisor = authChallenge.getAuthMember();
             }
 
-            percentage_d = ( (double) divisor / (double) division ) * 100.0;
-            percentage = (int) percentage_d;
+            int percentage = (int)(((double) divisor / (double) division) * 100.0);
 
             ReportResponseDto responseDto = ReportResponseDto.builder().date(date.toString()).percentage(percentage).build();
             responseDtos.add(responseDto);
         }
+
         return responseDtos;
     }
 
@@ -265,8 +252,8 @@ public class ChallengeService {
     }
 
     public List<ChallengesResponseDto> recommendChallenges(Long challengeId, PrincipalDetails principalDetails) throws ParseException {
-        Optional<Challenge> challenge = challengeRepository.findById(challengeId);
-        Category category= challenge.get().getCategory();
+        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(()-> new NotFoundException("존재하지 않는 챌린지입니다.") );
+        Category category= challenge.getCategory();
         List<Challenge> challenges = challengeRepository.findAllByCategoryIdOrderByCreatedAtDesc(category.getId());
         List<ChallengesResponseDto> challengesResponseDtos = new ArrayList<>();
         int cnt = 0;
@@ -288,7 +275,7 @@ public class ChallengeService {
 
             int challengeDate = userChallengeCheckDate.get().getChallengeDate();
 
-            if((    !c.equals(challenge.get())&&
+            if((    !c.equals(challenge)&&
                     !userChallengeOptional.isPresent()) &&
                     (c.getMaxMember() > c.getCurrentMember()) &&
                     userChallengeCheckDate.get().getParticipateDate(challengeDate, c)
@@ -414,19 +401,15 @@ public class ChallengeService {
         // update percentage of report - plus currentMember
         // 현재 진행 중이라면 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
         LocalDate now = LocalDate.now();
-        Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, now));
-        AuthChallenge authChallenge;
+        AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, now)).orElse(
+                AuthChallenge.builder()
+                        .challenge(challenge)
+                        .date(now)
+                        .currentMember(challenge.getCurrentMember())
+                        .authMember(0)
+                        .build()
+        );
 
-        if(!authChallengeCheck.isPresent()){
-            authChallenge = AuthChallenge.builder()
-                    .challenge(challenge)
-                    .date(now)
-                    .currentMember(challenge.getCurrentMember())
-                    .build();
-            authChallengeRepository.save(authChallenge);
-        }else{
-            authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
-        }
 
         authChallenge.setCurrentMember(challenge.getCurrentMember());
         authChallengeRepository.save(authChallenge);
@@ -490,6 +473,7 @@ public class ChallengeService {
                         imEmpty = false;
                         break;
                     }
+
                 }
                 if(imEmpty) {
                     tagRepository.deleteById(tagChallenge.getTag().getId());
@@ -497,9 +481,11 @@ public class ChallengeService {
 
             }
 
+
             List<TagChallenge> tagChallengeList = new ArrayList<>();
             for (String tagString : tagNames) {
                 Tag tag = new Tag(tagString);
+
 
                 if (!tagChallengeRepository.existsByChallengeAndTagName(challenge, tagString)) {
                     tagRepository.save(tag);
@@ -604,7 +590,7 @@ public class ChallengeService {
             List<UserChallenge> userChallenges = userChallengeRepository.findAllByChallenge(challenge);
             challenge.setCurrentMember(userChallenges.size());
             challengeRepository.save(challenge);
-          
+
         } else {
             throw new InvalidException("비밀번호가 틀렸습니다");
         }
