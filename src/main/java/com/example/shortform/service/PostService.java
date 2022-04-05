@@ -264,7 +264,7 @@ public class PostService {
                 () -> new NotFoundException("인증 게시글이 존재하지 않습니다.")
         );
 
-        Page<Comment> commentPage = commentRepository.findAllByPostId(pageable, postId);
+        Page<Comment> commentPage = commentRepository.findAllComment(pageable, postId);
         List<CommentResponseDto> commentDetailList = new ArrayList<>();
 
         for (Comment comment : commentPage) {

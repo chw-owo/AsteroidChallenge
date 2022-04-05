@@ -110,10 +110,10 @@ public class ChatRoomService {
         User user = principalDetails.getUser();
 
         // 채팅 메세지 DB에서 이 채팅방의 메세지 전체 조회
-        Page<ChatMessage> messagePage = chatMessageRepository.findAllByChatRoom(chatRoom, pageable);
+        Page<ChatMessage> messagePage = chatMessageRepository.findAllChatRoomMessage(chatRoom, pageable);
 
         // 채팅 방 참가자 목록 조회
-        List<UserChatRoom> memberList = userChatRoomRepository.findAllByChatRoom(chatRoom);
+        List<UserChatRoom> memberList = userChatRoomRepository.findAllChatRoomUser(chatRoom);
 
         List<ChatMessageResponseDto> responseDtoList = new ArrayList<>();
 

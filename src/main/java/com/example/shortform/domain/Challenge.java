@@ -105,13 +105,13 @@ public class Challenge extends Timestamped{
     }
 
     @Setter
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
 
     @Setter
-    @OneToOne(orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 

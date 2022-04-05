@@ -37,7 +37,7 @@ public class ChatRoom extends Timestamped{
     @OneToMany(mappedBy = "chatRoom", orphanRemoval = true)
     private List<ChatMessage> messages = new ArrayList<>();
 
-    @OneToOne(mappedBy = "chatRoom")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "chatRoom")
     private Challenge challenge;
 
     public ChatRoomListResponseDto toResponseList(LocalDateTime createdAt,

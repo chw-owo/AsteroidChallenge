@@ -332,7 +332,7 @@ public class ChallengeService {
     }
 
     public ChallengePageResponseDto getChallenges(Pageable pageable) throws ParseException, InternalServerException {
-        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
+        Page<Challenge> challengePage = challengeRepository.findAllChallenge(pageable);
         return getChallengePageResponseDto(challengePage);
     }
 

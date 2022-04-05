@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -15,4 +16,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findAllByPostId(Long id, Pageable pageable);
 
     Page<Comment> findAllByPostId(Pageable pageable, Long postId);
+
+    @Query(value = "select distinct c from Comment c inner join fetch c.post inner join fetch c.user where c.post.id = :postId",
+    countQuery = "select count(c) from Comment c inner join c.post where c.post.id = :postId")
+    Page<Comment> findAllComment(Pageable pageable, Long postId);
 }

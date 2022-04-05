@@ -36,7 +36,7 @@ public class Post extends Timestamped{
     @OneToMany(mappedBy = "post", orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToOne(mappedBy = "post", orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "post", orphanRemoval = true)
     private ImageFile imageFile;
 
     public void setImageFile(ImageFile imageFile) {

@@ -39,7 +39,7 @@ public class Scheduler {
 
         for (User user : totalUserList) {
             List<Challenge> challengingList = new ArrayList<>();
-            List<UserChallenge> userChallengeList = userChallengeRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+            List<UserChallenge> userChallengeList = userChallengeRepository.findAllUserChallengeInfo(user.getId());
             for (UserChallenge userChallenge : userChallengeList) {
                 String status = challengeService.challengeStatus(userChallenge.getChallenge());
                 if (status.equals("진행중")) {
@@ -73,7 +73,7 @@ public class Scheduler {
         LocalDateTime today = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), 0, 0, 0);
 
         for (User user : totalUserList) {
-            List<UserChallenge> userChallengeList = userChallengeRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+            List<UserChallenge> userChallengeList = userChallengeRepository.findAllUserChallengeInfo(user.getId());
             for (UserChallenge userChallenge : userChallengeList) {
                 if (userChallenge.getChallenge().getEndDate().equals(today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
                     if(!postRepository.existsByUserAndChallengeIdAndCreatedAtBetween(user, userChallenge.getChallenge().getId(), today.minusDays(1), today)) {
@@ -101,7 +101,7 @@ public class Scheduler {
         List<User> totalUserList = userRepository.findAll();
 
         for (User user : totalUserList) {
-            List<UserChallenge> userChallengeList = userChallengeRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+            List<UserChallenge> userChallengeList = userChallengeRepository.findAllUserChallengeInfo(user.getId());
             for (UserChallenge userChallenge : userChallengeList) {
                 String status = challengeService.challengeStatus(userChallenge.getChallenge());
                 if (status.equals("진행중")) {
@@ -131,7 +131,7 @@ public class Scheduler {
         List<User> userList = userRepository.findAll();
 
         for (User user : userList) {
-            List<UserChallenge> userChallengeList = userChallengeRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+            List<UserChallenge> userChallengeList = userChallengeRepository.findAllUserChallengeInfo(user.getId());
             for (UserChallenge userChallenge : userChallengeList) {
                 String status = challengeService.challengeStatus(userChallenge.getChallenge());
                 if (status.equals("완료")) {
