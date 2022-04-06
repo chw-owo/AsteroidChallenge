@@ -13,11 +13,13 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findAllByPostIdOrderByCreatedAtDesc(Long id);
 
+    @Query(value = "select c from Comment c inner join c.post inner join c.user where c.post.id = :id",
+    countQuery = "select count(c) from Comment c where c.post.id = :id")
     Page<Comment> findAllByPostId(Long id, Pageable pageable);
 
     Page<Comment> findAllByPostId(Pageable pageable, Long postId);
 
-    @Query(value = "select distinct c from Comment c inner join fetch c.post inner join fetch c.user where c.post.id = :postId",
+    @Query(value = "select c from Comment c inner join c.post inner join c.user where c.post.id = :postId",
     countQuery = "select count(c) from Comment c inner join c.post where c.post.id = :postId")
     Page<Comment> findAllComment(Pageable pageable, Long postId);
 }

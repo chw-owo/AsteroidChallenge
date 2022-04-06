@@ -197,42 +197,28 @@ public class PostService {
 
     @Transactional
     public ResponseEntity<PostPageResponseDto> getListPost(Long challengeId, Pageable postPageable, Pageable commentPageable) {
-        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(
+        Challenge challenge = challengeRepository.findCheckChallenge(challengeId).orElseThrow(
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
 
-//        List<Post> postList = postRepository.findAllByChallengeIdOrderByCreatedAtDesc(challengeId);
         // DB에서 챌린지의 모든 인증게시글 조회
         Page<Post> postPage = postRepository.findAllByChallengeId(challengeId, postPageable);
         List<PostResponseDto> responseDtoList = new ArrayList<>();
 
         for (Post post : postPage) {
             List<CommentResponseDto> commentDetailList = new ArrayList<>();
-//            List<Comment> commentList = commentRepository.findAllByPostIdOrderByCreatedAtDesc(post.getId());
             // DB에서 인증 게시글의 모든 댓글 조회
             Page<Comment> commentPage = commentRepository.findAllByPostId(post.getId(), commentPageable);
             for (Comment comment : commentPage) {
                 // 댓글 날짜 형식 변경
                 CommentResponseDto commentDetailResponseDto = comment.toResponse();
                 String commentCreatedAt = comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
-//                String commentCreatedAt = comment.getCreatedAt().toString();
-//                String year = commentCreatedAt.substring(0,4) + ".";
-//                String month = commentCreatedAt.substring(5,7) + ".";
-//                String day = commentCreatedAt.substring(8,10) + " ";
-//                String time = commentCreatedAt.substring(11,19);
-//                commentCreatedAt = year + month + day + time;
                 commentDetailResponseDto.setCreatedAt(commentCreatedAt);
                 commentDetailList.add(commentDetailResponseDto);
             }
             // 인증 게시글 날짜 형식 변경
             PostResponseDto postResponseDto = post.toResponse(commentDetailList, commentPage.getTotalElements());
             String postCreatedAt = post.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
-//            String postCreatedAt = post.getCreatedAt().toString();
-//            String year = postCreatedAt.substring(0,4) + ".";
-//            String month = postCreatedAt.substring(5,7) + ".";
-//            String day = postCreatedAt.substring(8,10) + " ";
-//            String time = postCreatedAt.substring(11,19);
-//            postCreatedAt = year + month + day + time;
             postResponseDto.setCreatedAt(postCreatedAt);
             responseDtoList.add(postResponseDto);
         }
@@ -245,7 +231,7 @@ public class PostService {
     }
 
     public ResponseEntity<PostDetailPageResponseDto> getPost(Long challengeId, Long postId, Pageable pageable) {
-        Post post = postRepository.findById(postId).orElseThrow(
+        Post post = postRepository.findPost(postId).orElseThrow(
                 () -> new NotFoundException("인증 게시글이 존재하지 않습니다.")
         );
 

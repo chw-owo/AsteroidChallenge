@@ -19,4 +19,7 @@ public interface UserChatRoomRepository extends JpaRepository<UserChatRoom, Long
 
     @Query("select distinct uc from UserChatRoom uc where uc.chatRoom = :chatRoom")
     List<UserChatRoom> findAllChatRoomUser(ChatRoom chatRoom);
+
+    @Query("select count(uc) from UserChatRoom uc where uc.chatRoom = :chatRoom")
+    int findUserCnt(ChatRoom chatRoom);
 }

@@ -16,7 +16,7 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
 
     List<Challenge> findAllByTitleContaining(String search);
 
-//    @Query(value = "select distinct c from Challenge c join fetch c.challengeImage join fetch c.category where c.category.id = :categoryId order by c.createdAt desc")
+    @Query(value = "select c from Challenge c join fetch c.challengeImage join fetch c.category where c.category.id = :categoryId order by c.createdAt desc")
     List<Challenge> findAllByCategoryIdOrderByCreatedAtDesc(Long categoryId);
 
     List<Challenge> findAllByCategoryId(Long categoryId);
@@ -38,4 +38,10 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
     @Query(value = "select distinct c from Challenge c inner join c.category left join c.challengeImage left join c.tagChallenges",
     countQuery = "select count(c) from Challenge c")
     Page<Challenge> findAllChallenge(Pageable pageable);
+
+    @Query("select c from Challenge c where c.id = :challengeId")
+    Optional<Challenge> findCheckChallenge(Long challengeId);
+
+    @Query("select distinct c from Challenge c join fetch c.category join fetch c.user join fetch c.tagChallenges left join c.challengeImage where c.id = :challengeId")
+    Optional<Challenge> findChallenge(Long challengeId);
 }
