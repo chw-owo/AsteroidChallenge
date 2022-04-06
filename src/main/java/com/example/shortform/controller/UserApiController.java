@@ -38,8 +38,8 @@ public class UserApiController {
     // 회원가입
     @PostMapping("/auth/signup")
     public ResponseEntity<CMResponseDto> signup(@RequestBody @Valid SignupRequestDto signupRequestDto) {
-
-        return userService.signup(signupRequestDto);
+        userService.signup(signupRequestDto);
+        return ResponseEntity.ok(new CMResponseDto("true"));
     }
 
     // 이메일 중복체크

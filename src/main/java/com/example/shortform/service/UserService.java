@@ -12,6 +12,7 @@ import com.example.shortform.exception.DuplicateException;
 import com.example.shortform.exception.InvalidException;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.exception.UnauthorizedException;
+import com.example.shortform.handler.MemberEventHandler;
 import com.example.shortform.mail.EmailMessage;
 import com.example.shortform.mail.EmailService;
 import com.example.shortform.repository.LevelRepository;
@@ -43,76 +44,33 @@ import java.util.UUID;
 @Service
 public class UserService {
 
+    private final UserFactory userFactory;
     private final UserRepository userRepository;
     private final UserChallengeRepository userChallengeRepository;
     private final ChallengeService challengeService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
-    private final LevelRepository levelRepository;
     private final S3Uploader s3Uploader;
     private final HttpServletRequest request;
-
-    private final RankingService rankingService;
-    private final NoticeRepository noticeRepository;
+    private final MemberEventHandler memberEventHandler;
     private final TemplateEngine templateEngine;
 
     @Transactional
-    public ResponseEntity<CMResponseDto> signup(SignupRequestDto signupRequestDto) {
+    public void signup(SignupRequestDto signupRequestDto) {
 
-        // 유효성 검사
-        String email = signupRequestDto.getEmail();
-        String rawPassword = signupRequestDto.getPassword();
-        String passwordCheck = signupRequestDto.getPasswordCheck();
+        // 유저 생성
+        User user = userFactory.createUser(signupRequestDto);
 
-        if (!isExistEmail(signupRequestDto.getEmail()))
-            throw new DuplicateException("이미 존재하는 이메일입니다.");
-
-        if (!isPasswordMatched(email, rawPassword))
-            throw new InvalidException("비밀번호에 아이디가 들어갈 수 없습니다.");
-
-        if(!isDuplicatePassword(rawPassword, passwordCheck))
-            throw new InvalidException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
-
-        Level level = levelRepository.findById(1L).orElseThrow(
-                () -> new NotFoundException("존재하지 않는 LEVEL 입니다.")
-        );
-
-        // 비밀번호 암호화
-        String encPassword = passwordEncoder.encode(rawPassword);
-
-        // User 객체 생성
-        User user = User.builder()
-                .email(email)
-                .nickname(signupRequestDto.getNickname())
-                .password(encPassword)
-                .level(level) // 기본 1레벨
-
-                .rankingPoint(50) // 기본 포인트 50
-                .yesterdayRankingPoint(50) // 이전 포인트도 50으로 설정
-
-                .role(Role.ROLE_USER)
-                .emailVerified(false)
-                .newbie(true)
-                .build();
-
-        // 저장, 랭킹 매기기
+        // 저장
         User savedUser = userRepository.save(user);
-        rankingService.updateRank(savedUser);
 
         // 메일 보내기
         savedUser.generateEmailCheckToken();
         sendSignupConfirmEmail(savedUser);
 
-        Notice notice = Notice.builder()
-                .noticeType(Notice.NoticeType.SIGNIN)
-                .is_read(false)
-                .user(savedUser)
-                .build();
-
-        noticeRepository.save(notice);
-
-        return ResponseEntity.ok(new CMResponseDto("true"));
+        // 회원가입 후 랭킹, 알람 저장
+        memberEventHandler.memberSignUpEventListener(savedUser);
     }
 
     // 이메일 토큰 처리
@@ -247,11 +205,6 @@ public class UserService {
 
     private boolean isExistEmail(String email) {
         return !userRepository.findByEmail(email).isPresent();
-    }
-
-    private boolean isPasswordMatched(String email, String rawPassword) {
-        String domain = email.split("@")[0];
-        return !rawPassword.contains(domain);
     }
 
     // 임시 비밀번호 생성 메서드
