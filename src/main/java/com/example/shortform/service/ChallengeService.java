@@ -672,25 +672,12 @@ public class ChallengeService {
 
             // challenge
             Challenge challenge = userChallenge.getChallenge();
-            // status
-            String status = challengeStatus(challenge);
 
-            String dailyAuth = null;
-            // 진행중 챌린지 : 포스트 인증하면 내가 해냄 리턴해주기
-            if (userChallenge.isDailyAuthenticated())
-                dailyAuth = "true";
-            else
-                dailyAuth = "false";
+            // 진행중 챌린지 : 당일 인증하면 내가 해냄 리턴해주기
+            String dailyAuth = userChallenge.isDailyAuthenticated() ? "true" : "false";
 
-            // 완료된 챌린지에서 성공, 실패 리턴해주기
-            if ("완료".equals(status)) {
-                // 성공일수(챌린지 진행일 * 0.8) > 인증횟수
-                if ((int)Math.ceil(userChallenge.getChallengeDate() * 0.8) > userChallenge.getAuthCount())
-                    status = "실패";
-                    // 인증횟수가 같거나 더 많으면 성공
-                else
-                    status = "성공";
-            }
+            // 완료된 챌린지 : 성공, 실패 리턴해주기
+            String status = getSuccessAndFailChallenge(userChallenge, challenge);
 
             // tag
             List<String> tagChallengeStrings = new ArrayList<>();
@@ -703,9 +690,8 @@ public class ChallengeService {
             // image
             List<String> challengeImages = new ArrayList<>();
             List<ImageFile> ImageFiles =  challenge.getChallengeImage();
-            for(ImageFile image:ImageFiles){
+            for(ImageFile image:ImageFiles)
                 challengeImages.add(image.getFilePath());
-            }
 
             UserChallengeInfo userChallengeInfo = UserChallengeInfo.of(challenge, status, tagChallengeStrings,
                     challengeImages, dailyAuth);
@@ -715,5 +701,12 @@ public class ChallengeService {
 
         return ResponseEntity.ok(userChallengeInfoList);
 
+    }
+
+    private String getSuccessAndFailChallenge(UserChallenge userChallenge, Challenge challenge) throws ParseException {
+        String status = challengeStatus(challenge);
+        if ("완료".equals(status))
+            status = userChallenge.isSuccessChallenge() ? "성공" : "실패"; // 인증횟수가 같거나 더 많으면 성공
+        return status;
     }
 }
