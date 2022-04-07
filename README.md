@@ -36,7 +36,7 @@
 
 <details>
   <summary>DB 테이블</summary>
-  ![](https://user-images.githubusercontent.com/94841127/162137926-c65d29ab-09ee-4cec-9e96-8ccc4dec72fa.png)
+  <img width="800" alt="image" src="https://imagedelivery.net/v7-TZByhOiJbNM9RaUdzSA/a50337a6-ea46-4c65-c470-b50d3baa8b00/public">
 </details>
 
 </br>
@@ -170,7 +170,7 @@
   * 결과
   
     |항목|개선 전|개선 후|개선율| 
-    |:—|:—|:—|:—|
+    |:-|:-|:-|:-|
     |전체 챌린지 조회|47ms|103ms|363.1%| 
     |카테고리 검색|300ms|59ms|408.5%|
     |검색|345ms|97ms|255.7%|
@@ -248,7 +248,7 @@
 ## 8️⃣ 사용한 라이브러리(패키지)
 
 |라이브러리명|내용|참고| 
-|:—|:—|:—| 
+|:-|:-|:-| 
 |security|로그인 인증 및 권한|로그인 및 jwt 적용|
 |jpa|ORM 표준|데이터베이스와 연결|
 |lombok|어노테이션 기반 코드 자동 완성||
