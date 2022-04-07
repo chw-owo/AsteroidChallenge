@@ -143,13 +143,7 @@ public class ChallengeService {
         challengeRepository.save(challenge);
 
         if (user.isNewbie()) {
-            Notice notice = Notice.builder()
-                    .noticeType(Notice.NoticeType.FIRST)
-                    .is_read(false)
-                    .increasePoint(5)
-                    .user(user)
-                    .build();
-
+            Notice notice = new Notice(user, 5);
             noticeRepository.save(notice);
             user.setRankingPoint(user.getRankingPoint() + 5);
             user.setNewbie(false);
@@ -295,7 +289,7 @@ public class ChallengeService {
     }
 
     public ChallengeResponseDto getChallenge(Long challengeId) throws Exception, InternalServerException {
-        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new NotFoundException("존재하지 않는 챌린지입니다."));
+        Challenge challenge = challengeRepository.findChallenge(challengeId).orElseThrow(() -> new NotFoundException("존재하지 않는 챌린지입니다."));
         List<String> challengeImage = new ArrayList<>();
 
         List<ImageFile> ImageFiles = challenge.getChallengeImage();
@@ -319,7 +313,7 @@ public class ChallengeService {
     }
 
     public ChallengePageResponseDto getChallenges(Pageable pageable) throws ParseException, InternalServerException {
-        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
+        Page<Challenge> challengePage = challengeRepository.findAllChallenge(pageable);
         return getChallengePageResponseDto(challengePage);
     }
 
@@ -415,13 +409,7 @@ public class ChallengeService {
         authChallengeRepository.save(authChallenge);
 
         if (user.isNewbie()) {
-            Notice notice = Notice.builder()
-                    .noticeType(Notice.NoticeType.FIRST)
-                    .is_read(false)
-                    .increasePoint(5)
-                    .user(user)
-                    .build();
-
+            Notice notice = new Notice(user, 5);
             noticeRepository.save(notice);
             user.setRankingPoint(user.getRankingPoint() + 5);
             user.setNewbie(false);
@@ -598,31 +586,20 @@ public class ChallengeService {
         // update percentage of report - plus currentMember
         // 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
         LocalDate now = LocalDate.now();
-        Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, now));
-        AuthChallenge authChallenge;
-
-        if(!authChallengeCheck.isPresent()){
-            authChallenge = AuthChallenge.builder()
-                    .challenge(challenge)
-                    .date(now)
-                    .currentMember(challenge.getCurrentMember())
-                    .build();
-            authChallengeRepository.save(authChallenge);
-        }else{
-            authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
-        }
+        AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, now)).orElse(
+                AuthChallenge.builder()
+                        .challenge(challenge)
+                        .date(now)
+                        .currentMember(challenge.getCurrentMember())
+                        .authMember(0)
+                        .build()
+        );
 
         authChallenge.setCurrentMember(challenge.getCurrentMember());
         authChallengeRepository.save(authChallenge);
 
         if (user.isNewbie()) {
-            Notice notice = Notice.builder()
-                    .noticeType(Notice.NoticeType.FIRST)
-                    .is_read(false)
-                    .increasePoint(5)
-                    .user(user)
-                    .build();
-
+            Notice notice = new Notice(user, 5);
             noticeRepository.save(notice);
             user.setRankingPoint(user.getRankingPoint() + 5);
             user.setNewbie(false);

@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -79,6 +80,60 @@ public class Notice extends Timestamped {
 
     public void setNoticeType(NoticeType type) {
         this.noticeType = type;
+    }
+
+    public Notice(User user, List<Challenge> challengeList) {
+        this.noticeType = NoticeType.MORNING_CALL;
+        this.is_read = false;
+        this.user = user;
+        this.challengeCnt = challengeList.size();
+        this.challengeId = challengeList.get(0).getId();
+    }
+
+    public Notice(User user, Challenge challenge) {
+        this.noticeType = NoticeType.INITIAL;
+        this.is_read = false;
+        this.user = user;
+        this.challengeId = challenge.getId();
+    }
+
+    public Notice(User user, Challenge challenge, int point) {
+        this.noticeType = NoticeType.SUCCESS;
+        this.is_read = false;
+        this.user = user;
+        this.isSuccess = true;
+        this.challengeId = challenge.getId();
+        this.increasePoint = point;
+    }
+
+    public Notice(User user){
+        this.noticeType = NoticeType.RECOMMEND;
+        this.is_read = false;
+        this.user = user;
+    }
+
+    public Notice(User user, Challenge challenge, Post post, int point) {
+        this.noticeType = NoticeType.WRITE;
+        this.is_read = false;
+        this.user = user;
+        this.challengeId = challenge.getId();
+        this.postId = post.getId();
+        this.roomId = challenge.getChatRoom().getId();
+        this.increasePoint = point;
+    }
+
+    public Notice(User user, int point) {
+        this.noticeType = NoticeType.FIRST;
+        this.is_read = false;
+        this.user = user;
+        this.increasePoint = point;
+    }
+
+    public Notice(User user, Level level) {
+        this.noticeType = NoticeType.LEVEL;
+        this.is_read = false;
+        this.user = user;
+        this.noticeLevel = level.getId();
     }
 
     public NoticeResponseDto toChallengeResponse(MemberResponseDto memberResponseDto,

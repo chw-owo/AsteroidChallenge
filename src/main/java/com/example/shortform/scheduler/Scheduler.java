@@ -39,24 +39,17 @@ public class Scheduler {
 
         for (User user : totalUserList) {
             List<Challenge> challengingList = new ArrayList<>();
-            List<UserChallenge> userChallengeList = userChallengeRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+            List<UserChallenge> userChallengeList = userChallengeRepository.findAllUserChallengeInfo(user.getId());
             for (UserChallenge userChallenge : userChallengeList) {
-                String status = challengeService.challengeStatus(userChallenge.getChallenge());
+                Challenge challenge = userChallenge.getChallenge();
+                String status = challengeService.challengeStatus(challenge);
                 if (status.equals("진행중")) {
-
                     if (!userChallenge.isDailyAuthenticated())
-                        challengingList.add(userChallenge.getChallenge());
-
+                        challengingList.add(challenge);
                 }
             }
             if (challengingList.size() != 0) {
-                Notice notice = Notice.builder()
-                        .noticeType(Notice.NoticeType.MORNING_CALL)
-                        .is_read(false)
-                        .user(user)
-                        .challengeCnt(challengingList.size())
-                        .challengeId(challengingList.get(0).getId())
-                        .build();
+                Notice notice = new Notice(user, challengingList);
                 noticeRepository.save(notice);
             }
         }
@@ -73,16 +66,13 @@ public class Scheduler {
         LocalDateTime today = LocalDateTime.of(now.getYear(), now.getMonth(), now.getDayOfMonth(), 0, 0, 0);
 
         for (User user : totalUserList) {
-            List<UserChallenge> userChallengeList = userChallengeRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+            List<UserChallenge> userChallengeList = userChallengeRepository.findAllUserChallengeInfo(user.getId());
             for (UserChallenge userChallenge : userChallengeList) {
-                if (userChallenge.getChallenge().getEndDate().equals(today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
-                    if(!postRepository.existsByUserAndChallengeIdAndCreatedAtBetween(user, userChallenge.getChallenge().getId(), today.minusDays(1), today)) {
+                Challenge challenge = userChallenge.getChallenge();
+                if (challenge.getEndDate().equals(today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
+                    if(!postRepository.existsByUserAndChallengeIdAndCreatedAtBetween(user, challenge.getId(), today.minusDays(1), today)) {
                         if (!noticeRepository.existsByUserIdAndNoticeTypeAndCreatedAtBetween(user.getId(), Notice.NoticeType.RECOMMEND, today, today.plusDays(1))) {
-                            Notice notice = Notice.builder()
-                                    .noticeType(Notice.NoticeType.RECOMMEND)
-                                    .is_read(false)
-                                    .user(user)
-                                    .build();
+                            Notice notice = new Notice(user);
                             noticeRepository.save(notice);
                         }
                     }
@@ -101,18 +91,13 @@ public class Scheduler {
         List<User> totalUserList = userRepository.findAll();
 
         for (User user : totalUserList) {
-            List<UserChallenge> userChallengeList = userChallengeRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+            List<UserChallenge> userChallengeList = userChallengeRepository.findAllUserChallengeInfo(user.getId());
             for (UserChallenge userChallenge : userChallengeList) {
-                String status = challengeService.challengeStatus(userChallenge.getChallenge());
+                Challenge challenge = userChallenge.getChallenge();
+                String status = challengeService.challengeStatus(challenge);
                 if (status.equals("진행중")) {
-                    if (userChallenge.getChallenge().getStartDate().equals(today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
-                        Notice notice = Notice.builder()
-                                .noticeType(Notice.NoticeType.INITIAL)
-                                .is_read(false)
-                                .user(user)
-                                .challengeId(userChallenge.getChallenge().getId())
-                                .build();
-
+                    if (challenge.getStartDate().equals(today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
+                        Notice notice = new Notice(user,challenge);
                         noticeRepository.save(notice);
                     }
                 }
@@ -131,25 +116,17 @@ public class Scheduler {
         List<User> userList = userRepository.findAll();
 
         for (User user : userList) {
-            List<UserChallenge> userChallengeList = userChallengeRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+            List<UserChallenge> userChallengeList = userChallengeRepository.findAllUserChallengeInfo(user.getId());
             for (UserChallenge userChallenge : userChallengeList) {
-                String status = challengeService.challengeStatus(userChallenge.getChallenge());
+                Challenge challenge = userChallenge.getChallenge();
+                String status = challengeService.challengeStatus(challenge);
                 if (status.equals("완료")) {
                     // 성공일수(챌린지 진행일 * 0.8) > 인증횟수
                     if ((int)Math.ceil(userChallenge.getChallengeDate() * 0.8) <= userChallenge.getAuthCount()) {
-                        if (userChallenge.getChallenge().getEndDate().equals(today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
-                            if (!noticeRepository.existsByChallengeIdAndIsSuccess(userChallenge.getChallenge().getId(), true)) {
-                                Notice notice = Notice.builder()
-                                        .noticeType(Notice.NoticeType.SUCCESS)
-                                        .is_read(false)
-                                        .isSuccess(true)
-                                        .user(user)
-                                        .challengeId(userChallenge.getChallenge().getId())
-                                        .increasePoint(5)
-                                        .build();
-
+                        if (challenge.getEndDate().equals(today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")))) {
+                            if (!noticeRepository.existsByChallengeIdAndIsSuccess(challenge.getId(), true)) {
+                                Notice notice = new Notice(user, challenge, 5);
                                 user.setRankingPoint(user.getRankingPoint() + 5);
-
                                 noticeRepository.save(notice);
                             }
 

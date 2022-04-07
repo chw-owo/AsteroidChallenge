@@ -35,7 +35,7 @@ public class ImageFile {
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 
-    @OneToOne(orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "post_id")
     private Post post;
 
