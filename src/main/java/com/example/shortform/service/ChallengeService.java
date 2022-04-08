@@ -430,19 +430,28 @@ public class ChallengeService {
             // 기존 이미지가 있을 경우
             if (requestDto.getImage() != null) {
 
-                // 해당 챌린지에 있는 이미지 중에서 받아온 기존이미지 말고는 다 삭제해주기
-                for (ImageFile imageFile : challenge.getChallengeImage()) {
-                    boolean isEmpty = true;
-                    for (String imageUrl : requestDto.getImage()) {
-                        if (imageFile.getFilePath().equals(imageUrl)) {
-                            isEmpty = false;
-                            break;
-                        }
-                    }
-
-                    if (isEmpty)
-                        imageFileRepository.deleteById(imageFile.getId()); // TODO S3에서도 삭제하기
+                Map<String, Integer> map = new HashMap<>();
+                for (int i = 0; i < requestDto.getImage().size(); i++) {
+                    map.put(requestDto.getImage().get(i), i);
                 }
+
+                for (int i = 0; i < challenge.getChallengeImage().size(); i++) {
+                    if (!map.containsKey(challenge.getChallengeImage().get(i).getFilePath()))
+                        imageFileRepository.deleteById(challenge.getChallengeImage().get(i).getId());
+                }
+//                // 해당 챌린지에 있는 이미지 중에서 받아온 기존이미지 말고는 다 삭제해주기
+//                for (ImageFile imageFile : challenge.getChallengeImage()) {
+//                    boolean isEmpty = true;
+//                    for (String imageUrl : requestDto.getImage()) {
+//                        if (imageFile.getFilePath().equals(imageUrl)) {
+//                            isEmpty = false;
+//                            break;
+//                        }
+//                    }
+//
+//                    if (isEmpty)
+//                        imageFileRepository.deleteById(imageFile.getId()); // TODO S3에서도 삭제하기
+//                }
             }
 
             // 수정할 이미지가 있으면 challenge 에서 image 가져오기
@@ -454,26 +463,33 @@ public class ChallengeService {
             List<TagChallenge> tagChallenges = tagChallengeRepository.findAllByChallenge(challenge);
             List<String> tagNames = requestDto.getTagName();
 
-            for (TagChallenge tagChallenge : tagChallenges) {
-                boolean imEmpty = true;
-                for (String tagName : tagNames) {
-                    if (tagChallenge.getTag().getName().equals(tagName)) {
-                        imEmpty = false;
-                        break;
-                    }
-
-                }
-                if(imEmpty) {
-                    tagRepository.deleteById(tagChallenge.getTag().getId());
-                }
-
+            Map<String, Integer> tagMap = new HashMap<>();
+            for (int i = 0; i < tagNames.size(); i++) {
+                tagMap.put(tagNames.get(i), i);
             }
 
+            for (TagChallenge value : tagChallenges) {
+                if (!tagMap.containsKey(value.getTag().getName()))
+                    tagRepository.deleteById(value.getTag().getId());
+            }
 
-            List<TagChallenge> tagChallengeList = new ArrayList<>();
+//            for (TagChallenge tagChallenge : tagChallenges) {
+//                boolean imEmpty = true;
+//                for (String tagName : tagNames) {
+//                    if (tagChallenge.getTag().getName().equals(tagName)) {
+//                        imEmpty = false;
+//                        break;
+//                    }
+//
+//                }
+//                if(imEmpty) {
+//                    tagRepository.deleteById(tagChallenge.getTag().getId());
+//                }
+//
+//            }
+
             for (String tagString : tagNames) {
                 Tag tag = new Tag(tagString);
-
 
                 if (!tagChallengeRepository.existsByChallengeAndTagName(challenge, tagString)) {
                     tagRepository.save(tag);
@@ -481,7 +497,6 @@ public class ChallengeService {
                             .challenge(challenge)
                             .tag(tag)
                             .build();
-                    tagChallengeList.add(newTagChallenge);
                     tagChallengeRepository.save(newTagChallenge);
                 }
             }
