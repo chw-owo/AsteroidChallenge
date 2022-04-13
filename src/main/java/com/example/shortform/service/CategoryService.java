@@ -1,7 +1,7 @@
 package com.example.shortform.service;
 
 import com.example.shortform.domain.Category;
-import com.example.shortform.dto.ResponseDto.CategoryResponseDto;
+import com.example.shortform.dto.resonse.CategoryResponseDto;
 import com.example.shortform.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

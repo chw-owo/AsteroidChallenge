@@ -3,7 +3,7 @@ package com.example.shortform.service;
 import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.domain.User;
 import com.example.shortform.domain.UserChallenge;
-import com.example.shortform.dto.ResponseDto.RankingResponseDto;
+import com.example.shortform.dto.resonse.RankingResponseDto;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.RankingRepository;
 import com.example.shortform.repository.UserChallengeRepository;

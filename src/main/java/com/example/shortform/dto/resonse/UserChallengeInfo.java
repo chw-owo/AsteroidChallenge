@@ -21,8 +21,8 @@ public class UserChallengeInfo {
     private List<String> challengeImage;
     private int maxMember;
     private int currentMember;
-    private String startDate; //LocalDate
-    private String endDate; //LocalDate
+    private String startDate;
+    private String endDate;
     private Boolean isPrivate;
     private List<String> tagName;
     private String status;

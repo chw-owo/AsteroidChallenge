@@ -1,4 +1,4 @@
-package com.example.shortform.dto.ResponseDto;
+package com.example.shortform.dto.resonse;
 
 import com.example.shortform.domain.Challenge;
 import com.example.shortform.domain.TagChallenge;
@@ -19,8 +19,8 @@ public class ChallengesResponseDto {
     private List<String> challengeImage;
     private int maxMember;
     private int currentMember;
-    private String startDate; //LocalDate
-    private String endDate; //LocalDate
+    private String startDate;
+    private String endDate;
     private Boolean isPrivate;
     private String category;
     private List<String> tagName;

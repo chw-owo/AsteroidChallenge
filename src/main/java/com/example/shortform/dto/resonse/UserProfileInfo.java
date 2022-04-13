@@ -1,6 +1,5 @@
 package com.example.shortform.dto.resonse;
 
-import com.example.shortform.domain.Level;
 import com.example.shortform.domain.User;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,9 +15,9 @@ public class UserProfileInfo {
     private int rankingPoint;
 
 
-    private String levelName; // 레벨 이름
-    private String levelIcon; // 레벨 아이콘
-    private int experiencePoint; // 다음 레벨에 필요한 경험치
+    private String levelName;
+    private String levelIcon;
+    private int experiencePoint;
 
     private boolean isKakao;
 
