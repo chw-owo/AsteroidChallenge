@@ -14,14 +14,6 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-//    for test
-//    @Transactional
-//    public boolean makeCategory(CategoryRequestDto requestDto){
-//        Category category = new Category(requestDto);
-//        categoryRepository.save(category);
-//        return true;
-//    }
-
     public CategoryResponseDto getCategory(){
         List<Category> categories = categoryRepository.findAll();
         List<Long> categoryId = new ArrayList<>();

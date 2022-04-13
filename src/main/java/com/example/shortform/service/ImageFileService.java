@@ -45,7 +45,7 @@ public class ImageFileService {
             imageFileRequestDto.setFilePath(String.valueOf(filePath));
             try{
                 imageFileRequestDto.setFileSize(multipartFile.getSize());
-            } catch (MaxUploadSizeExceededException ex){ //FileSizeLimitExceededException ex){
+            } catch (MaxUploadSizeExceededException ex){
                 throw new FileUploadException(multipartFile.getSize());
             }
 
@@ -73,7 +73,7 @@ public class ImageFileService {
         imageFileRequestDto.setFilePath(String.valueOf(filePath));
         try{
             imageFileRequestDto.setFileSize(multipartFile.getSize());
-        } catch (MaxUploadSizeExceededException ex){ //FileSizeLimitExceededException ex){
+        } catch (MaxUploadSizeExceededException ex){
             throw new FileUploadException(multipartFile.getSize());
         }
 
@@ -95,7 +95,7 @@ public class ImageFileService {
         imageFileRequestDto.setFilePath(String.valueOf(filePath));
         try{
             imageFileRequestDto.setFileSize(multipartFile.getSize());
-        } catch (MaxUploadSizeExceededException ex){ //FileSizeLimitExceededException ex){
+        } catch (MaxUploadSizeExceededException ex){
             throw new FileUploadException(multipartFile.getSize());
         }
 
