@@ -10,6 +10,7 @@ import java.util.*;
 @Setter
 @Builder
 public class CategoryResponseDto {
+
     private List<Long> categoryId;
 
     public CategoryResponseDto(List<Long> categoryId) {

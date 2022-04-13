@@ -11,5 +11,6 @@ import java.util.List;
 @Setter
 @Builder
 public class TagResponseDto {
+
     private List<String> names;
 }

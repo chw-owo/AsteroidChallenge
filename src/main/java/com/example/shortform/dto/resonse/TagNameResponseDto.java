@@ -7,5 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class TagNameResponseDto {
+
     private String tagName;
 }

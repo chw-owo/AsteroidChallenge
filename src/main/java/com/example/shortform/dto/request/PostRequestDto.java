@@ -11,6 +11,7 @@ import lombok.*;
 @Builder
 @Getter
 public class PostRequestDto {
+
     private String content;
 
     public Post toEntity(Challenge challenge, User user) {

@@ -18,14 +18,13 @@ public class ChallengeResponseDto {
     private Long challengeId;
     private Long userId;
     private String roomId;
-
     private String title;
     private String content;
     private List<String> challengeImage;
     private int maxMember;
     private int currentMember;
-    private String startDate; //LocalDate
-    private String endDate; //LocalDate
+    private String startDate;
+    private String endDate;
     private Boolean isPrivate;
     private String category;
     private List<String> tagName;
@@ -45,7 +44,6 @@ public class ChallengeResponseDto {
         this.isPrivate=challenge.getIsPrivate();
         this.roomId = challenge.getChatRoom().getId().toString();
         this.userId = challenge.getUser().getId();
-
 
         List<String> tagChallengeStrings = new ArrayList<>();
         List<TagChallenge> tagChallenges = challenge.getTagChallenges();

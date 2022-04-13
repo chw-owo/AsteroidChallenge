@@ -9,5 +9,7 @@ import lombok.*;
 @Setter
 @Builder
 public class ReportRequestDto {
+
     private String startDate;
+
 }

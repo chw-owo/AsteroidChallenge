@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class CommentResponseDto {
+
     private Long commentId;
     private String nickname;
     private String content;

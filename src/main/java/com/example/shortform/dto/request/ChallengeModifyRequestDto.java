@@ -12,9 +12,11 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class ChallengeModifyRequestDto {
+
     private String title;
     private String content;
     private String category;
     private List<String> tagName;
     private List<String> image;
+
 }

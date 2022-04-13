@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ChatRoomRequestDto {
+
     private Long challengeId;
 
     public ChatRoom toEntity(String profileImage) {

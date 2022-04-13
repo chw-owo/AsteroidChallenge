@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class ChallengePageResponseDto {
+
     private boolean next;
     private long totalCnt;
     private List<ChallengesResponseDto> challengeList;

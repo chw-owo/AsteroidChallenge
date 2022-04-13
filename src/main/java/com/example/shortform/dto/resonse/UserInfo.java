@@ -12,7 +12,6 @@ public class UserInfo {
     private String nickname;
     private String profileUrl;
     private String levelName;
-
     private int dailyCount;
 
     public static UserInfo of(User user, int dailyCount) {

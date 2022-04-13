@@ -6,5 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PasswordDto {
+
     private String password;
+
 }

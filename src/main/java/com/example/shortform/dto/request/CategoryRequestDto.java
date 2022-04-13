@@ -7,6 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 public class CategoryRequestDto {
+
     private String name;
 
 }

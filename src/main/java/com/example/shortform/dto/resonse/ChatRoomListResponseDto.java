@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class ChatRoomListResponseDto {
+
     private Long roomId;
     private String chatRoomName;
     private List<String> chatRoomImg;

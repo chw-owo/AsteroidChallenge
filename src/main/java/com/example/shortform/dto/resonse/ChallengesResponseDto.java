@@ -13,7 +13,6 @@ import java.util.List;
 public class ChallengesResponseDto {
 
     private Long challengeId;
-
     private String title;
     private String content;
     private List<String> challengeImage;
@@ -37,7 +36,6 @@ public class ChallengesResponseDto {
         this.startDate=challenge.getStartDate();
         this.endDate=challenge.getEndDate();
         this.isPrivate=challenge.getIsPrivate();
-
 
         List<String> tagChallengeStrings = new ArrayList<>();
         List<TagChallenge> tagChallenges = challenge.getTagChallenges();

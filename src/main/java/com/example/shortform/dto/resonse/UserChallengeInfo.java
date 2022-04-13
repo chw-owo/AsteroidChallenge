@@ -13,9 +13,7 @@ import java.util.List;
 public class UserChallengeInfo {
 
     private Long userId;
-
     private Long challengeId;
-
     private String title;
     private String category;
     private List<String> challengeImage;
