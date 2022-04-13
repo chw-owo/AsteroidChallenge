@@ -43,7 +43,11 @@ public class ImageFileService {
             imageFileRequestDto.setOriginalFileName(originalFileName);
             imageFileRequestDto.setConvertedFileName(convertedFileName);
             imageFileRequestDto.setFilePath(String.valueOf(filePath));
-            imageFileRequestDto.setFileSize(multipartFile.getSize());
+            try{
+                imageFileRequestDto.setFileSize(multipartFile.getSize());
+            } catch (MaxUploadSizeExceededException ex){ //FileSizeLimitExceededException ex){
+                throw new FileUploadException(multipartFile.getSize());
+            }
 
             ImageFile challengeImage = imageFileRepository.save(imageFileRequestDto.toEntity(challenge));
 
@@ -67,7 +71,11 @@ public class ImageFileService {
         imageFileRequestDto.setOriginalFileName(originalFileName);
         imageFileRequestDto.setConvertedFileName(convertedFileName);
         imageFileRequestDto.setFilePath(String.valueOf(filePath));
-        imageFileRequestDto.setFileSize(multipartFile.getSize());
+        try{
+            imageFileRequestDto.setFileSize(multipartFile.getSize());
+        } catch (MaxUploadSizeExceededException ex){ //FileSizeLimitExceededException ex){
+            throw new FileUploadException(multipartFile.getSize());
+        }
 
         ImageFile challengeImage = imageFileRepository.save(imageFileRequestDto.toEntity(challenge));
 
