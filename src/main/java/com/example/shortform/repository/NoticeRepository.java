@@ -11,8 +11,6 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     boolean existsByUserIdAndNoticeLevel(Long id, Long id1);
 
-    boolean existsByUserIdAndIsSuccessAndChallengeId(Long id, boolean b, Long challengeId);
-
     boolean existsByUserIdAndNoticeTypeAndCreatedAtBetween(Long id, Notice.NoticeType recommend, LocalDateTime today, LocalDateTime plusDays);
 
     boolean existsByPostIdAndUserId(Long postId, Long id);

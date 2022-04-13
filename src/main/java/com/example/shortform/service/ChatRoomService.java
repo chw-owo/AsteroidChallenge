@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,22 +76,19 @@ public class ChatRoomService {
                 }
                 ChatRoom chatRoom = challenge.getChatRoom();
                 // 채팅방에 참여 중인 유저 목록 조회
-                List<UserChatRoom> userChatRooms = userChatRoomRepository.findAllByChatRoom(chatRoom);
-                // 채팅방의 채팀 리스트 조회
-                List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoom(chatRoom);
+                int roomCnt = userChatRoomRepository.findUserCnt(chatRoom);
+                // 채팅방의 최근 채팅 조회
+                ChatMessage chatMessage = Optional.ofNullable(chatMessageRepository.findFirstByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()))
+                        .orElse(ChatMessage.builder()
+                                .content("")
+                                .build());
 
-                String recentMessage;
-                // 채팅 리스트가 없으면 nullpointexception 발생하므로 처리
-                // 리스트 존재시 최근 채팅 추출
-                if (chatMessageList.size() == 0)
-                    recentMessage = null;
-                else
-                    recentMessage = chatMessageList.get(chatMessageList.size() - 1).getContent();
+                String recentMessage = chatMessage.getContent();
 
-                ChatRoomListResponseDto chatRoomResponseDto = challenge.getChatRoom().toResponseList(
+                ChatRoomListResponseDto chatRoomResponseDto = chatRoom.toResponseList(
                             chatRoom.getCreatedAt(),
                             profileImageList,
-                            userChatRooms.size(),
+                            roomCnt,
                             memberList,
                             recentMessage
                     );
@@ -110,10 +108,10 @@ public class ChatRoomService {
         User user = principalDetails.getUser();
 
         // 채팅 메세지 DB에서 이 채팅방의 메세지 전체 조회
-        Page<ChatMessage> messagePage = chatMessageRepository.findAllByChatRoom(chatRoom, pageable);
+        Page<ChatMessage> messagePage = chatMessageRepository.findAllChatRoomMessage(chatRoom, pageable);
 
         // 채팅 방 참가자 목록 조회
-        List<UserChatRoom> memberList = userChatRoomRepository.findAllByChatRoom(chatRoom);
+        List<UserChatRoom> memberList = userChatRoomRepository.findAllChatRoomUser(chatRoom);
 
         List<ChatMessageResponseDto> responseDtoList = new ArrayList<>();
 

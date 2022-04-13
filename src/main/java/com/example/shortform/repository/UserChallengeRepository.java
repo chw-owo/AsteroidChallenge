@@ -10,8 +10,16 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface UserChallengeRepository extends JpaRepository<UserChallenge, Long> {
+    @Query("select uc from UserChallenge uc " +
+            "join fetch uc.user " +
+            "where uc.challenge = :challenge")
     List<UserChallenge> findAllByChallenge(Challenge challenge);
+
+    @Query("select uc from UserChallenge uc " +
+            "join fetch uc.challenge " +
+            "where uc.user = :user")
     List<UserChallenge> findAllByUser(User user);
+
     UserChallenge findByUserIdAndChallengeId(Long id, Long challengeId);
 
     void deleteByUserIdAndChallengeId(Long id, Long challengeId);
@@ -23,5 +31,4 @@ public interface UserChallengeRepository extends JpaRepository<UserChallenge, Lo
             "order by uc.challenge.createdAt desc ")
     List<UserChallenge> findAllUserChallengeInfo(@Param("user_id") Long user_id);
 
-    List<UserChallenge> findAllByUserIdOrderByCreatedAtDesc(Long id);
 }

@@ -143,13 +143,7 @@ public class ChallengeService {
         challengeRepository.save(challenge);
 
         if (user.isNewbie()) {
-            Notice notice = Notice.builder()
-                    .noticeType(Notice.NoticeType.FIRST)
-                    .is_read(false)
-                    .increasePoint(5)
-                    .user(user)
-                    .build();
-
+            Notice notice = new Notice(user, 5);
             noticeRepository.save(notice);
             user.setRankingPoint(user.getRankingPoint() + 5);
             user.setNewbie(false);
@@ -295,7 +289,7 @@ public class ChallengeService {
     }
 
     public ChallengeResponseDto getChallenge(Long challengeId) throws Exception, InternalServerException {
-        Challenge challenge = challengeRepository.findById(challengeId).orElseThrow(() -> new NotFoundException("존재하지 않는 챌린지입니다."));
+        Challenge challenge = challengeRepository.findChallenge(challengeId).orElseThrow(() -> new NotFoundException("존재하지 않는 챌린지입니다."));
         List<String> challengeImage = new ArrayList<>();
 
         List<ImageFile> ImageFiles = challenge.getChallengeImage();
@@ -319,7 +313,7 @@ public class ChallengeService {
     }
 
     public ChallengePageResponseDto getChallenges(Pageable pageable) throws ParseException, InternalServerException {
-        Page<Challenge> challengePage = challengeRepository.findAll(pageable);
+        Page<Challenge> challengePage = challengeRepository.findAllChallenge(pageable);
         return getChallengePageResponseDto(challengePage);
     }
 
@@ -415,13 +409,7 @@ public class ChallengeService {
         authChallengeRepository.save(authChallenge);
 
         if (user.isNewbie()) {
-            Notice notice = Notice.builder()
-                    .noticeType(Notice.NoticeType.FIRST)
-                    .is_read(false)
-                    .increasePoint(5)
-                    .user(user)
-                    .build();
-
+            Notice notice = new Notice(user, 5);
             noticeRepository.save(notice);
             user.setRankingPoint(user.getRankingPoint() + 5);
             user.setNewbie(false);
@@ -442,19 +430,28 @@ public class ChallengeService {
             // 기존 이미지가 있을 경우
             if (requestDto.getImage() != null) {
 
-                // 해당 챌린지에 있는 이미지 중에서 받아온 기존이미지 말고는 다 삭제해주기
-                for (ImageFile imageFile : challenge.getChallengeImage()) {
-                    boolean isEmpty = true;
-                    for (String imageUrl : requestDto.getImage()) {
-                        if (imageFile.getFilePath().equals(imageUrl)) {
-                            isEmpty = false;
-                            break;
-                        }
-                    }
-
-                    if (isEmpty)
-                        imageFileRepository.deleteById(imageFile.getId()); // TODO S3에서도 삭제하기
+                Map<String, Integer> map = new HashMap<>();
+                for (int i = 0; i < requestDto.getImage().size(); i++) {
+                    map.put(requestDto.getImage().get(i), i);
                 }
+
+                for (int i = 0; i < challenge.getChallengeImage().size(); i++) {
+                    if (!map.containsKey(challenge.getChallengeImage().get(i).getFilePath()))
+                        imageFileRepository.deleteById(challenge.getChallengeImage().get(i).getId());
+                }
+//                // 해당 챌린지에 있는 이미지 중에서 받아온 기존이미지 말고는 다 삭제해주기
+//                for (ImageFile imageFile : challenge.getChallengeImage()) {
+//                    boolean isEmpty = true;
+//                    for (String imageUrl : requestDto.getImage()) {
+//                        if (imageFile.getFilePath().equals(imageUrl)) {
+//                            isEmpty = false;
+//                            break;
+//                        }
+//                    }
+//
+//                    if (isEmpty)
+//                        imageFileRepository.deleteById(imageFile.getId()); // TODO S3에서도 삭제하기
+//                }
             }
 
             // 수정할 이미지가 있으면 challenge 에서 image 가져오기
@@ -466,26 +463,33 @@ public class ChallengeService {
             List<TagChallenge> tagChallenges = tagChallengeRepository.findAllByChallenge(challenge);
             List<String> tagNames = requestDto.getTagName();
 
-            for (TagChallenge tagChallenge : tagChallenges) {
-                boolean imEmpty = true;
-                for (String tagName : tagNames) {
-                    if (tagChallenge.getTag().getName().equals(tagName)) {
-                        imEmpty = false;
-                        break;
-                    }
-
-                }
-                if(imEmpty) {
-                    tagRepository.deleteById(tagChallenge.getTag().getId());
-                }
-
+            Map<String, Integer> tagMap = new HashMap<>();
+            for (int i = 0; i < tagNames.size(); i++) {
+                tagMap.put(tagNames.get(i), i);
             }
 
+            for (TagChallenge value : tagChallenges) {
+                if (!tagMap.containsKey(value.getTag().getName()))
+                    tagRepository.deleteById(value.getTag().getId());
+            }
 
-            List<TagChallenge> tagChallengeList = new ArrayList<>();
+//            for (TagChallenge tagChallenge : tagChallenges) {
+//                boolean imEmpty = true;
+//                for (String tagName : tagNames) {
+//                    if (tagChallenge.getTag().getName().equals(tagName)) {
+//                        imEmpty = false;
+//                        break;
+//                    }
+//
+//                }
+//                if(imEmpty) {
+//                    tagRepository.deleteById(tagChallenge.getTag().getId());
+//                }
+//
+//            }
+
             for (String tagString : tagNames) {
                 Tag tag = new Tag(tagString);
-
 
                 if (!tagChallengeRepository.existsByChallengeAndTagName(challenge, tagString)) {
                     tagRepository.save(tag);
@@ -493,7 +497,6 @@ public class ChallengeService {
                             .challenge(challenge)
                             .tag(tag)
                             .build();
-                    tagChallengeList.add(newTagChallenge);
                     tagChallengeRepository.save(newTagChallenge);
                 }
             }
@@ -598,31 +601,20 @@ public class ChallengeService {
         // update percentage of report - plus currentMember
         // 리포트 퍼센테이지 업데이트 - 현재 멤버 ++
         LocalDate now = LocalDate.now();
-        Optional<AuthChallenge> authChallengeCheck = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, now));
-        AuthChallenge authChallenge;
-
-        if(!authChallengeCheck.isPresent()){
-            authChallenge = AuthChallenge.builder()
-                    .challenge(challenge)
-                    .date(now)
-                    .currentMember(challenge.getCurrentMember())
-                    .build();
-            authChallengeRepository.save(authChallenge);
-        }else{
-            authChallenge = authChallengeRepository.findByChallengeAndDate(challenge, now);
-        }
+        AuthChallenge authChallenge = Optional.ofNullable(authChallengeRepository.findByChallengeAndDate(challenge, now)).orElse(
+                AuthChallenge.builder()
+                        .challenge(challenge)
+                        .date(now)
+                        .currentMember(challenge.getCurrentMember())
+                        .authMember(0)
+                        .build()
+        );
 
         authChallenge.setCurrentMember(challenge.getCurrentMember());
         authChallengeRepository.save(authChallenge);
 
         if (user.isNewbie()) {
-            Notice notice = Notice.builder()
-                    .noticeType(Notice.NoticeType.FIRST)
-                    .is_read(false)
-                    .increasePoint(5)
-                    .user(user)
-                    .build();
-
+            Notice notice = new Notice(user, 5);
             noticeRepository.save(notice);
             user.setRankingPoint(user.getRankingPoint() + 5);
             user.setNewbie(false);
