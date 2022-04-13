@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class MemberResponseDto {
+
     private Long userId;
     private String nickname;
     private String profileImage;

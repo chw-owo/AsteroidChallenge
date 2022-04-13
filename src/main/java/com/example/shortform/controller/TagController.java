@@ -1,6 +1,5 @@
 package com.example.shortform.controller;
 
-import com.example.shortform.dto.ResponseDto.TagResponseDto;
 import com.example.shortform.service.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

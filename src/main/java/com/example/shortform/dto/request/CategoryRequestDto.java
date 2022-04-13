@@ -1,4 +1,4 @@
-package com.example.shortform.dto.RequestDto;
+package com.example.shortform.dto.request;
 
 import lombok.*;
 
@@ -7,8 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 public class CategoryRequestDto {
+
     private String name;
-    public CategoryRequestDto (String name) {
-        this.name = name;
-    }
+
 }

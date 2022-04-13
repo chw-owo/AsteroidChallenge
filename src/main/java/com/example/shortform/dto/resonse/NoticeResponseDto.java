@@ -1,7 +1,6 @@
-package com.example.shortform.dto.ResponseDto;
+package com.example.shortform.dto.resonse;
 
 import com.example.shortform.domain.Notice;
-import com.example.shortform.dto.resonse.MemberResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

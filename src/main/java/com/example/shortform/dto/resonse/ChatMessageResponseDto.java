@@ -6,13 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ChatMessageResponseDto {
+
     private ChatMessage.MessageType type;
     private Long id;
     private String roomId;
@@ -20,4 +19,5 @@ public class ChatMessageResponseDto {
     private String createdAt;
     private ChatRoomMemberDto user;
     private String sender;
+
 }

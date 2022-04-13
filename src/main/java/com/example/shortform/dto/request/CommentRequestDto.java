@@ -11,6 +11,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentRequestDto implements Serializable {
+
     private String content;
 
     public Comment toEntity(Post post, User user) {

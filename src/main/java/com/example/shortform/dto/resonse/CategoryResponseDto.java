@@ -1,4 +1,4 @@
-package com.example.shortform.dto.ResponseDto;
+package com.example.shortform.dto.resonse;
 
 import lombok.*;
 
@@ -10,6 +10,7 @@ import java.util.*;
 @Setter
 @Builder
 public class CategoryResponseDto {
+
     private List<Long> categoryId;
 
     public CategoryResponseDto(List<Long> categoryId) {

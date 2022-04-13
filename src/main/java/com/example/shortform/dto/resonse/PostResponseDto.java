@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class PostResponseDto {
+
     private Long postId;
     private String nickname;
     private String profileImage;

@@ -1,4 +1,4 @@
-package com.example.shortform.dto.RequestDto;
+package com.example.shortform.dto.request;
 
 import lombok.*;
 
@@ -9,5 +9,7 @@ import lombok.*;
 @Setter
 @Builder
 public class ReportRequestDto {
+
     private String startDate;
+
 }
