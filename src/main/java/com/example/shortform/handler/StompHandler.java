@@ -35,38 +35,36 @@ public class StompHandler implements ChannelInterceptor {
         //accessor를 사용하면 패킷에 접근이 가능
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         String jwtToken = accessor.getFirstNativeHeader("authorization");
-        //log.info("Web Socket 들어올 때 token 검증 = {}", message.getHeaders());
-        //log.info("Web Socket 들어올 때 token 검증 = {}", jwtToken);
+
 
         // Command 헤더가 CONNECT일 경우 TCP 연결
         if (StompCommand.CONNECT == accessor.getCommand()) {
-           // log.info("connect 진입");
-            //log.info("Connect 시 email= {}", jwtAuthenticationProvider.getUser(accessor.getFirstNativeHeader("authorization")));
+
             if (jwtToken == null) {
                 throw new UnauthorizedException("로그인 후 이용가능합니다.");
             }
 
             // Command 헤더가 SUBSCRIBE일 경우 채팅 방 구독 요청
         } else if (StompCommand.SUBSCRIBE == accessor.getCommand()) {
-            //log.info("Subscribe token 검증 = {}", jwtToken);
+
             // 메세지 헤더에서 destination 추출
             String destination = Optional.ofNullable((String) message.getHeaders().get("simpDestination")).orElse("InvalidRoomId");
             // 추출한 destination을 이용해 roomId 추출
             String roomId = chatMessageService.getRoomId(destination);
-            //log.info("sub destination roomId = {} {}", destination, roomId);
+
 
             if (roomId != null) {
-               // log.info("sub if문 진입");
+
                 //메세지 헤더에서 sessionId 추출
                 String sessionId = (String) message.getHeaders().get("simpSessionId");
-                //log.info("sub sessionId = {}", sessionId);
+
 
                 // redis 에 sessionId와 roomId 매핑
                 redisRepository.setUserEnterInfo(sessionId, roomId);
-                //log.info("SUBSCRIBED {}, {}", user.getNickname(), roomId);
+
             }
         } else if (StompCommand.DISCONNECT == accessor.getCommand()) {
-            //log.info("disconnect 진입 token = {}", jwtToken);
+
             //헤더에서 sessionId 추출
             String sessionId = (String) message.getHeaders().get("simpSessionId");
             //sessionId를 이용해 redis 에 매핑된 roomId를 찾는다.
@@ -77,7 +75,7 @@ public class StompHandler implements ChannelInterceptor {
                 redisRepository.removeUserEnterInfo(sessionId);
             }
 
-            //log.info("DISCONNECT {}, {}", sessionId, roomId);
+
         }
 
         return message;
