@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class PostPageResponseDto {
+
     private boolean next;
     private List<PostResponseDto> postList;
 }

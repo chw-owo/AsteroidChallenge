@@ -1,25 +1,19 @@
 package com.example.shortform.controller;
 
 import com.example.shortform.config.auth.PrincipalDetails;
-import com.example.shortform.domain.Category;
-import com.example.shortform.dto.RequestDto.ChallengeRequestDto;
-import com.example.shortform.dto.RequestDto.ReportRequestDto;
-import com.example.shortform.dto.ResponseDto.*;
+import com.example.shortform.dto.request.ChallengeRequestDto;
+import com.example.shortform.dto.request.ReportRequestDto;
 import com.example.shortform.dto.request.ChallengeModifyRequestDto;
 import com.example.shortform.dto.request.PasswordDto;
-import com.example.shortform.dto.resonse.CMResponseDto;
-import com.example.shortform.dto.resonse.ChallengeIdResponseDto;
+import com.example.shortform.dto.resonse.*;
 import com.example.shortform.exception.InternalServerException;
 import com.example.shortform.exception.NotFoundException;
-import com.example.shortform.dto.ResponseDto.ChallengeResponseDto;
-import com.example.shortform.dto.ResponseDto.ChallengesResponseDto;
 import com.example.shortform.exception.UnauthorizedException;
 import com.example.shortform.service.ChallengeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +35,8 @@ public class ChallengeController {
 
     public Map<String, Object> postChallenge(@RequestPart("challenge") ChallengeRequestDto requestDto,
                                              @AuthenticationPrincipal PrincipalDetails principal,
-                                             @RequestPart(value = "challengeImage", required = false) List<MultipartFile> multipartFiles) throws IOException, InternalServerException, ParseException {
+                                             @RequestPart(value = "challengeImage", required = false)
+                                                         List<MultipartFile> multipartFiles) throws IOException, ParseException {
         if (principal != null) {
             HashMap<String, Object> result = new HashMap<>();
             result.put("result", "true");
@@ -55,7 +50,7 @@ public class ChallengeController {
 
     @GetMapping("/challenge")
     public ChallengePageResponseDto getChallenges(@RequestParam("page") int page,
-                                                  @RequestParam("size") int size) throws ParseException, InternalServerException {
+                                                  @RequestParam("size") int size) throws ParseException {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
         return challengeService.getChallenges(pageable);
     }
@@ -65,15 +60,10 @@ public class ChallengeController {
         return challengeService.getChallenge(challengeId);
     }
 
-//     @GetMapping("/challenge/{challengeId}")
-//     public ResponseEntity<?> getChallenge(@PathVariable Long challengeId) {
-//         return challengeService.getChallenge(challengeId);
-//     }
-
     @GetMapping("/challenge/category/{categoryId}")
     public ChallengePageResponseDto getCategoryChallenge(@PathVariable Long categoryId,
                                                             @RequestParam("page") int page,
-                                                            @RequestParam("size") int size) throws ParseException, InternalServerException {
+                                                            @RequestParam("size") int size) throws ParseException {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
         return challengeService.getCategoryChallenge(categoryId, pageable);
     }
@@ -81,13 +71,14 @@ public class ChallengeController {
     @GetMapping("/challenge/search")
     public ChallengePageResponseDto getKeywordChallenge(@RequestParam("keyword") String keyword,
                                                            @RequestParam("page") int page,
-                                                           @RequestParam("size") int size) throws ParseException, InternalServerException {
+                                                           @RequestParam("size") int size) throws ParseException {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
         return challengeService.getKeywordChallenge(keyword, pageable);
     }
 
     @PostMapping("/challenge/{challengeId}/user")
-    public HashMap<String, Object> participateChallenge(@PathVariable Long challengeId, @AuthenticationPrincipal PrincipalDetails principalDetails) throws ParseException {
+    public HashMap<String, Object> participateChallenge(@PathVariable Long challengeId,
+                                                        @AuthenticationPrincipal PrincipalDetails principalDetails) {
         if (principalDetails != null) {
             challengeService.participateChallenge(challengeId, principalDetails);
             HashMap<String, Object> result = new HashMap<>();
@@ -99,7 +90,9 @@ public class ChallengeController {
     }
 
     @PostMapping("/challenge/{challengeId}/private")
-    public HashMap<String, Object> privateParticipateChallenge(@PathVariable Long challengeId, @RequestBody PasswordDto passwordDto, @AuthenticationPrincipal PrincipalDetails principalDetails) {
+    public HashMap<String, Object> privateParticipateChallenge(@PathVariable Long challengeId,
+                                                               @RequestBody PasswordDto passwordDto,
+                                                               @AuthenticationPrincipal PrincipalDetails principalDetails) {
         if (principalDetails != null) {
             challengeService.privateParticipateChallenge(challengeId, passwordDto, principalDetails);
             HashMap<String, Object> result = new HashMap<>();
@@ -132,9 +125,9 @@ public class ChallengeController {
     }
 
     @PostMapping("/challenge/{challengeId}/report")
-    public List<ReportResponseDto> getReport(@PathVariable Long challengeId, @RequestBody ReportRequestDto requsetDto) throws ParseException {
+    public List<ReportResponseDto> getReport(@PathVariable Long challengeId, @RequestBody ReportRequestDto requestDto) {
 
-        return challengeService.getReport(challengeId, requsetDto);
+        return challengeService.getReport(challengeId, requestDto);
 
 
     }

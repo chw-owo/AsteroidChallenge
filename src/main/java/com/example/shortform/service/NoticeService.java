@@ -4,7 +4,7 @@ import com.example.shortform.config.auth.PrincipalDetails;
 import com.example.shortform.domain.Challenge;
 import com.example.shortform.domain.Notice;
 import com.example.shortform.domain.User;
-import com.example.shortform.dto.ResponseDto.NoticeResponseDto;
+import com.example.shortform.dto.resonse.NoticeResponseDto;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.repository.ChallengeRepository;
 import com.example.shortform.repository.NoticeRepository;

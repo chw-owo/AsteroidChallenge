@@ -1,9 +1,8 @@
-package com.example.shortform.dto.ResponseDto;
+package com.example.shortform.dto.resonse;
 
 import lombok.*;
 
-import java.util.*;
-import java.nio.file.FileStore;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -12,5 +11,6 @@ import java.nio.file.FileStore;
 @Setter
 @Builder
 public class TagResponseDto {
+
     private List<String> names;
 }

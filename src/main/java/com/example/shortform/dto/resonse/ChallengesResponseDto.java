@@ -1,4 +1,4 @@
-package com.example.shortform.dto.ResponseDto;
+package com.example.shortform.dto.resonse;
 
 import com.example.shortform.domain.Challenge;
 import com.example.shortform.domain.TagChallenge;
@@ -13,14 +13,13 @@ import java.util.List;
 public class ChallengesResponseDto {
 
     private Long challengeId;
-
     private String title;
     private String content;
     private List<String> challengeImage;
     private int maxMember;
     private int currentMember;
-    private String startDate; //LocalDate
-    private String endDate; //LocalDate
+    private String startDate;
+    private String endDate;
     private Boolean isPrivate;
     private String category;
     private List<String> tagName;
@@ -37,7 +36,6 @@ public class ChallengesResponseDto {
         this.startDate=challenge.getStartDate();
         this.endDate=challenge.getEndDate();
         this.isPrivate=challenge.getIsPrivate();
-
 
         List<String> tagChallengeStrings = new ArrayList<>();
         List<TagChallenge> tagChallenges = challenge.getTagChallenges();

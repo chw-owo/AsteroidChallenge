@@ -13,6 +13,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ChatMessageRequestDto {
+
     private ChatMessage.MessageType type;
     private String roomId;
     private Long userId;

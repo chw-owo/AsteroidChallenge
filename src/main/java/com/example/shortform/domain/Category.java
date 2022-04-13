@@ -1,6 +1,5 @@
 package com.example.shortform.domain;
 
-import com.example.shortform.dto.RequestDto.CategoryRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

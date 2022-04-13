@@ -3,7 +3,7 @@ package com.example.shortform.service;
 import com.example.shortform.domain.Challenge;
 import com.example.shortform.domain.ImageFile;
 import com.example.shortform.domain.Post;
-import com.example.shortform.dto.RequestDto.ImageFileRequestDto;
+import com.example.shortform.dto.request.ImageFileRequestDto;
 import com.example.shortform.exception.FileUploadException;
 import com.example.shortform.repository.ImageFileRepository;
 import com.example.shortform.util.S3Uploader;
@@ -45,7 +45,7 @@ public class ImageFileService {
             imageFileRequestDto.setFilePath(String.valueOf(filePath));
             try{
                 imageFileRequestDto.setFileSize(multipartFile.getSize());
-            } catch (MaxUploadSizeExceededException ex){ //FileSizeLimitExceededException ex){
+            } catch (MaxUploadSizeExceededException ex){
                 throw new FileUploadException(multipartFile.getSize());
             }
 
@@ -73,7 +73,7 @@ public class ImageFileService {
         imageFileRequestDto.setFilePath(String.valueOf(filePath));
         try{
             imageFileRequestDto.setFileSize(multipartFile.getSize());
-        } catch (MaxUploadSizeExceededException ex){ //FileSizeLimitExceededException ex){
+        } catch (MaxUploadSizeExceededException ex){
             throw new FileUploadException(multipartFile.getSize());
         }
 
@@ -95,7 +95,7 @@ public class ImageFileService {
         imageFileRequestDto.setFilePath(String.valueOf(filePath));
         try{
             imageFileRequestDto.setFileSize(multipartFile.getSize());
-        } catch (MaxUploadSizeExceededException ex){ //FileSizeLimitExceededException ex){
+        } catch (MaxUploadSizeExceededException ex){
             throw new FileUploadException(multipartFile.getSize());
         }
 

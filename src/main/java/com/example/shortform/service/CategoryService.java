@@ -1,7 +1,7 @@
 package com.example.shortform.service;
 
 import com.example.shortform.domain.Category;
-import com.example.shortform.dto.ResponseDto.CategoryResponseDto;
+import com.example.shortform.dto.resonse.CategoryResponseDto;
 import com.example.shortform.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,14 +13,6 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-
-//    for test
-//    @Transactional
-//    public boolean makeCategory(CategoryRequestDto requestDto){
-//        Category category = new Category(requestDto);
-//        categoryRepository.save(category);
-//        return true;
-//    }
 
     public CategoryResponseDto getCategory(){
         List<Category> categories = categoryRepository.findAll();

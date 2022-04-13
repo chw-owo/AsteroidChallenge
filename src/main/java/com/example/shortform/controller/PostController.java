@@ -29,13 +29,11 @@ public class PostController {
         this.postService = postService;
     }
 
-    // 인증 게시글 작성 API
     @PostMapping("/challenge/{challengeId}/posts")
     public ResponseEntity<PostWriteResponseDto> writePost(@PathVariable Long challengeId,
                                                           @RequestPart(value = "postImage",required = false) MultipartFile multipartFile,
                                                           @RequestPart("post") PostRequestDto requestDto,
-                                                          @AuthenticationPrincipal PrincipalDetails principalDetails) throws IOException, ParseException {
-        // 로그인 한 유저만 이용가능하도록 설정
+                                                          @AuthenticationPrincipal PrincipalDetails principalDetails) throws IOException {
         if (principalDetails != null) {
             return postService.writePost(challengeId, requestDto, multipartFile, principalDetails);
         } else{
@@ -45,7 +43,6 @@ public class PostController {
 
     }
 
-    // 인증 게시글 삭제 API
     @DeleteMapping("/posts/{postId}")
     public void deletePost(@PathVariable Long postId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
         if (principalDetails != null) {
@@ -55,7 +52,6 @@ public class PostController {
         }
     }
 
-    // 인증 게시글 수정 API
     @PatchMapping("/posts/{postId}")
     public ResponseEntity<PostIdResponseDto> modifyPost(@PathVariable Long postId,
                                                         @RequestPart("post") PostRequestDto requestDto,
@@ -68,7 +64,6 @@ public class PostController {
         }
     }
 
-    // 인증 게시글 전체조회
     @GetMapping("/challenge/{challengeId}/posts")
     public ResponseEntity<PostPageResponseDto> getListPost(@PathVariable Long challengeId,
                                                            @RequestParam("page") int page,

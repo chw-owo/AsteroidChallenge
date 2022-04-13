@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CommentIdResponseDto {
+
     private Long commentId;
 }

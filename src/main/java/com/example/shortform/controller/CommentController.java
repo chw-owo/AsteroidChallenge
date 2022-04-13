@@ -17,12 +17,10 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    // 댓글 작성 API
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentIdResponseDto> writeComment(@PathVariable Long postId,
                                                              @RequestBody CommentRequestDto requestDto,
                                                              @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        // 로그인 한 유저만 이용가능하도록 설정
         if (principalDetails != null) {
             return commentService.writeComment(postId, requestDto, principalDetails);
         } else {
@@ -30,10 +28,8 @@ public class CommentController {
         }
     }
 
-    // 댓글 삭제 API
     @DeleteMapping("/comments/{commentId}")
     public void deleteComment(@PathVariable Long commentId, @AuthenticationPrincipal PrincipalDetails principalDetails) {
-        // 로그인 한 유저만 이용가능하도록 설정
         if (principalDetails != null) {
             commentService.deleteComment(commentId, principalDetails);
         } else {

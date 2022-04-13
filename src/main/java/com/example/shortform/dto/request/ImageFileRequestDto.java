@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ImageFileRequestDto {
+
     private String originalFileName;
     private String convertedFileName;
     private String filePath;

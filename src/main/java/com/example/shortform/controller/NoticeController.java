@@ -1,7 +1,7 @@
 package com.example.shortform.controller;
 
 import com.example.shortform.config.auth.PrincipalDetails;
-import com.example.shortform.dto.ResponseDto.NoticeResponseDto;
+import com.example.shortform.dto.resonse.NoticeResponseDto;
 import com.example.shortform.exception.NotFoundException;
 import com.example.shortform.service.NoticeService;
 import lombok.RequiredArgsConstructor;

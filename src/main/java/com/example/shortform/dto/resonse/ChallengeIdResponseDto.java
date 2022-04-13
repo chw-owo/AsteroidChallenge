@@ -7,5 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ChallengeIdResponseDto {
+
     private Long challengeId;
 }

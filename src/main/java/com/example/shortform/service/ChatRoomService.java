@@ -38,26 +38,20 @@ public class ChatRoomService {
         Challenge challenge = challengeRepository.findById(requestDto.getChallengeId()).orElseThrow(
                 () -> new NotFoundException("챌린지가 존재하지 않습니다.")
         );
-        // 채팅방과 챌린지가 oneToOne이므로 이미 채팅방 존재시 생성 불가
         if (challenge.getChatRoom() != null) {
             throw new InvalidException("이미 채팅방이 존재합니다.");
         }
-        // 채팅방 DB에 저장
         ChatRoom chatRoom = requestDto.toEntity(user.getProfileImage());
         chatRoomRepository.save(chatRoom);
-        //챌린지에 채팅방 FK
         challenge.setChatRoom(chatRoom);
-        // 채팅방 명단에 채팅방 생성한 유저 등록
         UserChatRoom userChatRoom = requestDto.toEntity(chatRoom, user);
         userChatRoomRepository.save(userChatRoom);
     }
 
     @Transactional
     public List<ChatRoomListResponseDto> getAllMyRooms(PrincipalDetails principalDetails) throws ParseException {
-        // 인증 정보를 이용해 유저 정보 획득
         User user = principalDetails.getUser();
         List<ChatRoomListResponseDto> chatRoomResponseDtoList = new ArrayList<>();
-        // 유저가 참가한 챌린지 목록 조회
         List<UserChallenge> userChallenges = userChallengeRepository.findAllByUser(user);
 
         for (UserChallenge userChallenge : userChallenges) {
@@ -65,9 +59,7 @@ public class ChatRoomService {
             List<ChatRoomMemberDto> memberList = new ArrayList<>();
             Challenge challenge = userChallenge.getChallenge();
             String status = challengeService.challengeStatus(challenge);
-            // 진행중인 챌린지만 채팅방이 존재하므로 status 사용
             if (status.equals("진행중")) {
-                // 챌린지에 참여 중인 유저 목록 조회
                 List<UserChallenge> userList = userChallengeRepository.findAllByChallenge(challenge);
                 for (UserChallenge userC : userList) {
                     User member = userC.getUser();
@@ -75,9 +67,7 @@ public class ChatRoomService {
                     profileImageList.add(member.getProfileImage());
                 }
                 ChatRoom chatRoom = challenge.getChatRoom();
-                // 채팅방에 참여 중인 유저 목록 조회
                 int roomCnt = userChatRoomRepository.findUserCnt(chatRoom);
-                // 채팅방의 최근 채팅 조회
                 ChatMessage chatMessage = Optional.ofNullable(chatMessageRepository.findFirstByChatRoomIdOrderByCreatedAtDesc(chatRoom.getId()))
                         .orElse(ChatMessage.builder()
                                 .content("")
@@ -107,15 +97,10 @@ public class ChatRoomService {
 
         User user = principalDetails.getUser();
 
-        // 채팅 메세지 DB에서 이 채팅방의 메세지 전체 조회
         Page<ChatMessage> messagePage = chatMessageRepository.findAllChatRoomMessage(chatRoom, pageable);
-
-        // 채팅 방 참가자 목록 조회
         List<UserChatRoom> memberList = userChatRoomRepository.findAllChatRoomUser(chatRoom);
-
         List<ChatMessageResponseDto> responseDtoList = new ArrayList<>();
 
-        //메세지 날짜 형식 변경
         for (ChatMessage chatMessage : messagePage) {
             String createdAt = chatMessage.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss"));
             ChatMessageResponseDto responseDto = chatMessage.toResponse(createdAt);
@@ -125,7 +110,6 @@ public class ChatRoomService {
                 .sorted(Comparator.comparing(ChatMessageResponseDto::getCreatedAt))
                 .collect(Collectors.toList());
 
-        // responseDto로 변경 후 return
         ChatMessageListDto chatMessageList = ChatMessageListDto.builder()
                 .roomName(chatRoom.getChallenge().getTitle())
                 .messageList(responseDtoList)
@@ -137,12 +121,4 @@ public class ChatRoomService {
         return chatMessageList;
     }
 
-    @Transactional
-    public void deleteRoom(Long roomId, PrincipalDetails principalDetails) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new NotFoundException("채팅방이 존재하지 않습니다.")
-        );
-        chatRoom.getChallenge().setChatRoom(null);
-//        chatRoomRepository.deleteById(roomId);
-    }
 }
