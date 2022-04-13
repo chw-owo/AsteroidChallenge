@@ -25,7 +25,6 @@ public class ChatMessageController {
     // websocket으로 publish 된 메세지를 받는다
     @MessageMapping("/chat/message")
     public void message(@RequestBody ChatMessageRequestDto requestDto, @Header("authorization") String token) {
-        //헤더에서 토큰을 사용해 유저 인증 여부 확인
         String email = jwtAuthenticationProvider.getUser(token);
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new NotFoundException("인증되지 않은 유저입니다.")

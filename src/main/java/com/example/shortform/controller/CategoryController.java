@@ -16,11 +16,6 @@ import java.util.List;
 @RestController
 public class CategoryController {
 
-//    @PostMapping("/category/test")
-//    public boolean makeCategory(@RequestBody CategoryRequestDto requestDto){
-//        return challengeService.makeCategory(requestDto);
-//    }
-
     private final CategoryService categoryService;
     @GetMapping("/category")
     public CategoryResponseDto getCategory(){

@@ -14,7 +14,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    // 사용할 redisTemplate 설정
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
@@ -24,13 +23,11 @@ public class RedisConfig {
         return redisTemplate;
     }
 
-    // 단일 토픽 사용을 위한 bean 설정
     @Bean
     public ChannelTopic channelTopic() {
         return new ChannelTopic("chatroom");
     }
 
-    // redis에 publish 된 메세지 처리를 위한 리스너 설정
     @Bean
     public RedisMessageListenerContainer redisMessageListener(RedisConnectionFactory connectionFactory,
                                                               MessageListenerAdapter listenerAdapter,
@@ -41,8 +38,6 @@ public class RedisConfig {
         return container;
     }
 
-    // 실제 메세지를 처리하는 subscriber 설정
-    // publish 된 메세지가 sendMessage로 보내진다.
     @Bean
     public MessageListenerAdapter listenerAdapter(RedisSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "sendMessage");

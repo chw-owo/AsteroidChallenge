@@ -26,10 +26,10 @@ public class S3Uploader {
     private final String imageDirName = "image";
 
     @Value("${cloud.aws.s3.bucket}")
-    public String bucket;  // S3 버킷 이름
+    public String bucket;
 
     public String upload(MultipartFile multipartFile, String convertedFileName) throws IOException {
-        File uploadFile = convert(multipartFile)  // 파일 변환할 수 없으면 에러
+        File uploadFile = convert(multipartFile)
                 .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
 
         return upload(uploadFile, convertedFileName);
@@ -37,35 +37,30 @@ public class S3Uploader {
 
 
     public String upload(ImageFile imageFile, String convertedFileName) throws IOException {
-        File uploadFile = convert((MultipartFile)imageFile)  // 파일 변환할 수 없으면 에러
+        File uploadFile = convert((MultipartFile)imageFile)
                 .orElseThrow(() -> new IllegalArgumentException("error: MultipartFile -> File convert fail"));
 
         return upload(uploadFile, convertedFileName);
     }
 
-
-    // S3로 파일 업로드하기
     private String upload(File uploadFile, String convertedFileName) {
-        String fileName = imageDirName + "/" + convertedFileName;   // S3에 저장된 파일 이름
+        String fileName = imageDirName + "/" + convertedFileName;
         System.out.println("작성" + fileName);
-        String uploadImageUrl = putS3(uploadFile, fileName); // s3로 업로드
+        String uploadImageUrl = putS3(uploadFile, fileName);
         removeNewFile(uploadFile);
         return uploadImageUrl;
     }
 
 
-    // S3로 업로드
     private String putS3(File uploadFile, String fileName) {
         amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, uploadFile).withCannedAcl(CannedAccessControlList.PublicRead));
         return amazonS3Client.getUrl(bucket, fileName).toString();
     }
 
-    // S3로 파일 삭제
     public void deleteFile(String deleteFile) {
         amazonS3Client.deleteObject(bucket, deleteFile);
     }
 
-    // 로컬에 저장된 이미지 지우기
     private void removeNewFile(File targetFile) {
         if (targetFile.delete()) {
             log.info("local File delete success");
@@ -74,11 +69,10 @@ public class S3Uploader {
         log.info("local File delete fail");
     }
 
-    // 로컬에 파일 업로드 하기
     private Optional<File> convert(MultipartFile file) throws IOException {
         File convertFile = new File(System.getProperty("user.dir") + "/" + file.getOriginalFilename());
-        if (convertFile.createNewFile()) { // 바로 위에서 지정한 경로에 File이 생성됨 (경로가 잘못되었다면 생성 불가능)
-            try (FileOutputStream fos = new FileOutputStream(convertFile)) { // FileOutputStream 데이터를 파일에 바이트 스트림으로 저장하기 위함
+        if (convertFile.createNewFile()) {
+            try (FileOutputStream fos = new FileOutputStream(convertFile)) {
                 fos.write(file.getBytes());
             }
             return Optional.of(convertFile);
